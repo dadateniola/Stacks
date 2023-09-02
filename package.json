@@ -1,0 +1,12 @@
+{
+  "name": "stacks",
+  "version": "1.0.0",
+  "description": "Stacks is an E-Library system aimed to provide not only the upmost requirements of an E-Library System but also top notch user experience like never before. Join us in the future of E-Libraries.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC"
+}
