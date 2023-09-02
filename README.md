@@ -5,8 +5,9 @@ Stacks is an E-Library system aimed to provide not only the upmost requirements 
 ## Creators
 
 Stacks was created in partial participation of the below mentioned:
--Dada Teniola Emmanuel
--Baiyere Samuel Fikayo
+
+- Dada Teniola Emmanuel
+- Baiyere Samuel Fikayo
 
 ## Installation
 
