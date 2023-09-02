@@ -1,0 +1,35 @@
+/* Styles that are common to all pages */
+
+@font-face {
+    font-family: 'SpaceGrotesk';
+    src: url(/fonts/SpaceGrotesk-VariableFont_wght.ttf);
+}
+
+@font-face {
+    font-family: 'Avenir';
+    src: url(/fonts/AvenirNextLTPro-Bold.otf);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+} 
+
+:root {
+    /* Colors */
+    --light: #fff;
+    --dark: #000;
+
+    /* Spacing */
+    --page-padding: 40px;
+
+    /* Fonts */
+    --paragraph: 'SpaceGrotesk';
+    --heading: 'Avenir';
+}
+
+body {
+    padding: var(--page-padding);
+    font-family: var(--heading);
+}
