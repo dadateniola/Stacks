@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome To Stacks</title>
+
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="/others/fa/css/all.min.css">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/styles/common.css">
+    <link rel="stylesheet" href="/styles/intro.css">
+    <link rel="stylesheet" href="/styles/media-queries.css">
+</head>
+
+<body>
+
+    <%- include('partials/head') %>
+
+        <main class="intro hidden">
+            <div class="logo">
+                <img src="/images/icons/logo-dark.png" alt="logo">
+            </div>
+            <div class="container">
+                <div class="intro-img">
+                    <!-- <img src="/images/intro/access.png" alt="image"> -->
+                    <img src="/images/intro/login.png" alt="image">
+                </div>
+            </div>
+            <div class="white-box">
+                <div class="form-box">
+                    <!-- <h1>student login</h1> -->
+                    <!-- <p>Unlock a world of knowledge in our digital library</p> -->
+                    <!-- <div class="form">
+                        <input type="text" name="matric" id="matric" placeholder="matric no.">
+                        <input type="text" name="password" id="password" placeholder="password">
+                        <button>welcome back</button>
+                    </div> -->
+                    <h1>get library access</h1>
+                    <p>Join our community of avid reader.</p>
+                    <div class="form">
+                        <input type="text" name="appid" id="appid" placeholder="application id.">
+                        <input type="text" name="surname" id="surname" placeholder="surname">
+                        <input type="text" name="other" id="other" placeholder="other names">
+                        <button>request access</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <%- include('partials/tail') %>
+
+</body>
+
+</html>

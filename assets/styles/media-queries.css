@@ -1,1 +1,12 @@
 /* Responsiveness common to all pages */
+@media (max-width: 1200px) {
+    :root {
+        --text-size: 18px;
+    }
+}
+
+@media (max-width: 425px) {
+    :root {
+        --text-size: 16px;
+    }
+}
