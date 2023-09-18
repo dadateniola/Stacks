@@ -99,6 +99,7 @@ button, a {
     text-transform: capitalize;
     font-family: var(--main);
     border-radius: 10px;
+    cursor: pointer;
 }
 
 img {
