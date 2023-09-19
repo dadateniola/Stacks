@@ -1,47 +1,139 @@
-window.addEventListener("load", () => {
-    const whiteBox = select(".white-box");
-    const formCont = selectAll(".form-box h1, .form-box p, .form>*")
-    const introImg = select(".intro-img img");
-    const logo = select(".logo");
+class Setup {
+    constructor(params = {}) {
+        Object.assign(this, params);
 
-    // const tl = gsap.timeline();
+        this.init();
+    }
 
-    // tl
-    //     .from(whiteBox, { width: '100%', delay: 1, borderRadius: 0, duration: 1.3, ease: 'Power1.easeOut' })
-    //     .from(formCont, { opacity: 0, y: 200, stagger: 0.1, ease: 'Back.easeOut' })
-    //     .from(introImg, { opacity: 0, yPercent: 100 }, "<")
-})
+    init() {
+        this.setupParameters();
 
-const change = select("#change");
+        const type = (this?.type) ? this.type.toLowerCase() : null;
 
-change.addEventListener("click", () => {
-    disableLinksAndBtns(true);
+        const tl = gsap.timeline({ defaults: { duration: 0.6 } });
 
-    const whiteBox = select(".white-box");
-    const formCont = selectAll(".form-box h1, .form-box p, .form>*")
-    const introImg = select(".intro-img img");
-    const logo = select(".logo");
-    const tl = gsap.timeline({ defaults: { duration: 0.6 } });
+        tl.call(() => disableLinksAndBtns(true))
 
-    const width = getStyle(whiteBox, 'width');
-    const borderRadius = () => {
+        //Checking conditions
+        if (type == 'load') {
+            const load = this.load();
+            tl.add(load)
+        }
+        if (type == 'change') {
+            const change = this.change();
+            tl.add(change)
+        }
+
+        tl.call(() => disableLinksAndBtns())
+    }
+
+    setupParameters() {
+        this.intro = select(".intro");
+        this.whiteBox = select(".white-box");
+        this.formBox = select(".form-box");
+        this.formCont = selectAllWith(this.formBox, "h1, p, .form>*")
+        this.introImg = select(".intro-img img");
+
+        this.formStructure = {
+            login: `<h1>student login</h1>
+                    <p>Unlock a world of knowledge in our digital library</p>
+                    <div class="form">
+                        <input type="text" name="matric" id="matric" placeholder="matric no.">
+                        <input type="text" name="password" id="password" placeholder="password">
+                        <button>welcome back</button>
+                    </div>
+                    <p class="change">Don't have an account, <button id="change">request library access</button></p>`,
+
+            access: `<h1>get library access</h1>
+                    <p>Join our community of avid reader.</p>
+                    <div class="form">
+                        <input type="text" name="appid" id="appid" placeholder="application id.">
+                        <input type="text" name="surname" id="surname" placeholder="surname">
+                        <input type="text" name="other" id="other" placeholder="other names">
+                        <button>request access</button>
+                    </div>
+                    <p class="change">Already have an account ? <button id="change">welcome back</button></p>`
+        }
+    }
+
+    //Global functions
+    static setChange = () => select("#change").addEventListener("click", () => new Setup({ type: 'change' }));
+
+    static getBorderRadius = (condition) => {
         let depth = 0;
-        const radius = getStyle(whiteBox, 'borderRadius').split("px ");
-        radius.forEach(e => (e != 0) ? depth = e : null)
-        radius.forEach((e, i) => (e != 0) ? radius[i] = '0px' : radius[i] = depth)
+        const radius = getStyle(select(".white-box"), 'borderRadius').split("px ");
+        
+        if (condition) return radius.join("px ")
+
+        radius.forEach(e => (parseInt(e) != 0) ? depth = e : null)
+        radius.forEach((e, i) => (parseInt(e) != 0) ? radius[i] = '0px' : radius[i] = depth)
         return radius.join(" ");
     };
 
-    tl
-        .to(formCont, { opacity: 0, y: -200, stagger: 0.1, ease: 'Back.easeIn' })
-        .to(introImg, { opacity: 0, yPercent: 100 }, "<")
-        .to(whiteBox, { width: '100%', borderRadius: 0, ease: 'Power1.easeOut' })
+    //Animations
+    load() {
+        const tl = gsap.timeline();
 
-        .call(() => {
-            select(".intro").classList.add("next")
-            introImg.src = '/images/intro/access.png';
-        })
-        .to(whiteBox, { width, borderRadius: borderRadius(), ease: 'Power1.easeOut', clearProps: 'all' })
-        .to(formCont, { opacity: 1, y: 0, stagger: 0.1, ease: 'Back.easeOut' })
-        .to(introImg, { opacity: 1, yPercent: 0 })
+        tl
+            .from(this.whiteBox, { width: '100%', delay: 1, borderRadius: 0, duration: 1, ease: 'Power1.easeOut', clearProps: 'all' })
+            .from(this.formCont, { opacity: 0, y: 200, stagger: 0.1, ease: 'Back.easeOut' })
+            .from(this.introImg, { opacity: 0, yPercent: 100 }, "<")
+
+        return tl;
+    }
+
+    change() {
+        //Change conditions
+        const formBoxType = this.formBox.dataset?.type;
+        const introType = this.intro.classList.contains('next');
+        const condition = (formBoxType == 'login' && introType == true) ? true : (formBoxType == 'access' && introType == false) ? true : null;
+
+        const width = getStyle(this.whiteBox, 'width');
+        const borderRadius = Setup.getBorderRadius(condition);
+
+        const tl = gsap.timeline();
+
+        tl
+            .to(this.formCont, { opacity: 0, y: -200, stagger: 0.1, ease: 'Back.easeIn' })
+            .to(this.introImg, { opacity: 0, xPercent: (introType) ? 100 : -100 }, "<")
+            .to(this.whiteBox, { width: '100%', borderRadius: 0, ease: 'Power1.easeOut' })
+
+            .call(() => {
+                if (introType) {
+                    this.intro.classList.remove("next");
+                    this.introImg.src = '/images/intro/login.png';
+                    this.formBox.dataset.type = 'login';
+                    this.formBox.style.opacity = 0;
+                    this.formBox.innerHTML = this.formStructure.login
+                } else {
+                    this.intro.classList.add("next")
+                    this.introImg.src = '/images/intro/access.png';
+                    this.formBox.dataset.type = 'access';
+                    this.formBox.style.opacity = 0;
+                    this.formBox.innerHTML = this.formStructure.access
+                }
+
+                const timeline = gsap.timeline();
+                this.formCont = selectAllWith(this.formBox, "h1, p, .form>*");
+
+                timeline
+                    .set(this.introImg, { xPercent: (introType) ? -100 : 100 })
+                    .set(this.formCont, { opacity: 0, y: -200 })
+                    .set(this.formBox, { opacity: 1 })
+
+                    .to(this.whiteBox, { width, borderRadius, ease: 'Power1.easeOut', clearProps: 'all' })
+                    .to(this.formCont, { opacity: 1, y: 0, stagger: 0.1, ease: 'Back.easeOut' })
+                    .to(this.introImg, { opacity: 1, xPercent: 0 })
+
+                    .call(() => Setup.setChange())
+            })
+
+        return tl;
+    }
+}
+
+
+window.addEventListener("load", () => {
+    Setup.setChange();
+    new Setup({ type: 'load' })
 })

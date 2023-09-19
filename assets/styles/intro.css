@@ -6,6 +6,7 @@
 
 .intro .container {
     background-color: var(--tiffany-blue);
+    transition: 0.5s;
 }
 
 .logo {
@@ -55,6 +56,18 @@
     background-color: white;
     border-radius: 80px 0px 0px 80px;
     z-index: 2;
+}
+
+.form-box {
+    padding: 20px 0;
+    height: auto;
+    max-height: 85%;
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
+::-webkit-scrollbar {
+    display: none;
 }
 
 .form-box h1 {
