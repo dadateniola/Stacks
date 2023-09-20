@@ -23,6 +23,10 @@ class Setup {
             const change = this.change();
             tl.add(change)
         }
+        if(type == 'more') {
+            const more = this.more();
+            tl.add(more);
+        }
 
         tl.call(() => disableLinksAndBtns())
     }
@@ -33,42 +37,59 @@ class Setup {
         this.formBox = select(".form-box");
         this.formCont = selectAllWith(this.formBox, "h1, p, .form>*")
         this.introImg = select(".intro-img img");
+        this.changeState = select("#change");
+        this.showMore = select('#more');
+        this.moreBtns = selectAll('.more-cont button')
 
         this.formStructure = {
-            login: `<h1>student login</h1>
-                    <p>Unlock a world of knowledge in our digital library</p>
-                    <div class="form">
-                        <input type="text" name="matric" id="matric" placeholder="matric no.">
-                        <input type="text" name="password" id="password" placeholder="password">
-                        <button>welcome back</button>
-                    </div>
-                    <p class="change">Don't have an account, <button id="change">request library access</button></p>`,
+            login: {
+                html: ` <h1>student login</h1>
+                        <p>Unlock a world of knowledge in our digital library</p>
+                        <div class="form">
+                            <input type="text" name="matric" id="matric" placeholder="matric no.">
+                            <input type="text" name="password" id="password" placeholder="password">
+                            <button>welcome back</button>
+                        </div> `,
+                btn: 'request library access'
+            },
 
-            access: `<h1>get library access</h1>
-                    <p>Join our community of avid reader.</p>
-                    <div class="form">
-                        <input type="text" name="appid" id="appid" placeholder="application id.">
-                        <input type="text" name="surname" id="surname" placeholder="surname">
-                        <input type="text" name="other" id="other" placeholder="other names">
-                        <button>request access</button>
-                    </div>
-                    <p class="change">Already have an account ? <button id="change">welcome back</button></p>`
+            access: {
+                html: ` <h1>get library access</h1>
+                        <p>Join our community of avid reader.</p>
+                        <div class="form">
+                            <input type="text" name="appid" id="appid" placeholder="application id.">
+                            <input type="text" name="surname" id="surname" placeholder="surname">
+                            <input type="text" name="other" id="other" placeholder="other names">
+                            <button>request access</button>
+                        </div> `,
+                btn: 'welcome back'
+            }
         }
     }
 
     //Global functions
+    static setMore = () => {
+        const showMore = select('#more');
+
+        showMore.dataset.status = 'collapsed'
+
+        showMore.addEventListener('click', () => new Setup({ type: 'more'}))
+    }
+
     static setChange = () => select("#change").addEventListener("click", () => new Setup({ type: 'change' }));
 
     static getBorderRadius = (condition) => {
         let depth = 0;
         const radius = getStyle(select(".white-box"), 'borderRadius').split("px ");
-        
+
         if (condition) return radius.join("px ")
 
         radius.forEach(e => (parseInt(e) != 0) ? depth = e : null)
         radius.forEach((e, i) => (parseInt(e) != 0) ? radius[i] = '0px' : radius[i] = depth)
         return radius.join(" ");
     };
+
+    static disableMore = (condition) => selectAll('.more-cont button').forEach(e => e.disabled = condition);
 
     //Animations
     load() {
@@ -104,13 +125,15 @@ class Setup {
                     this.introImg.src = '/images/intro/login.png';
                     this.formBox.dataset.type = 'login';
                     this.formBox.style.opacity = 0;
-                    this.formBox.innerHTML = this.formStructure.login
+                    this.formBox.innerHTML = this.formStructure.login.html
+                    this.changeState.innerHTML = this.formStructure.login.btn
                 } else {
                     this.intro.classList.add("next")
                     this.introImg.src = '/images/intro/access.png';
                     this.formBox.dataset.type = 'access';
                     this.formBox.style.opacity = 0;
-                    this.formBox.innerHTML = this.formStructure.access
+                    this.formBox.innerHTML = this.formStructure.access.html
+                    this.changeState.innerHTML = this.formStructure.access.btn
                 }
 
                 const timeline = gsap.timeline();
@@ -130,10 +153,35 @@ class Setup {
 
         return tl;
     }
+
+    more() {
+        const icon = selectWith(this.showMore, 'i');
+        const status = this.showMore.dataset?.status;
+        const tl = gsap.timeline();
+
+        if (status == 'collapsed') {
+            tl.set(this.moreBtns, { opacity: 0, y: 0, x: '120%' })
+            tl.to(this.moreBtns, { opacity: 1, x: 0, stagger: 0.1, duration: 1.5, ease: 'Elastic.easeOut' })
+
+            icon.classList.replace("fa-question", 'fa-xmark')
+            this.showMore.dataset.status = 'expanded'
+            Setup.disableMore(false);
+        } else {
+            tl.to(this.moreBtns, { opacity: 0, y: -60, stagger: 0.15, duration: 1, ease: 'Expo.easeOut' })
+            
+            icon.classList.replace("fa-xmark", 'fa-question')
+            this.showMore.dataset.status = 'collapsed'
+            Setup.disableMore(true)
+        }
+
+        return tl;
+    }
 }
 
 
 window.addEventListener("load", () => {
+    Setup.disableMore(true);
     Setup.setChange();
-    new Setup({ type: 'load' })
+    Setup.setMore();
+    // new Setup({ type: 'load' })
 })

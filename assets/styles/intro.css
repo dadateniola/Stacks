@@ -1,3 +1,12 @@
+/*
+    Z-Index Heirachy
+    --------------------
+    .more-box: 5
+    .logo: 1 | 4
+    .intro-img: 3
+    .white-box: 2 | 3
+*/
+
 .intro {
     position: relative;
     height: 100vh;
@@ -15,7 +24,9 @@
     left: 0;
     width: 105px;
     height: 105px;
-    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border-radius: 0;
     border-bottom-right-radius: 60px;
     background-color: white;
@@ -23,6 +34,7 @@
 }
 
 .logo img {
+    transform: translate(-5px, -5px);
     width: 60px;
     height: 60px;
 }
@@ -124,6 +136,10 @@
     border-bottom-left-radius: 60px;
 }
 
+.intro.next .logo img {
+    transform: translate(5px, -5px);
+}
+
 .intro.next .container {
     background-color: var(--space-cadet);
 }
@@ -154,6 +170,57 @@
 }
 
 
+.more-box {
+    position: absolute;
+    max-width: 100%;
+    bottom: 30px;
+    right: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    z-index: 5;
+}
+
+/* .more-cont {
+    width: 100%;
+    height: 200px;
+    background-color: white;
+    box-shadow: rgb(var(--gray), 0.15) 0px 4px 24px;
+    border-radius: 20px ;
+} */
+
+.more-cont {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.more-cont button {
+    padding: 13px 18px;
+    font-family: var(--secondary);
+    font-size: 15px;
+    background-color: var(--rich-black);
+    color: white;
+    transform: translateX(120%);
+    opacity: 0;
+}
+
+.more-cont>*,
+.more-action {
+    display: flex;
+    justify-content: end;
+}
+
+.more-action button {
+    width: 50px;
+    height: 50px;
+    font-size: 18px;
+    background-color: var(--error);
+    color: white;
+    border-radius: 20px;
+}
+
+
 
 @media (max-width: 1200px) {
     .form input {
@@ -177,9 +244,9 @@
 
 @media (max-width: 1020px) {
     .logo {
-        padding: 13px;
         width: 80px;
         height: 80px;
+        z-index: 4;
     }
 
     .logo img {
@@ -195,17 +262,20 @@
         background-color: #2D746B;
     }
 
+    .intro.next .white-box,
     .white-box {
         padding: 15px;
         width: 100%;
+        display: flex;
+        justify-content: center;
         border-radius: 0;
-        background-color: transparent;
+        background-color: rgba(0, 0, 0, 0.6);
         z-index: 3;
     }
 
     .intro-img {
+        padding: 0;
         max-width: 100%;
-        opacity: 0.7;
     }
 
     .form-box {
