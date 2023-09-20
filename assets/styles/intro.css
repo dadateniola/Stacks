@@ -288,7 +288,7 @@
 
     .form-box input {
         color: white;
-        border-bottom: 3px solid rgba(var(--light), 0.4);
+        border-bottom: 2px solid rgba(var(--light), 0.4);
     }
 
     .form-box input::placeholder {

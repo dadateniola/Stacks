@@ -165,13 +165,12 @@ class Setup {
 
             icon.classList.replace("fa-question", 'fa-xmark')
             this.showMore.dataset.status = 'expanded'
-            Setup.disableMore(false);
         } else {
             tl.to(this.moreBtns, { opacity: 0, y: -60, stagger: 0.15, duration: 1, ease: 'Expo.easeOut' })
-            
+            tl.set(this.moreBtns, { opacity: 0, y: 0, x: '120%' })
+
             icon.classList.replace("fa-xmark", 'fa-question')
             this.showMore.dataset.status = 'collapsed'
-            Setup.disableMore(true)
         }
 
         return tl;

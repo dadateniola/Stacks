@@ -1,9 +1,5 @@
 /* Styles that are common to all pages */
-
-@font-face {
-    font-family: 'Main';
-    src: url(/fonts/Main.otf);
-}
+@import url(/fonts/Clash-Display/css/clash-display.css);
 
 @font-face {
     font-family: 'Secondary';
@@ -39,7 +35,8 @@
 
     /* Fonts */
     --paragraph: 'SpaceGrotesk';
-    --main: 'Main';
+    --main: 'ClashDisplay-Regular';
+    --heading: 'ClashDisplay-Semibold';
     --secondary: 'Secondary';
 
     --sub-text-light: rgba(var(--light), 0.5);
@@ -69,6 +66,7 @@ input {
     width: 100%;
     display: block;
     border: none;
+    border-radius: 0;
     padding: 20px 0 10px 0;
     border-bottom: 3px solid rgba(var(--dark), 0.1);
     background-color: transparent;
