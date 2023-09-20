@@ -140,3 +140,14 @@ img {
         background-position: 200% 0;
     }
 }
+
+.preload {
+    position: fixed;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    visibility: hidden;
+    pointer-events: none;
+    display: none;
+    z-index: -1;
+}
