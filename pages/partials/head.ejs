@@ -1,6 +1,21 @@
 <!-- Common things like navbar, alert and more.. -->
-<!-- <div class="loader-box">
-    <div class="loader-cont">
-        <h1>stacks</h1>
+<div class="page-overlay">
+    <div class="loader-box">
+        <div class="loader-cont">
+            <div class="loader-spinner"></div>
+            <div class="loader-logo">
+                <picture>
+                    <!-- Use the light logo by default -->
+                    <source srcset="/images/icons/logo-light.png" media="(max-width: 1019px)">
+                    <!-- Use the dark logo when viewport width is 1020px or larger -->
+                    <source srcset="/images/icons/logo-dark.png" media="(min-width: 1020px)">
+                    <!-- Fallback for browsers that do not support the <picture> element -->
+                    <img src="/images/icons/logo-light.png" alt="logo">
+                </picture>                  
+            </div>
+        </div>
     </div>
-</div> -->
+    <div class="spinner-box">
+        <div class="spinner"></div>
+    </div>
+</div>

@@ -5,6 +5,20 @@
     }
 }
 
+@media (max-width: 1020px) {
+    .loader-box {
+        background-color: var(--rich-black);
+    }
+
+    .loader-spinner {
+        background: conic-gradient(from 180deg at 50% 50%, transparent 0deg, rgba(217, 217, 217, 0) 90deg, #fff 300deg);
+    }
+
+    .loader-logo {
+        background-color: var(--rich-black);
+    }
+}
+
 @media (max-width: 425px) {
     :root {
         --text-size: 16px;

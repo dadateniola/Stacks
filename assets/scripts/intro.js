@@ -96,7 +96,9 @@ class Setup {
         const tl = gsap.timeline();
 
         tl
-            .from(this.whiteBox, { width: '100%', delay: 1, borderRadius: 0, duration: 1, ease: 'Power1.easeOut', clearProps: 'all' })
+            .to('.loader-box', { opacity: 0, delay: 1 })
+            .call(() => select('.page-overlay').classList.add('off'))
+            .from(this.whiteBox, { width: '100%', borderRadius: 0, duration: 1, ease: 'Power1.easeOut', clearProps: 'all' })
             .from(this.formCont, { opacity: 0, y: 200, stagger: 0.1, ease: 'Back.easeOut' })
             .from(this.introImg, { opacity: 0, yPercent: 100 }, "<")
 
@@ -182,5 +184,5 @@ window.addEventListener("load", () => {
     Setup.disableMore(true);
     Setup.setChange();
     Setup.setMore();
-    // new Setup({ type: 'load' })
+    new Setup({ type: 'load' })
 })
