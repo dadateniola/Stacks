@@ -58,8 +58,8 @@ class Setup {
                         <p>Join our community of avid reader.</p>
                         <div class="form">
                             <input type="text" name="appid" id="appid" placeholder="application id.">
-                            <input type="text" name="surname" id="surname" placeholder="surname">
-                            <input type="text" name="other" id="other" placeholder="other names">
+                            <input type="text" name="fullname" id="fullname" placeholder="fullname">
+                            <input type="email" name="email" id="email" placeholder="student email">
                             <button>request access</button>
                         </div> `,
                 btn: 'welcome back'
