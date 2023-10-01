@@ -23,7 +23,7 @@ class Setup {
             const change = this.change();
             tl.add(change)
         }
-        if(type == 'more') {
+        if (type == 'more') {
             const more = this.more();
             tl.add(more);
         }
@@ -73,7 +73,7 @@ class Setup {
 
         showMore.dataset.status = 'collapsed'
 
-        showMore.addEventListener('click', () => new Setup({ type: 'more'}))
+        showMore.addEventListener('click', () => new Setup({ type: 'more' }))
     }
 
     static setChange = () => select("#change").addEventListener("click", () => new Setup({ type: 'change' }));
@@ -89,15 +89,13 @@ class Setup {
         return radius.join(" ");
     };
 
-    static disableMore = (condition) => selectAll('.more-cont button').forEach(e => e.disabled = condition);
-
     //Animations
     load() {
         const tl = gsap.timeline();
 
         tl
-            .to('.loader-box', { opacity: 0, delay: 1 })
-            .call(() => select('.page-overlay').classList.add('off'))
+            .to('.loader-box, .spinner-box', { opacity: 0, delay: 1 })
+            .call(() => disableOverlays())
             .from(this.whiteBox, { width: '100%', borderRadius: 0, duration: 1, ease: 'Power1.easeOut', clearProps: 'all' })
             .from(this.formCont, { opacity: 0, y: 200, stagger: 0.1, ease: 'Back.easeOut' })
             .from(this.introImg, { opacity: 0, yPercent: 100 }, "<")
@@ -114,10 +112,14 @@ class Setup {
         const width = getStyle(this.whiteBox, 'width');
         const borderRadius = Setup.getBorderRadius(condition);
 
+        const spinnerBox = select('.spinner-box')
+
         const tl = gsap.timeline();
 
         tl
-            .to(this.formCont, { opacity: 0, y: -200, stagger: 0.1, ease: 'Back.easeIn' })
+            .call(() => disableOverlays(spinnerBox))
+            .to(spinnerBox, { opacity: 1 })
+            .to(this.formCont, { opacity: 0, y: -200, stagger: 0.1, ease: 'Back.easeIn' }, '<')
             .to(this.introImg, { opacity: 0, xPercent: (introType) ? 100 : -100 }, "<")
             .to(this.whiteBox, { width: '100%', borderRadius: 0, ease: 'Power1.easeOut' })
 
@@ -151,6 +153,7 @@ class Setup {
                     .to(this.introImg, { opacity: 1, xPercent: 0 })
 
                     .call(() => Setup.setChange())
+                    .to(spinnerBox, { opacity: 0 })
             })
 
         return tl;
@@ -163,7 +166,7 @@ class Setup {
 
         if (status == 'collapsed') {
             tl.set(this.moreBtns, { opacity: 0, y: 0, x: '120%' })
-            tl.to(this.moreBtns, { opacity: 1, x: 0, stagger: 0.1, duration: 1.5, ease: 'Elastic.easeOut' })
+            tl.to(this.moreBtns, { opacity: 1, x: 0, stagger: 0.1, duration: 1.2, ease: 'Elastic.easeOut' })
 
             icon.classList.replace("fa-question", 'fa-xmark')
             this.showMore.dataset.status = 'expanded'
@@ -181,7 +184,9 @@ class Setup {
 
 
 window.addEventListener("load", () => {
-    Setup.disableMore(true);
+    //Hide overlays
+    // selectAll('.page-overlay > *').forEach(e => e.classList.add('off'))
+
     Setup.setChange();
     Setup.setMore();
     new Setup({ type: 'load' })

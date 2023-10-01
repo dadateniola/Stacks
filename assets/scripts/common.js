@@ -34,6 +34,8 @@ const disableLinksAndBtns = (condition = false) => {
   });
 }
 
+const disableOverlays = (elem) => selectAll('.page-overlay > *').forEach(e => (elem == e) ? e.classList.remove('off') : e.classList.add('off'))
+
 
 //Page Setup
 class PageSetup {
