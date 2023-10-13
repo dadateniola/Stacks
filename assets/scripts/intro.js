@@ -96,7 +96,7 @@ class Setup {
         tl
             .to('.loader-box, .spinner-box', { opacity: 0, delay: 1 })
             .call(() => disableOverlays())
-            .from(this.whiteBox, { width: '100%', borderRadius: 0, duration: 1, ease: 'Power1.easeOut', clearProps: 'all' })
+            .from(this.whiteBox, { width: '100%', borderRadius: 0, duration: 2, ease: 'Expo.easeInOut', clearProps: 'all' })
             .from(this.formCont, { opacity: 0, y: 200, stagger: 0.1, ease: 'Back.easeOut' })
             .from(this.introImg, { opacity: 0, yPercent: 100 }, "<")
 
@@ -121,7 +121,7 @@ class Setup {
             .to(spinnerBox, { opacity: 1 })
             .to(this.formCont, { opacity: 0, y: -200, stagger: 0.1, ease: 'Back.easeIn' }, '<')
             .to(this.introImg, { opacity: 0, xPercent: (introType) ? 100 : -100 }, "<")
-            .to(this.whiteBox, { width: '100%', borderRadius: 0, ease: 'Power1.easeOut' })
+            .to(this.whiteBox, { width: '100%', borderRadius: 0, ease: 'Expo.easeIn', duration: 1 })
 
             .call(() => {
                 if (introType) {
@@ -148,7 +148,7 @@ class Setup {
                     .set(this.formCont, { opacity: 0, y: -200 })
                     .set(this.formBox, { opacity: 1 })
 
-                    .to(this.whiteBox, { width, borderRadius, ease: 'Power1.easeOut', clearProps: 'all' })
+                    .to(this.whiteBox, { width, borderRadius, ease: 'Expo.easeOut', duration: 1, clearProps: 'all', delay: 0.5})
                     .to(this.formCont, { opacity: 1, y: 0, stagger: 0.1, ease: 'Back.easeOut' })
                     .to(this.introImg, { opacity: 1, xPercent: 0 })
 
@@ -166,12 +166,12 @@ class Setup {
 
         if (status == 'collapsed') {
             tl.set(this.moreBtns, { opacity: 0, y: 0, x: '120%' })
-            tl.to(this.moreBtns, { opacity: 1, x: 0, stagger: 0.1, duration: 1.2, ease: 'Elastic.easeOut' })
+            tl.to(this.moreBtns, { opacity: 1, x: 0, stagger: 0.1, duration: 0.3, ease: 'Back.easeOut' })
 
             icon.classList.replace("fa-question", 'fa-xmark')
             this.showMore.dataset.status = 'expanded'
         } else {
-            tl.to(this.moreBtns, { opacity: 0, y: -60, stagger: 0.15, duration: 1, ease: 'Expo.easeOut' })
+            tl.to(this.moreBtns, { opacity: 0, y: -60, stagger: 0.15, duration: 0.8, ease: 'Expo.easeOut' })
             tl.set(this.moreBtns, { opacity: 0, y: 0, x: '120%' })
 
             icon.classList.replace("fa-xmark", 'fa-question')

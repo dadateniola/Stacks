@@ -9,4 +9,9 @@
     :root {
         --text-size: 16px;
     }
+
+    .spinner {
+        width: 35px;
+        height: 35px;
+    }
 }
