@@ -151,8 +151,6 @@ class Setup {
                     .to(this.whiteBox, { width, borderRadius, ease: 'Expo.easeOut', duration: 1, clearProps: 'all', delay: 0.5})
                     .to(this.formCont, { opacity: 1, y: 0, stagger: 0.1, ease: 'Back.easeOut' })
                     .to(this.introImg, { opacity: 1, xPercent: 0 })
-
-                    .call(() => Setup.setChange())
                     .to(spinnerBox, { opacity: 0 })
             })
 
