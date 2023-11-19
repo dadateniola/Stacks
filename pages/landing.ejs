@@ -1,5 +1,32 @@
-<%- include('partials/head') %>
+<!DOCTYPE html>
+<html lang="en">
 
-<h1>Welcome to Stacks</h1>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome To Stacks</title>
 
-<%- include('partials/tail') %>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="/others/fa/css/all.min.css">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="/styles/common.css">
+    <link rel="stylesheet" href="/styles/home.css">
+    <link rel="stylesheet" href="/styles/media-queries.css">
+</head>
+
+<body>
+
+    <%- include('partials/head') %>
+
+        <main class="home">
+            <%- include('partials/navbar') %>
+
+        </main>
+
+        <%- include('partials/tail') %>
+            <script src="/scripts/home.js"></script>
+
+</body>
+
+</html>

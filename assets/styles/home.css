@@ -1,0 +1,7 @@
+
+
+.home {
+    position: relative;
+    width: 100%;
+    padding: var(--page-padding);
+}

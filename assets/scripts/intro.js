@@ -94,7 +94,7 @@ class Setup {
         const tl = gsap.timeline();
 
         tl
-            .to('.loader-box, .spinner-box', { opacity: 0, delay: 1 })
+            .to('.loader-box, .spinner-box', { opacity: 0, delay: 0.5 })
             .call(() => disableOverlays())
             .from(this.whiteBox, { width: '100%', borderRadius: 0, duration: 2, ease: 'Expo.easeInOut', clearProps: 'all' })
             .from(this.formCont, { opacity: 0, y: 200, stagger: 0.1, ease: 'Back.easeOut' })

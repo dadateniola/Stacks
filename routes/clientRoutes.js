@@ -10,5 +10,7 @@ const router = Router();
 //Setup Routes
 router.get("/", showIntroPage);
 
+router.get("/home", showLandingPage)
+
 
 module.exports = router;
