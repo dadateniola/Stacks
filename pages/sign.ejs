@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Stacks</title>
+
+    <%- include('partials/head') %>
+        <link rel="stylesheet" href="/styles/slider.css">
+        <link rel="stylesheet" href="/styles/sign.css">
+</head>
+
+<body>
+
+    <main>
+        <div class="form-box">
+            <div class="form-cont flex-col">
+                <div class="logo">
+                    <img src="/images/icons/logo dark.png" alt="logo">
+                    <h1>Stacks</h1>
+                </div>
+                <div class="form flex-col">
+                    <div class="form-head flex-col">
+                        <h1>Welcome back</h1>
+                        <p>Enter your ID and password to access your account.</p>
+                    </div>
+                    <form class="form-inputs flex-col" data-url="/login">
+                        <div class="form-group">
+                            <label for="id">identification number</label>
+                            <input type="text" name="id" id="id" placeholder="Enter your identification number">
+                        </div>
+                        <div class="form-group">
+                            <label for="pswd">password</label>
+                            <input type="password" name="pswd" id="pswd" placeholder="Enter your password">
+                            <div class="extra">
+                                <div class="rem">
+                                    <input type="checkbox" name="rem" id="rem">
+                                    <label for="rem">remember me</label>
+                                </div>
+                                <a href="">forgot password</a>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <button>login</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="form-cta">
+                    <button class="null">Don't have an account?. <span>request library access</span></button>
+                </div>
+            </div>
+        </div>
+        <div class="form-slider-box">
+            <div class="form-slider">
+                <img src="/images/sign/front-view-smiley-girl-with-two-books_23-2148447997.jpg" alt="slide">
+                <img src="/images/sign/elegant-young-teacher-with-brunette-hair-stylish-light-shirt-black-striped-suit-glasses-holding-writings-pen-giving-lecture.jpg"
+                    alt="slide">
+                <img src="/images/sign/studio-shot-girlfriends-posing-with-their-phones.jpg" alt="slide">
+                <img src="/images/sign/young-woman-with-afro-haircut-wearing-pink-sweater.jpg" alt="slide">
+            </div>
+        </div>
+    </main>
+
+    <%- include('partials/foot') %>
+        <script src="/scripts/slider.js"></script>
+        <script src="/scripts/sign.js"></script>
+
+</body>
+
+</html>

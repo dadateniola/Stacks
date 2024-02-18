@@ -1,0 +1,412 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+
+    font-family: 'Manrope', sans-serif;
+    font-weight: 500;
+}
+
+:root {
+    /* Colors */
+    --light: #FFFFFF;
+    --dark: #161618;
+
+    /* Main */
+    --sub-text: #9D9E9F;
+    --mandy: #E84855;
+    --faint-gray: rgba(157, 158, 159, 0.4);
+    --faint-white: #F5F7FA;
+
+    /* Resources */
+    --slide: var(var(--mandy));
+    --course: 122, 186, 232;
+    --pq: #7CC1AA;
+    --user: #DDA76F;
+    --notice: #8A2BE2;
+
+    /* Requests */
+    --friend: #FF1493;
+    --access: #D2691E;
+    --resource: #DC143C;
+    --change: #1E90FF;
+
+    --swiper-theme-color: var(--mandy) !important;
+
+    /* Measurements */
+    --text: 1em;
+    --small-text: 0.8em;
+
+    --padding: 40px;
+    --input-padding: 17px 20px;
+
+    --sidebar-width: 240px;
+    --sidebar-gap: 18px;
+    --sidebar-small-gap: 12px;
+
+    --header-height: 65px;
+
+    --img-wh: 35px;
+}
+
+body {
+    width: 100%;
+    min-height: 100vh;
+    background-color: var(--faint-white);
+
+    overflow-x: hidden;
+}
+
+a {
+    text-decoration: none;
+    color: var(--dark);
+    font-weight: 700;
+    text-transform: capitalize;
+}
+
+section {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+
+/* Common styles */
+.flex {
+    display: flex;
+}
+
+.flex-col {
+    display: flex;
+    flex-direction: column;
+}
+
+.sub {
+    color: rgba(0, 0, 0, 0.6);
+}
+
+.line {
+    width: 1px;
+    background-color: var(--faint-gray);
+}
+
+.line-hr {
+    width: 100%;
+    height: 1px;
+    background-color: var(--faint-gray);
+}
+
+
+.content {
+    position: relative;
+    margin-left: var(--sidebar-width);
+    width: calc(100vw - var(--sidebar-width));
+    height: 100vh;
+    flex: 1;
+}
+
+button.stacks-active {
+    background-color: var(--mandy) !important;
+}
+
+.stacks-active img {
+    filter: invert(100%);
+}
+
+
+/* Forms */
+.form-inputs {
+    gap: 25px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+label {
+    font-size: var(--text);
+    font-weight: 700;
+    text-transform: capitalize;
+}
+
+input {
+    padding: var(--input-padding);
+    border: none;
+    background-color: var(--faint-white);
+    border-radius: 10px;
+    font-size: var(--small-text);
+}
+
+input:not([type="checkbox"]):focus {
+    outline: 2px solid var(--mandy);
+}
+
+.extra {
+    margin-top: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.extra label,
+.extra a {
+    font-size: var(--small-text);
+}
+
+.rem {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+}
+
+button {
+    padding: var(--input-padding);
+    border: none;
+    border-radius: 10px;
+    font-size: var(--small-text);
+    text-transform: capitalize;
+    background-color: var(--dark);
+    color: var(--light);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+button.null {
+    padding: 0;
+    color: black;
+    background-color: transparent;
+    border-radius: 0;
+}
+
+
+/* Main page content */
+.container {
+    width: 100%;
+    display: flex;
+}
+
+main.main-content {
+    padding: 30px;
+    padding-bottom: 10vh;
+    width: 100%;
+    background-color: var(--faint-white);
+
+    gap: 30px;
+}
+
+.content-head h1 {
+    font-size: 35px;
+    font-weight: 700;
+    text-transform: capitalize;
+}
+
+
+.section-head {
+    display: flex;
+    justify-content: space-between;
+}
+
+.section-format,
+.section-info {
+    display: flex;
+    gap: 15px;
+}
+
+.section-info p {
+    width: 180px;
+    text-transform: capitalize;
+    font-weight: 700;
+
+    display: flex;
+    align-items: center;
+}
+
+.user-img img {
+    width: var(--img-wh);
+    height: var(--img-wh);
+    border: 2px solid var(--faint-white);
+    border-radius: 100%;
+}
+
+.no-img {
+    opacity: 0.6;
+}
+
+.user-img img:not(:first-child) {
+    margin-left: -10px;
+}
+
+.section-format button {
+    padding: 0;
+    width: 35px;
+    height: 35px;
+    background-color: var(--light);
+    border-radius: 8px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.section-format button img {
+    width: 17px;
+    height: 17px;
+}
+
+.section-format .slide img {
+    transform: rotate(90deg);
+}
+
+
+/* Section layout */
+.section-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.section-slider {
+    position: relative;
+    padding-bottom: 40px;
+}
+
+/* Swiper overwrite */
+.section-slider {
+    position: relative;
+    padding-bottom: 40px;
+}
+
+.swiper {
+    width: 100%;
+}
+
+.swiper-slide {
+    height: auto;
+}
+
+/* Item styles */
+.item {
+    width: 300px !important;
+    height: auto !important;
+    background-color: var(--light);
+    padding: 15px;
+    border-radius: 15px;
+
+    display: flex !important;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.type {
+    padding: 10px;
+    border-radius: 10px;
+    background-color: rgba(var(--course), 0.1);
+}
+
+.type p {
+    font-size: var(--small-text);
+    text-transform: capitalize;
+    color: rgb(var(--course)) !important;
+}
+
+.more {
+    width: 20px;
+    height: 100%;
+
+    display: flex;
+    justify-content: end;
+    align-items: center;
+}
+
+.more img {
+    width: auto;
+    height: 18px;
+}
+
+.cont {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.cont p {
+    font-size: var(--text);
+    font-weight: 700;
+}
+
+.cont span {
+    padding-right: 10px;
+    text-transform: capitalize;
+    font-size: var(--small-text);
+    color: var(--sub-text) !important;
+    font-weight: 700;
+    text-wrap: wrap;
+}
+
+
+@media (max-width: 1100px) {
+    :root {
+        --text: 0.9em;
+        --small-text: 0.75em;
+
+        --img-wh: 28px;
+    }
+
+    main.main-content {
+        padding: 25px;
+        padding-bottom: 10vh;
+        gap: 25px;
+    }
+
+    section {
+        gap: 20px;
+    }
+
+    .content-head h1 {
+        font-size: 27px;
+    }
+
+    .section-info p {
+        font-size: var(--text);
+        width: 140px;
+    }
+
+    .section-format button {
+        width: 32px;
+        height: 32px;
+    }
+
+    .item {
+        width: 250px !important;
+        padding: 10px;
+    }
+
+    .type {
+        padding: 8px;
+    }
+
+    .more {
+        justify-content: center;
+    }
+
+    .cont {
+        gap: 3;
+    }
+}

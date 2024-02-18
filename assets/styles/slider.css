@@ -1,0 +1,52 @@
+[data-type="slider"] {
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    animation: fade 2s infinite linear;
+
+    overflow: hidden;
+}
+
+[data-type="slider"].stop {
+    animation: none;
+}
+
+[data-type="slider"]>* {
+    opacity: 0;
+}
+
+@keyframes fade {
+    0% {
+        background-color: rgba(45, 45, 45, 0.1);
+    }
+
+    50% {
+        background-color: rgba(45, 45, 45, 0.3);
+    }
+
+    100% {
+        background-color: rgba(45, 45, 45, 0.1);
+    }
+}
+
+.slider {
+    width: 100%;
+    height: 100%;
+    font-size: 0;
+    white-space: nowrap;
+    will-change: transform;
+}
+
+.slide {
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.slide>* {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    will-change: transform;
+}

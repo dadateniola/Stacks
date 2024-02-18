@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Stacks</title>
+
+    <%- include('partials/head') %>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+</head>
+
+<body>
+
+    <div class="container">
+        <%- include('partials/sidebar') %>
+            <div class="content">
+                <%- include('partials/navbar') %>
+                    <main class="main-content flex-col">
+                        <div class="content-head">
+                            <h1>dashboard</h1>
+                        </div>
+                        <section>
+                            <div class="section-head">
+                                <div class="section-info">
+                                    <p>semester courses</p>
+                                    <div class="line"></div>
+                                    <div class="user-img flex">
+                                        <img src="/images/avatars/avatar-6.png" alt="lecturer">
+                                        <img src="/images/avatars/avatar-7.png" alt="lecturer">
+                                        <img src="/images/avatars/avatar-8.png" alt="lecturer">
+                                        <img src="/images/avatars/avatar-9.png" alt="lecturer">
+                                    </div>
+                                </div>
+                                <div class="section-format">
+                                    <div class="line"></div>
+                                    <button class="slide stacks-active">
+                                        <img src="/images/icons/row dark.png" alt="icon">
+                                    </button>
+                                    <button>
+                                        <img src="/images/icons/row dark.png" alt="icon">
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="section-slider">
+                                <div class="swiper">
+                                    <div class="swiper-wrapper">
+                                        <% semesterCourses.forEach(course => { %>
+                                            <div class="swiper-slide item">
+                                                <div class="heading">
+                                                    <div class="type">
+                                                        <p>course</p>
+                                                    </div>
+                                                    <div class="more">
+                                                        <img src="/images/icons/more.png" alt="more">
+                                                    </div>
+                                                </div>
+                                                <div class="cont">
+                                                    <p><%= course.code %></p>
+                                                    <span><%= course.name %></span>
+                                                </div>
+                                                <div class="line-hr"></div>
+                                                <div class="user-img flex">
+                                                    <% let randomNumber = Math.floor(Math.random() * 4) + 1; %>
+                                                    <img src="/images/no-avatar/no-img-<%= randomNumber %>.png" alt="lecturer" class="no-img">
+                                                </div>
+                                            </div>
+                                        <% }) %>
+                                    </div>
+                                </div>
+                                <div class="swiper-pagination"></div>
+                            </div>
+                        </section>
+                    </main>
+            </div>
+    </div>
+
+    <%- include('partials/foot') %>
+        <script type="module">
+            import Swiper from 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.mjs'
+
+            const swiper = new Swiper('.swiper', {
+                slidesPerView: "auto",
+                spaceBetween: 30,
+                grabCursor: true,
+                // autoplay: true,
+                pagination: {
+                    el: '.swiper-pagination',
+                    // dynamicBullets: true,
+                    clickable: true,
+                },
+            });
+        </script>
+
+</body>
+
+</html>
