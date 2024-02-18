@@ -73,6 +73,50 @@ section {
 }
 
 
+/* Page overlay */
+#overlay {
+    padding: 0 8vw;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    pointer-events: none;
+    
+    z-index: 100;
+    transition: 0.3s;
+}
+
+#overlay.active {
+    pointer-events: all;
+    background-color: var(--faint-white);
+}
+
+#overlay [data-trigger] {
+    pointer-events: all;
+}
+
+#overlay [data-close] {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+#overlay > *:not([data-trigger]) {
+    opacity: 0;
+}
+
+#overlay > *:not([data-trigger]):not([data-triggered]) {
+    display: none;
+}
+
+
+.search-box {
+    padding-top: calc(60px + 50px + 30px);
+    width: 100%;
+    min-height: 100dvh;
+}
+
+
 /* Common styles */
 .flex {
     display: flex;
@@ -216,6 +260,14 @@ main.main-content {
     justify-content: space-between;
 }
 
+.section-head.colored {
+    background-color: white;
+    padding: 15px;
+    padding-right: 0;
+    border-radius: 15px;
+}
+
+.section-types,
 .section-format,
 .section-info {
     display: flex;
@@ -246,6 +298,10 @@ main.main-content {
     margin-left: -10px;
 }
 
+.section-format {
+    padding-right: 15px;
+}
+
 .section-format button {
     padding: 0;
     width: 35px;
@@ -267,12 +323,46 @@ main.main-content {
     transform: rotate(90deg);
 }
 
+.section-type {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.section-type p {
+    text-transform: capitalize;
+    font-size: var(--small-text);
+    font-weight: 600;
+}
+
+.section-type span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    font-size: 0.6em;
+    background-color: var(--faint-gray);
+    border-radius: 5px;
+}
+
+.section-type.active {
+    background-color: black;
+    color: white;
+}
+
 
 /* Section layout */
 .section-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 20px;
+}
+
+.section-grid .item {
+    width: 100% !important;
 }
 
 .section-slider {

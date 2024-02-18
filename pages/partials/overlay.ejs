@@ -1,0 +1,68 @@
+<div id="overlay">
+    <div class="search" data-trigger="search-box">
+        <input type="text" placeholder="Search.">
+        <div class="search-img">
+            <img src="/images/icons/search.png" alt="icon">
+        </div>
+    </div>
+    <div class="search-box" id="search-box">
+        <section>
+            <div class="section-head colored">
+                <div class="section-types">
+                    <div class="section-type active ">
+                        <p>all</p>
+                        <span>12</span>
+                    </div>
+                    <div class="section-type">
+                        <p>slides</p>
+                        <span>2</span>
+                    </div>
+                    <div class="section-type">
+                        <p>past questions</p>
+                        <span>5</span>
+                    </div>
+                </div>
+                <div class="section-format">
+                    <div class="section-type" data-close>
+                        <p>close</p>
+                    </div>
+                    <div class="line"></div>
+                    <button class="slide stacks-active">
+                        <img src="/images/icons/row dark.png" alt="icon">
+                    </button>
+                    <button>
+                        <img src="/images/icons/row dark.png" alt="icon">
+                    </button>
+                </div>
+            </div>
+            <div class="section-grid">
+                <% semesterCourses.forEach(course=> { %>
+                    <div class="item">
+                        <div class="heading">
+                            <div class="type">
+                                <p>course</p>
+                            </div>
+                            <div class="more">
+                                <img src="/images/icons/more.png" alt="more">
+                            </div>
+                        </div>
+                        <div class="cont">
+                            <p>
+                                <%= course.code %>
+                            </p>
+                            <span>
+                                <%= course.name %>
+                            </span>
+                        </div>
+                        <div class="line-hr"></div>
+                        <div class="user-img flex">
+                            <% let randomNumber=Math.floor(Math.random() * 4) + 1; %>
+                                <img src="/images/no-avatar/no-img-<%= randomNumber %>.png"
+                                    alt="lecturer" class="no-img">
+                        </div>
+                    </div>
+                    <% }) %>
+            </div>
+        </section>
+    </div>
+</div>
