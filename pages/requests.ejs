@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Stacks</title>
+
+    <%- include('partials/head') %>
+</head>
+
+<body>
+
+    <%- include('partials/overlay') %>
+        <div class="container">
+            <%- include('partials/sidebar') %>
+                <div class="content">
+                    <%- include('partials/navbar') %>
+                        <main class="main-content flex-col">
+                            <div class="content-head">
+                                <h1>requests</h1>
+                            </div>
+                            <section>
+                                <div class="section-head colored">
+                                    <div class="section-types">
+                                        <div class="section-type active ">
+                                            <p>all</p>
+                                            <span>5</span>
+                                        </div>
+                                        <div class="section-type">
+                                            <p>friend requests</p>
+                                            <span>1</span>
+                                        </div>
+                                        <div class="section-type">
+                                            <p>access requests</p>
+                                            <span>1</span>
+                                        </div>
+                                        <div class="section-type">
+                                            <p>resource requests</p>
+                                            <span>1</span>
+                                        </div>
+                                        <div class="section-type">
+                                            <p>change requests</p>
+                                            <span>1</span>
+                                        </div>
+                                    </div>
+                                    <div class="section-format">
+                                        <div class="line"></div>
+                                        <button class="slide stacks-active">
+                                            <img src="/images/icons/row dark.png" alt="icon">
+                                        </button>
+                                        <button>
+                                            <img src="/images/icons/row dark.png" alt="icon">
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="section-table">
+                                    <table>
+                                        <tbody>
+                                            <tr>
+                                                <th>request type</th>
+                                                <th>from</th>
+                                                <th>message</th>
+                                                <th>extra info</th>
+                                                <th>action</th>
+                                            </tr>
+                                            <tr>
+                                                <td>friend request</td>
+                                                <td>dada teniola</td>
+                                                <td class="no-cap"><p>Received a friend request from 20/1554</p></td>
+                                                <td>S.E</td>
+                                                <td class="flex-j-center">
+                                                    <div class="table-icon">
+                                                        <img src="/images/icons/next dark.png" alt="cta">
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>access request</td>
+                                                <td>123006</td>
+                                                <td class="no-cap">
+                                                    <p>Good morning, I am Dada Teniola and i am just accessing this
+                                                        system for the first time when i realized my account wasn't
+                                                        working, please help me.</p>
+                                                </td>
+                                                <td>Email</td>
+                                                <td class="flex-j-center">
+                                                    <div class="table-icon">
+                                                        <img src="/images/icons/next dark.png" alt="cta">
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>resource request</td>
+                                                <td><p>Ajala Oluwaferanmi</p></td>
+                                                <td class="no-cap">
+                                                    <p>Afternoon sir, there isn’t any past questions for Software Measurement and Metrics, please help us add some if you can</p>
+                                                </td>
+                                                <td>COSC 309</td>
+                                                <td class="flex-j-center">
+                                                    <div class="table-icon">
+                                                        <img src="/images/icons/next dark.png" alt="cta">
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>change request</td>
+                                                <td>Baiyere Fikayomi</td>
+                                                <td class="no-cap">
+                                                    <p>There are issues with the notification button on the dashboard. It glitches whenever</p>
+                                                </td>
+                                                <td>screenshot</td>
+                                                <td class="flex-j-center">
+                                                    <div class="table-icon">
+                                                        <img src="/images/icons/next dark.png" alt="cta">
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </section>
+                            <section>
+                                <div class="section-head">
+                                    <div class="section-types">
+                                    </div>
+                                    <div class="section-format">
+                                        <div class="line"></div>
+                                        <button class="slide stacks-active">
+                                            <img src="/images/icons/row dark.png" alt="icon">
+                                        </button>
+                                        <button>
+                                            <img src="/images/icons/row dark.png" alt="icon">
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="section-grid">
+                                    <div class="item" data-friend>
+                                        <div class="heading">
+                                            <div class="type">
+                                                <p>friend request</p>
+                                            </div>
+                                            <div class="more">
+                                                <img src="/images/icons/more.png" alt="more">
+                                            </div>
+                                        </div>
+                                        <div class="cont">
+                                            <p>dada teniola</p>
+                                            <span class="no-cap">Received a friend request from 20/1554</span>
+                                        </div>
+                                        <div class="line-hr"></div>
+                                        <div class="item-extra flex">
+                                            <p>extra info:</p>
+                                            <p>S.E</p>
+                                        </div>
+                                    </div>
+                                    <div class="item" data-access>
+                                        <div class="heading">
+                                            <div class="type">
+                                                <p>access request</p>
+                                            </div>
+                                            <div class="more">
+                                                <img src="/images/icons/more.png" alt="more">
+                                            </div>
+                                        </div>
+                                        <div class="cont">
+                                            <p>123006</p>
+                                            <span class="no-cap">Good morning, I am Dada Teniola and i am just accessing this system for the first time when i realized my account wasn't working, please help me.</span>
+                                        </div>
+                                        <div class="line-hr"></div>
+                                        <div class="item-extra flex">
+                                            <p>extra info:</p>
+                                            <p>email</p>
+                                        </div>
+                                    </div>
+                                    <div class="item" data-resource>
+                                        <div class="heading">
+                                            <div class="type">
+                                                <p>resource request</p>
+                                            </div>
+                                            <div class="more">
+                                                <img src="/images/icons/more.png" alt="more">
+                                            </div>
+                                        </div>
+                                        <div class="cont">
+                                            <p>Ajala Oluwaferanmi</p>
+                                            <span class="no-cap">Afternoon sir, there isn't any past questions for Software Measurement and Metrics, please help us add some if you can</span>
+                                        </div>
+                                        <div class="line-hr"></div>
+                                        <div class="item-extra flex">
+                                            <p>extra info:</p>
+                                            <p>COSC 309</p>
+                                        </div>
+                                    </div>
+                                    <div class="item" data-change>
+                                        <div class="heading">
+                                            <div class="type">
+                                                <p>change request</p>
+                                            </div>
+                                            <div class="more">
+                                                <img src="/images/icons/more.png" alt="more">
+                                            </div>
+                                        </div>
+                                        <div class="cont">
+                                            <p>Baiyere Fikayomi</p>
+                                            <span class="no-cap">There are issues with the notification button on the dashboard. It glitches whenever</span>
+                                        </div>
+                                        <div class="line-hr"></div>
+                                        <div class="item-extra flex">
+                                            <p>extra info:</p>
+                                            <p>Screenshot</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        </main>
+                </div>
+        </div>
+
+        <%- include('partials/foot') %>
+
+</body>
+
+</html>

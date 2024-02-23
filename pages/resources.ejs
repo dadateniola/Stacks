@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Stacks</title>
+
+    <%- include('partials/head') %>
+</head>
+
+<body> 
+
+    <%- include('partials/overlay') %>
+    <div class="container">
+        <%- include('partials/sidebar') %>
+        <div class="content">
+            <%- include('partials/navbar') %>
+            <button class="add-resource" data-trigger="add-resource">
+                <img src="/images/icons/plus.png" alt="add">
+                <p>add a new resource</p>
+            </button>
+            <main class="main-content flex-col">
+                <div class="content-head">
+                    <h1>course resources</h1>
+                </div>
+                <section>
+                    <div class="section-head">
+                        <div class="section-info">
+                            <p>recently added</p>
+                            <div class="line"></div>
+                        </div>
+                        <div class="section-format">
+                            <div class="line"></div>
+                            <button class="stacks-active">
+                                <img src="/images/icons/row dark.png" alt="icon">
+                            </button>
+                            <button>
+                                <img src="/images/icons/grid dark.png" alt="icon">
+                            </button>
+                        </div>
+                    </div>
+                    <div class="section-table">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <th>course code</th>
+                                    <th>name</th>
+                                    <th>date added</th>
+                                    <th>last updated</th>
+                                </tr>
+                                <tr data-trigger="course">
+                                    <td>COSC 205</td>
+                                    <td>Module 2: Basic elements in java</td>
+                                    <td>26 - aug - 2023</td>
+                                    <td>26 - aug - 2023</td>
+                                </tr>
+                                <tr>
+                                    <td>SENG 401</td>
+                                    <td>Module 5: Introduction to basic engineering</td>
+                                    <td>26 - aug - 2023</td>
+                                    <td>26 - aug - 2023</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <%- include('partials/foot') %>
+
+</body>
+
+</html>

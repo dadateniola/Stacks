@@ -1,3 +1,5 @@
+-- Database name is "stacks"
+
 -- Create a table for departments
 CREATE TABLE IF NOT EXISTS departments (
   `id` INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
@@ -32,12 +34,11 @@ CREATE TABLE IF NOT EXISTS departments_courses (
 
 -- Create a table for users
 CREATE TABLE IF NOT EXISTS users (
-  `id` INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  `id` VARCHAR(20) NOT NULL PRIMARY KEY,
   `name` VARCHAR(255) NOT NULL,
   `email` VARCHAR(255) NOT NULL UNIQUE,
   `password` VARCHAR(255) NOT NULL,
   `phone_number` VARCHAR(20),
-  `identification_number` VARCHAR(20) NOT NULL,
   `department_id` INT UNSIGNED,
   `role` ENUM('student', 'lecturer', 'admin') NOT NULL,
   `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -49,7 +50,7 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS courses_lecturers (
   `id` INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
   `course_id` INT UNSIGNED NOT NULL,
-  `lecturer_id` INT UNSIGNED NOT NULL,
+  `lecturer_id` VARCHAR(20) NOT NULL,
   `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
   `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (`course_id`) REFERENCES courses(`id`) ON DELETE CASCADE,
@@ -57,14 +58,43 @@ CREATE TABLE IF NOT EXISTS courses_lecturers (
   UNIQUE KEY (`course_id`, `lecturer_id`)
 );
 
+-- Create a table for requests
+CREATE TABLE IF NOT EXISTS requests (
+  `id` INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  `from` VARCHAR(255) NOT NULL,
+  `message` VARCHAR(255) NOT NULL,
+  `extra_info` VARCHAR(255),
+  `handled_by` VARCHAR(20) NOT NULL,
+  `type` ENUM('friend', 'access', 'resource', 'change') NOT NULL,
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (`handled_by`) REFERENCES users(`id`) ON DELETE CASCADE
+);
+
+-- Create table for notifications
+CREATE TABLE IF NOT EXISTS notifications (
+  `id` INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  `content_id` INT UNSIGNED NOT NULL,
+  `user_id` VARCHAR(20) NOT NULL,
+  `type` VARCHAR(255) NOT NULL,
+  `status` VARCHAR(255) DEFAULT 'pending',
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (`user_id`) REFERENCES users(`id`) ON DELETE CASCADE
+);
+
 
 
 -- Insert information into departments table
-INSERT IGNORE INTO departments (`id`, `name`, `years`) 
+INSERT IGNORE INTO departments (`id`, `name`, `years`)
 VALUES
 (1, 'Software Engineering', 4),
 (2, 'Computer Science', 4);
 
+
+INSERT IGNORE INTO users (`id`, `name`, `email`, `password`, `phone_number`, `role`)
+VALUES
+('20/1554' ,'dada teniola', 'emmatenny2004@gmail.com', 'pass', '09052513369', 'admin');
 
 -- Insert courses into the courses table with manually specified id
 INSERT IGNORE INTO courses (`id`, `code`, `name`)

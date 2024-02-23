@@ -1,6 +1,6 @@
-<div id="overlay">
-    <div class="search" data-trigger="search-box">
-        <input type="text" placeholder="Search.">
+<div id="overlay" >
+    <div class="search" data-avoid>
+        <input type="text" placeholder="Search." data-trigger="search-box" data-event="focus" data-affect="search">
         <div class="search-img">
             <img src="/images/icons/search.png" alt="icon">
         </div>
@@ -36,33 +36,399 @@
                 </div>
             </div>
             <div class="section-grid">
-                <% semesterCourses.forEach(course=> { %>
-                    <div class="item">
-                        <div class="heading">
-                            <div class="type">
-                                <p>course</p>
-                            </div>
-                            <div class="more">
-                                <img src="/images/icons/more.png" alt="more">
-                            </div>
+                <div class="item" data-course>
+                    <div class="heading">
+                        <div class="type">
+                            <p>course</p>
                         </div>
-                        <div class="cont">
-                            <p>
-                                <%= course.code %>
-                            </p>
-                            <span>
-                                <%= course.name %>
-                            </span>
-                        </div>
-                        <div class="line-hr"></div>
-                        <div class="user-img flex">
-                            <% let randomNumber=Math.floor(Math.random() * 4) + 1; %>
-                                <img src="/images/no-avatar/no-img-<%= randomNumber %>.png"
-                                    alt="lecturer" class="no-img">
+                        <div class="more">
+                            <img src="/images/icons/more.png" alt="more">
                         </div>
                     </div>
-                    <% }) %>
+                    <div class="cont">
+                        <p>course code</p>
+                        <span>course name</span>
+                    </div>
+                    <div class="line-hr"></div>
+                    <div class="user-img flex">
+                        <img src="/images/no-avatar/no-img-2.png" alt="lecturer" class="no-img">
+                    </div>
+                </div>
             </div>
         </section>
+    </div>
+    <div class="item-box" id="course">
+        <div class="item-cont">
+            <div class="item-left">
+                <div class="overlay-heading">
+                    <h1>COSC 205</h1>
+                    <p>programming in java</p>
+                </div>
+                <div class="desc">
+                    <p>Alteration literature to or an sympathize mr imprudence. Of is ferrars subject as enjoyed or
+                        tedious
+                        cottage. Procuring as in resembled by in agreeable. Next long no gave mr eyes. Admiration
+                        advantages
+                        no he celebrated so pianoforte unreserved. Not its herself forming charmed amiable. Him why
+                        feebly
+                        expect future now.</p>
+                </div>
+                <section>
+                    <div class="section-head">
+                        <div class="section-info">
+                            <p>course slides</p>
+                            <div class="line"></div>
+                        </div>
+                        <div class="section-format">
+                            <div class="line"></div>
+                            <button class="stacks-active">
+                                <img src="/images/icons/row dark.png" alt="icon">
+                            </button>
+                            <button>
+                                <img src="/images/icons/grid dark.png" alt="icon">
+                            </button>
+                        </div>
+                    </div>
+                    <div class="section-table">
+                        <table>
+                            <tr>
+                                <th>name</th>
+                                <th>date added</th>
+                                <th>last updated</th>
+                            </tr>
+                            <tr data-trigger="resource">
+                                <td>Module 1: Starting </td>
+                                <td>10 - feb - 2024</td>
+                                <td>23 - feb - 2024</td>
+                            </tr>
+                            <tr>
+                                <td>Module 2: Basic elements in java</td>
+                                <td>26 - aug - 2023</td>
+                                <td>26 - aug - 2023</td>
+                            </tr>
+                        </table>
+                    </div>
+                </section>
+                <section>
+                    <div class="section-head">
+                        <div class="section-info">
+                            <p>past questions</p>
+                            <div class="line"></div>
+                        </div>
+                        <div class="section-format">
+                            <div class="line"></div>
+                            <button>
+                                <img src="/images/icons/row dark.png" alt="icon">
+                            </button>
+                            <button class="stacks-active">
+                                <img src="/images/icons/grid dark.png" alt="icon">
+                            </button>
+                        </div>
+                    </div>
+                    <div class="section-grid">
+                        <div class="item" data-pq>
+                            <div class="heading">
+                                <div class="type">
+                                    <p>past question</p>
+                                </div>
+                                <div class="more">
+                                    <img src="/images/icons/more.png" alt="more">
+                                </div>
+                            </div>
+                            <div class="cont">
+                                <p>2021 / 2022</p>
+                                <span>main examination</span>
+                            </div>
+                            <div class="line-hr"></div>
+                            <div class="item-extra flex">
+                                <p>last updated</p>
+                                <p>10 - feb - 2022</p>
+                            </div>
+                        </div>
+                        <div class="item" data-pq>
+                            <div class="heading">
+                                <div class="type">
+                                    <p>past question</p>
+                                </div>
+                                <div class="more">
+                                    <img src="/images/icons/more.png" alt="more">
+                                </div>
+                            </div>
+                            <div class="cont">
+                                <p>2022 / 2023</p>
+                                <span>mid semester examination</span>
+                            </div>
+                            <div class="line-hr"></div>
+                            <div class="item-extra flex">
+                                <p>last updated</p>
+                                <p>26 - aug - 2023</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            <div class="item-right">
+                <div class="item-info">
+                    <div class="item-info-section">
+                        <h1>lecturers</h1>
+                        <div class="user-img-row">
+                            <img src="/images/avatars/avatar-5.png" alt="lecturer">
+                            <p>dada oluwaferanmi</p>
+                        </div>
+                        <div class="user-img-row">
+                            <img src="/images/avatars/avatar-8.png" alt="lecturer">
+                            <p>ajala fikayomi</p>
+                        </div>
+                    </div>
+                    <div class="line-hr"></div>
+                    <div class="item-info-section">
+                        <h1>actions</h1>
+                        <button>make a request</button>
+                        <button>report a problem</button>
+                        <button data-close>close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="item-box" id="resource">
+        <div class="item-cont">
+            <div class="item-left">
+                <div class="overlay-heading">
+                    <h1>module 1: starting</h1>
+                    <p>from: <span class="highlight" data-trigger="course">COSC 205</span></p>
+                </div>
+                <div class="desc">
+                    <p>Far curiosity incommode now led smallness allowance. Favour bed assure son things yet. She
+                        consisted consulted elsewhere happiness disposing household any old the. Widow downs you new
+                        shade drift hopes small.</p>
+                </div>
+                <section>
+                    <div class="section-head">
+                        <div class="section-info">
+                            <p>more like this</p>
+                            <div class="line"></div>
+                        </div>
+                        <div class="section-format">
+                            <div class="line"></div>
+                            <button class="stacks-active">
+                                <img src="/images/icons/row dark.png" alt="icon">
+                            </button>
+                            <button>
+                                <img src="/images/icons/grid dark.png" alt="icon">
+                            </button>
+                        </div>
+                    </div>
+                    <div class="section-table">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <th>name</th>
+                                    <th>date added</th>
+                                    <th>last updated</th>
+                                </tr>
+                                <tr>
+                                    <td>Module 2: Basic elements in java</td>
+                                    <td>26 - aug - 2023</td>
+                                    <td>26 - aug - 2023</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+            <div class="item-right">
+                <div class="item-info">
+                    <div class="item-info-section">
+                        <h1>resource information</h1>
+                        <div class="flex-btwn">
+                            <p>type</p>
+                            <p>slide</p>
+                        </div>
+                        <div class="flex-btwn">
+                            <p>views</p>
+                            <p>112</p>
+                        </div>
+                        <div class="flex-btwn">
+                            <p>added</p>
+                            <p>10 - feb - 2024</p>
+                        </div>
+                        <div class="flex-btwn">
+                            <p>updated</p>
+                            <p>23 - feb - 2024</p>
+                        </div>
+                    </div>
+                    <div class="line-hr"></div>
+                    <div class="item-info-section">
+                        <h1>actions</h1>
+                        <button class="form-active">read</button>
+                        <button>share</button>
+                        <button>add to collection</button>
+                        <button data-close>close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="item-box" id="collection">
+        <div class="item-cont">
+            <div class="item-left">
+                <div class="overlay-heading">
+                    <h1 class="no-cap">To whom it may concern</h1>
+                </div>
+                <div class="desc">
+                    <p>Am if number no up period regard sudden better. Decisively surrounded all admiration and not you.
+                        Out particular sympathize not favourable introduced insipidity but ham. Rather number can and
+                        set praise. Distrusts an it contented perceived attending oh. Thoroughly estimating introduced
+                        stimulated why but motionless.</p>
+                </div>
+                <section>
+                    <div class="section-head">
+                        <div class="section-info">
+                            <p>slides</p>
+                            <div class="line"></div>
+                        </div>
+                        <div class="section-format">
+                            <div class="line"></div>
+                            <button class="stacks-active">
+                                <img src="/images/icons/row dark.png" alt="icon">
+                            </button>
+                            <button>
+                                <img src="/images/icons/grid dark.png" alt="icon">
+                            </button>
+                        </div>
+                    </div>
+                    <div class="section-table">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <th>course code</th>
+                                    <th>name</th>
+                                    <th>date added</th>
+                                    <th>last updated</th>
+                                </tr>
+                                <tr>
+                                    <td>COSC 205</td>
+                                    <td>Module 1: starting</td>
+                                    <td>26 - aug - 2023</td>
+                                    <td>26 - aug - 2023</td>
+                                </tr>
+                                <tr>
+                                    <td>COSC 205</td>
+                                    <td>Module 2: Basic elements in java</td>
+                                    <td>26 - aug - 2023</td>
+                                    <td>26 - aug - 2023</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+                <section>
+                    <div class="section-head">
+                        <div class="section-info">
+                            <p>past questions</p>
+                            <div class="line"></div>
+                        </div>
+                        <div class="section-format">
+                            <div class="line"></div>
+                            <button class="stacks-active">
+                                <img src="/images/icons/row dark.png" alt="icon">
+                            </button>
+                            <button>
+                                <img src="/images/icons/grid dark.png" alt="icon">
+                            </button>
+                        </div>
+                    </div>
+                    <div class="section-table">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <th>course code</th>
+                                    <th>name</th>
+                                    <th>date added</th>
+                                    <th>last updated</th>
+                                </tr>
+                                <tr>
+                                    <td>COSC 205</td>
+                                    <td>2021 / 2022: Main Examination</td>
+                                    <td>26 - aug - 2023</td>
+                                    <td>26 - aug - 2023</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+            <div class="item-right">
+                <div class="item-info">
+                    <div class="item-info-section">
+                        <h1>collection information</h1>
+                        <div class="flex-btwn">
+                            <p>slides</p>
+                            <p>2</p>
+                        </div>
+                        <div class="flex-btwn">
+                            <p>past questions</p>
+                            <p>1</p>
+                        </div>
+                    </div>
+                    <div class="line-hr"></div>
+                    <div class="item-info-section">
+                        <h1>owner</h1>
+                        <div class="user-img-row">
+                            <img src="/images/avatars/avatar-1.png" alt="owner">
+                            <p>emmanuel adeboye</p>
+                        </div>
+                    </div>
+                    <div class="line-hr"></div>
+                    <div class="item-info-section">
+                        <h1>actions</h1>
+                        <button>share</button>
+                        <button>make a request</button>
+                        <button data-close>close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="item-box" id="add-resource">
+        <div class="item-form">
+            <div class="overlay-heading">
+                <h1 class="no-cap">Add a new resource</h1>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="module">module</label>
+                    <input type="number" name="module" id="module" placeholder="1" min="1">
+                </div>
+                <div class="form-group">
+                    <label for="name">resource name</label>
+                    <input type="text" name="name" id="name" placeholder="Enter resource name">
+                </div>
+                <div class="form-group">
+                    <label for="course">select course</label>
+                    <select name="course" id="course">
+                        <option value="" selected disabled>Select course</option>
+                        <option value="">COSC 205</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="type">resource type</label>
+                    <select name="type" id="type">
+                        <option value="" selected disabled>Select resource type</option>
+                        <option value="slide">slide</option>
+                        <option value="past question">past question</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="description">resource description</label>
+                    <textarea name="description" id="description" cols="30" rows="10" placeholder="Enter resource description here..."></textarea>
+                </div>
+            </div>
+            <div class="form-cta">
+                <button data-close>close</button>
+                <button type="submit">submit</button>
+            </div>
+        </div>
     </div>
 </div>

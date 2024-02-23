@@ -1,17 +1,20 @@
 const { Router } = require("express");
-const { showSignPage, showDashboard } = require("../controllers/mainControllers");
+const { showSignPage, showDashboard, showResourcesPage, getItems, showRequestsPage, handleLogin, handleRequestAccess } = require("../controllers/mainControllers");
 
 const router = Router();
 
 router.get('/', showSignPage);
 
-router.post('/login', (req, res) => {
-    console.log(req.body);
+router.post('/login', handleLogin)
 
-    res.status(200).json({ message: 'User successfully authenticated' });
-    // res.status(400).json({ message: 'User not found' });
-})
+router.post('/request-access', handleRequestAccess)
 
 router.get('/dashboard', showDashboard);
+
+router.get('/resources', showResourcesPage);
+
+router.get('/requests', showRequestsPage);
+
+router.post('/get-items', getItems)
 
 module.exports = router;

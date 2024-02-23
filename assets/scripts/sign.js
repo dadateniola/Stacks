@@ -17,8 +17,8 @@ class PageSetup {
                     <input type="text" name="id" id="id" placeholder="Enter your identification number">
                 </div>
                 <div class="form-group">
-                    <label for="pswd">password</label>
-                    <input type="password" name="pswd" id="pswd" placeholder="Enter your password">
+                    <label for="password">password</label>
+                    <input type="password" name="password" id="password" placeholder="Enter your password">
                     <div class="extra">
                         <div class="rem">
                             <input type="checkbox" name="rem" id="rem">
@@ -47,8 +47,8 @@ class PageSetup {
                     <input type="text" name="email" id="email" placeholder="Enter your email">
                 </div>
                 <div class="form-group">
-                    <label for="fullname">full name</label>
-                    <input type="text" name="fullname" id="fullname" placeholder="Enter your full name">
+                    <label for="name">full name</label>
+                    <input type="text" name="name" id="name" placeholder="Enter your full name">
                 </div>
                 <div class="form-group">
                     <label for="id">identification number</label>
@@ -87,10 +87,10 @@ class PageSetup {
                     }
                 });
 
-                if(response.ok) return window.location.href = '/dashboard';
-
                 const data = await response.json();
-                console.warn('Server response:', data.message);
+
+                if(Methods.isEmptyObject(data)) return window.location.href = '/dashboard';
+                else Methods.assignErrorMsgs(data);
             } catch (error) {
                 console.error('Error:', error);
             }

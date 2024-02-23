@@ -27,12 +27,12 @@ class Model {
         return pluralizedName.replace(/^_/, '').toLowerCase();
     }
 
-    static async find(filters = []) {
+    static async find(filters = [], table = null) {
         let result = [];
         let params = [];
         let val = [];
         let operators = [];
-        let sql = `SELECT * FROM ${this.tableName}`;
+        let sql = `SELECT * FROM ${table || this.tableName}`;
 
         try {
             if (filters.length) {
@@ -54,19 +54,25 @@ class Model {
                         operators.push(filters[limitIndex]);
                         filters.splice(limitIndex, 1);
                     }
+                    //Checks if filters contains offset
+                    if (filters.map(item => item[0].toLowerCase()).includes("offset")) {
+                        let offsetIndex = filters.findIndex(item => item[0].toLowerCase() === "offset");
+                        operators.push(filters[offsetIndex]);
+                        filters.splice(offsetIndex, 1);
+                    }
 
                     //Filter out the parameters and the values of arrays that have 2 values
                     params = filters.filter(([p, v]) => v !== undefined && v !== null && v !== '').map(([p, v]) => p);
                     val = filters.filter(([p, v]) => v !== undefined && v !== null && v !== '').map(([p, v]) => v);
 
-                    //Pass the extra operators into a string (Order By, and Limit)
+                    //Pass the extra operators into a string (Order By, Limit, Offset)
                     let operatorsString = operators.map(op => op.join(' ')).join(' ');
 
                     //Insert the value for clause, basically WHERE clause
                     let clause = "";
 
                     //Add "where" in case there are still parameters after the operators have been removed
-                    if (filters.length) clause += ` WHERE`;
+                    if (params.length) clause += ` WHERE`;
                     for (let i = 0; i < params.length; i++) {
                         clause += ` ${params[i]} = ? ${operator}`;
                     }
@@ -90,7 +96,7 @@ class Model {
             }
             return result;
         } catch (err) {
-            console.log(`SQL: ${sql}\nValues: ${val}\nFilters: ${filters}\n${err}`)
+            console.error(`\n-- SQL: ${sql}\n-- Values: ${val}\n-- Filters: ${filters}\n-- ${err}\n`)
             return [];
         }
     }

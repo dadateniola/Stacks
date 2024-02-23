@@ -114,6 +114,43 @@ class Methods {
     static isObject(value) {
         return (typeof value === 'object' && value !== null && !Array.isArray(value));
     }
+
+    static isEmptyObject(obj) {
+        return Object.keys(obj).length === 0;
+    }
+
+    static sentenceCase(str='') {
+        return str.charAt(0).toUpperCase() + str.slice(1); 
+    }
+
+    static assignErrorMsgs(data) {
+        Object.entries(data).forEach(([key, value]) => {
+            const input = select(`[name=${key}]`);
+            const parent = input.parentNode;
+
+            Methods.removeErrorMsgs(input);
+
+            Methods.insertToDOM({
+                type: 'span',
+                text: this.sentenceCase(value),
+                parent,
+                classes: 'error'
+            })
+            
+            input.classList.add('error');
+            input.addEventListener("focus", Methods.removeErrorMsgs)
+        })
+    }
+
+    static removeErrorMsgs(e) {
+        const input = e instanceof Event ? e.target : e;
+        const nextSibling = input.nextElementSibling;
+
+        if(nextSibling && nextSibling.tagName === 'SPAN' && nextSibling.classList.contains('error')) nextSibling.remove();
+
+        input.classList.remove('error');
+        input.removeEventListener("focus", Methods.removeErrorMsgs);
+    }
 }
 
 class CommonSetup {
@@ -126,11 +163,14 @@ class CommonSetup {
     init() {
         CommonSetup.updateGrid();
         window.addEventListener('resize', CommonSetup.handleResize);
+
+        this.initializeTriggers()
     }
 
+    //Update grid sizes for sections
     static updateGrid() {
         selectAll(".section-grid").forEach(grid => {
-            const threshold = 250 + 20;
+            const threshold = 240 + 20;
             const width = grid.clientWidth;
             const columns = Math.floor(width / threshold);
 
@@ -142,45 +182,103 @@ class CommonSetup {
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(CommonSetup.updateGrid, 500);
     }
+
+    initializeTriggers() {
+        selectAll('[data-trigger]').forEach(trigger => trigger.addEventListener(`${trigger?.dataset?.event || 'click'}`, CommonSetup.openTrigger));
+        selectAll('[data-close]').forEach(trigger => trigger.addEventListener('click', CommonSetup.closeTrigger));
+    }
+
+    static openTrigger() {
+        if (this.hasAttribute('data-animated')) return;
+        const currentlyTriggered = select('#overlay [data-triggered]');
+
+        const animate = select(`.${this.dataset?.affect}`) || this;
+        const triggered = select(`#${this.dataset?.trigger}`);
+        const children = (selectAllWith(triggered, 'section > *').length) ? selectAllWith(triggered, 'section > *') : triggered.children;
+        const tl = gsap.timeline();
+
+        if (currentlyTriggered) {
+            const currentTrigger = select(`[data-trigger="${currentlyTriggered.id}"][data-animated]`);
+            tl
+                .to(currentlyTriggered, { opacity: 0 })
+                .call(() => {
+                    currentTrigger.classList.remove("add");
+
+                    currentTrigger.removeAttribute('data-animated', '');
+                    currentlyTriggered.removeAttribute('data-triggered');
+                })
+        }
+
+        tl
+            .call(() => {
+                animate.classList.add('active');
+                select("#overlay").classList.add(
+                    (this.dataset?.affect && this.dataset?.affect == "search") ? 'active-search' : 'active'
+                );
+
+                this.setAttribute('data-animated', '');
+                triggered.setAttribute('data-triggered', '');
+
+                CommonSetup.updateGrid();
+            })
+            .set(children, { opacity: 0 })
+            .set(triggered, { opacity: 0 })
+            .to(triggered, { opacity: 1, delay: 0.3 })
+            .to(children, { opacity: 1, stagger: 0.3 })
+    }
+
+    static closeTrigger() {
+        const triggered = select('#overlay [data-triggered]');
+        const trigger = select(`[data-trigger="${triggered.id}"][data-animated]`);
+        const animate = select(`.${trigger.dataset?.affect}`) || trigger;
+
+        const tl = gsap.timeline();
+
+        tl
+            .to(triggered, { opacity: 0 })
+            .call(() => {
+                animate.classList.remove('active');
+                select("#overlay").classList.remove(
+                    (trigger.dataset?.affect && trigger.dataset?.affect == "search") ? 'active-search' : 'active'
+                );
+
+                trigger.removeAttribute('data-animated', '');
+                triggered.removeAttribute('data-triggered');
+            }, null, '+=0.3')
+    }
 }
 
-new CommonSetup()
+class Items {
+    constructor(params = {}) {
+        Object.assign(this, params);
+        this.init();
+    }
 
-select('.search input').addEventListener("focus", function () {
-    const input = this;
-    const search = this.parentNode;
-    const triggered = select(`.${search.dataset?.trigger}`);
-    const children = selectAllWith(triggered, 'section > *');
+    async init() {
+        // if (!this?.table || Object.keys(this).length < 2) return console.warn("Couldn't get items because conditions weren't met");
 
-    const tl = gsap.timeline();
+        try {
+            const response = await fetch('/get-items', {
+                method: 'POST',
+                body: JSON.stringify(this),
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            });
 
-    tl
-        .call(() => {
-            search.classList.add('active');
-            select("#overlay").classList.add("active");
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
 
-            triggered.setAttribute('data-triggered', '');
-        })
-        .set(triggered, { opacity: 1 })
-        .set(children, { opacity: 0 })
-        .to(children, { opacity: 1, stagger: 0.3, delay: 0.3 })
+            const items = await response.json();
 
+            console.log(items);
+        } catch (error) {
+            console.error('Fetch error:', error.message);
+        }
+    }
+}
 
-})
+new CommonSetup();
 
-select('[data-close]').addEventListener("click", function () {
-    const close = this;
-    const toTrigger = select('#overlay [data-triggered]');
-    const search = select(`[data-trigger="${toTrigger.id}"]`);
-
-    const tl = gsap.timeline();
-
-    tl
-        .to(toTrigger, { opacity: 0 })
-        .call(() => {
-            search.classList.remove('active');
-            select("#overlay").classList.remove("active");
-
-            triggered.removeAttribute('data-triggered');
-        })
-})
+// new Items({ table: 'courses', offset: 10, limit: 10 });
