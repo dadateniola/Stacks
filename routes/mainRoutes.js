@@ -1,15 +1,13 @@
 const { Router } = require("express");
-const { showSignPage, showDashboard, showResourcesPage, getItems, showRequestsPage, handleLogin, handleRequestAccess } = require("../controllers/mainControllers");
+const { showDefaultPage, showResourcesPage, getItems, showRequestsPage, handleLogin, handleRequestAccess } = require("../controllers/mainControllers");
 
 const router = Router();
 
-router.get('/', showSignPage);
+router.get('/', showDefaultPage);
 
 router.post('/login', handleLogin)
 
 router.post('/request-access', handleRequestAccess)
-
-router.get('/dashboard', showDashboard);
 
 router.get('/resources', showResourcesPage);
 

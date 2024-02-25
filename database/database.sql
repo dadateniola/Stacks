@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS departments_courses (
 CREATE TABLE IF NOT EXISTS users (
   `id` VARCHAR(20) NOT NULL PRIMARY KEY,
   `name` VARCHAR(255) NOT NULL,
-  `email` VARCHAR(255) NOT NULL UNIQUE,
+  `email` VARCHAR(255) UNIQUE,
   `password` VARCHAR(255) NOT NULL,
   `phone_number` VARCHAR(20),
   `department_id` INT UNSIGNED,
@@ -61,11 +61,13 @@ CREATE TABLE IF NOT EXISTS courses_lecturers (
 -- Create a table for requests
 CREATE TABLE IF NOT EXISTS requests (
   `id` INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  `from` VARCHAR(255) NOT NULL,
+  `sender` VARCHAR(255) NOT NULL,
+  `receiver` VARCHAR(255) NOT NULL,
   `message` VARCHAR(255) NOT NULL,
   `extra_info` VARCHAR(255),
-  `handled_by` VARCHAR(20) NOT NULL,
   `type` ENUM('friend', 'access', 'resource', 'change') NOT NULL,
+  `handled_by` VARCHAR(20) DEFAULT NULL,
+  `status` VARCHAR(255) DEFAULT 'pending',
   `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
   `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (`handled_by`) REFERENCES users(`id`) ON DELETE CASCADE
@@ -94,7 +96,9 @@ VALUES
 
 INSERT IGNORE INTO users (`id`, `name`, `email`, `password`, `phone_number`, `role`)
 VALUES
-('20/1554' ,'dada teniola', 'emmatenny2004@gmail.com', 'pass', '09052513369', 'admin');
+('20/1554' ,'dada teniola', 'emmatenny2004@gmail.com', 'pass', '09052513369', 'admin'),
+('20/0018' ,'baiyere fikayo', 'fikayo@gmail.com', 'pass', '09052513369', 'admin'),
+('20/0725' ,'ajala oluwaferanmi', 'ajala@gmail.com', 'pass', '09052513369', 'admin');
 
 -- Insert courses into the courses table with manually specified id
 INSERT IGNORE INTO courses (`id`, `code`, `name`)

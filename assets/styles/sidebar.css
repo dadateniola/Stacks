@@ -12,7 +12,7 @@
 .sidebar p {
     width: 100%;
     text-overflow: ellipsis;
-    font-size: var(--small-text);
+    font-size: 0.8em;
 }
 
 img[alt="icon"] {
@@ -74,6 +74,10 @@ img[alt="icon"] {
 .sidebar .link.stacks-active {
     background-color: var(--dark);
     color: var(--light);
+}
+
+.sidebar .link:not(.stacks-active):hover {
+    background-color: var(--faint-white);
 }
 
 .sidebar .friend {

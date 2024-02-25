@@ -77,6 +77,14 @@ section {
     gap: 20px;
 }
 
+[data-radio] {
+    cursor: pointer;
+}
+
+[data-radio]:hover {
+    background-color: var(--faint-white);
+}
+
 
 /* Page overlay */
 #overlay {
@@ -268,37 +276,38 @@ section {
     color: rgb(var(--slides));
 }
 
-/* Request types */
-.item[data-friend] .type {
-    background-color: rgba(var(--friend), var(--opacity));
+
+/* Request & Alert types */
+.alert[data-success] {
+    --color: 0, 128, 0;
 }
 
-.item[data-friend] .type p {
-    color: rgb(var(--friend));
+.alert[data-warning] {
+    --color: 255, 133, 3;
 }
 
-.item[data-access] .type {
-    background-color: rgba(var(--access), var(--opacity));
+.alert[data-error] {
+    --color: 255, 0, 0;
 }
 
-.item[data-access] .type p {
-    color: rgb(var(--access));
+.alert[data-friend],
+.item[data-friend] {
+    --color: var(--friend);
 }
 
-.item[data-resource] .type {
-    background-color: rgba(var(--resource), var(--opacity));
+.alert[data-access],
+.item[data-access] {
+    --color: var(--access);
 }
 
-.item[data-resource] .type p {
-    color: rgb(var(--resource));
+.alert[data-resource],
+.item[data-resource] {
+    --color: var(--resource);
 }
 
-.item[data-change] .type {
-    background-color: rgba(var(--change), var(--opacity));
-}
-
-.item[data-change] .type p {
-    color: rgb(var(--change));
+.alert[data-change],
+.item[data-change] {
+    --color: var(--change);
 }
 
 
@@ -680,6 +689,7 @@ main.main-content {
 
 /* Tables */
 table {
+    table-layout: fixed;
     width: 100%;
     background-color: var(--light);
     border-radius: 15px;
@@ -693,20 +703,26 @@ td {
     padding: 15px;
     text-align: left;
     text-transform: capitalize;
-
 }
 
-.cont span,
 th p,
 td p {
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
+    white-space: nowrap;
     overflow: hidden;
-    -webkit-line-clamp: 1;
     text-overflow: ellipsis;
 }
 
+th.small,
+td.small {
+    width: 80px;
+    min-width: 80px;
+}
+
 .cont span {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
     -webkit-line-clamp: 2;
 }
 
@@ -768,6 +784,8 @@ tr:nth-child(odd) .table-icon {
 
 /* Item styles */
 .item {
+    --color: 0, 0, 0;
+
     width: 280px !important;
     height: auto !important;
     background-color: var(--light);
@@ -785,6 +803,11 @@ tr:nth-child(odd) .table-icon {
 }
 
 .item-extra p {
+    max-width: 100px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
     text-transform: capitalize;
     font-size: var(--small-text);
     font-weight: 600;
@@ -799,13 +822,13 @@ tr:nth-child(odd) .table-icon {
 .type {
     padding: 10px;
     border-radius: 10px;
-    background-color: var(--faint-white);
+    background-color: rgba(var(--color), var(--opacity));
 }
 
 .type p {
     font-size: var(--small-text);
     text-transform: capitalize;
-    color: black;
+    color: rgb(var(--color));
     font-weight: 700;
 }
 
@@ -832,7 +855,7 @@ tr:nth-child(odd) .table-icon {
 
 .cont p {
     font-size: var(--text);
-    font-weight: 800;
+    font-weight: 700;
     text-transform: capitalize;
 }
 
@@ -841,7 +864,7 @@ tr:nth-child(odd) .table-icon {
     text-transform: capitalize;
     font-size: var(--small-text);
     color: var(--sub-text) !important;
-    font-weight: 700;
+    font-weight: 600;
     text-wrap: wrap;
 }
 
@@ -851,7 +874,7 @@ tr:nth-child(odd) .table-icon {
         --text: 0.9em;
         --small-text: 0.75em;
 
-        --img-wh: 28px;
+        --img-wh: 30px;
     }
 
     main.main-content {
@@ -885,9 +908,5 @@ tr:nth-child(odd) .table-icon {
 
     .more {
         justify-content: center;
-    }
-
-    .cont {
-        gap: 3;
     }
 }

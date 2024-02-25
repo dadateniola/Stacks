@@ -89,8 +89,16 @@ class PageSetup {
 
                 const data = await response.json();
 
-                if(Methods.isEmptyObject(data)) return window.location.href = '/dashboard';
-                else Methods.assignErrorMsgs(data);
+                if (data.invalidKeys) Methods.assignErrorMsgs(data.invalidKeys);
+                else {
+                    if (response.ok) {
+                        if (data?.url) return window.location.href = data?.url || "/";
+                        else {
+                            event.target?.reset();
+                            new Alert(data);
+                        }
+                    } else new Alert(data);
+                };
             } catch (error) {
                 console.error('Error:', error);
             }
@@ -114,7 +122,7 @@ class PageSetup {
         const tl = gsap.timeline();
 
         tl
-            .to(formElements, { y: -60, opacity: 0, stagger: 0.1, ease: "Back.easeIn", duration: 0.8 })
+            .to(formElements, { y: -60, opacity: 0, stagger: 0.1, ease: "Expo.easeIn" })
             .to(formCTA, { opacity: 0 }, "<")
 
             .call(() => {
@@ -141,7 +149,7 @@ class PageSetup {
                     .set(formElements, { y: 60, opacity: 0 })
                     .set(form, { opacity: 1 })
 
-                    .to(formElements, { y: 0, opacity: 1, stagger: 0.1, ease: "Back.easeOut", duration: 0.8 })
+                    .to(formElements, { y: 0, opacity: 1, stagger: 0.1, ease: "Expo.easeOut" })
                     .to(formCTA, { opacity: 1 }, "<")
 
                     .call(() => {

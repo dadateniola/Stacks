@@ -72,7 +72,7 @@ class Methods {
         //     properties: CSS properties to be applied to the element, must be an object
         // }
 
-        const { type, text, append, parent, before, classes, properties } = params;
+        const { type, text, append, parent, before, classes, properties, attributes } = params;
 
         if (!type || !parent) return null;
 
@@ -97,11 +97,16 @@ class Methods {
 
         //Change properties
         if (properties) {
-            if (Slider.isObject(properties)) {
+            if (Methods.isObject(properties)) {
                 for (const property in properties) {
                     element.style[property] = properties[property];
                 }
             }
+        }
+
+        if (attributes?.length) {
+            if (Array.isArray(attributes)) attributes.forEach(a => element.setAttribute(`data-${a}`, ''));
+            else element.setAttribute(`data-${attributes}`, '');
         }
 
         //Append element to parent
@@ -119,8 +124,8 @@ class Methods {
         return Object.keys(obj).length === 0;
     }
 
-    static sentenceCase(str='') {
-        return str.charAt(0).toUpperCase() + str.slice(1); 
+    static sentenceCase(str = '') {
+        return str.charAt(0).toUpperCase() + str.slice(1);
     }
 
     static assignErrorMsgs(data) {
@@ -136,7 +141,7 @@ class Methods {
                 parent,
                 classes: 'error'
             })
-            
+
             input.classList.add('error');
             input.addEventListener("focus", Methods.removeErrorMsgs)
         })
@@ -146,7 +151,7 @@ class Methods {
         const input = e instanceof Event ? e.target : e;
         const nextSibling = input.nextElementSibling;
 
-        if(nextSibling && nextSibling.tagName === 'SPAN' && nextSibling.classList.contains('error')) nextSibling.remove();
+        if (nextSibling && nextSibling.tagName === 'SPAN' && nextSibling.classList.contains('error')) nextSibling.remove();
 
         input.classList.remove('error');
         input.removeEventListener("focus", Methods.removeErrorMsgs);
@@ -163,6 +168,20 @@ class CommonSetup {
     init() {
         CommonSetup.updateGrid();
         window.addEventListener('resize', CommonSetup.handleResize);
+
+        select(`a[href='${window.location.pathname}']`)?.classList.add("stacks-active");
+
+        // Change this later
+        const info = select(".alert-box [data-info]");
+        if(info) {
+            const type = selectWith(info, "#type").innerHTML;
+            const message = selectWith(info, "#message").innerHTML;
+            
+            info.remove();
+            select(".alert-box").removeAttribute("data-disabled")
+
+            new Alert({ type, message })
+        }
 
         this.initializeTriggers()
     }
@@ -279,6 +298,60 @@ class Items {
     }
 }
 
-new CommonSetup();
+class Alert {
+    constructor(params = {}) {
+        Object.assign(this, params);
+        this.init();
+    }
 
-// new Items({ table: 'courses', offset: 10, limit: 10 });
+    init() {
+        Methods.disableLinksAndBtns(true);
+
+        if (!this?.type && !this?.message) return console.warn("Conditions weren't met for Alert");
+
+        const html = `
+            <div class="alert-progress"></div>
+            <div class="alert-icon">
+                <img src="/images/icons/${this.type}.png" alt="icon">
+            </div>
+            <div class="alert-text">
+                <h1>${this.type}</h1>
+                <p>${this.message}</p>
+            </div>`;
+
+        const newAlert = Methods.insertToDOM({
+            type: 'div',
+            text: html,
+            parent: select(".alert-box"),
+            classes: 'alert',
+            attributes: this.type,
+            properties: { opacity: 0 }
+        })
+        const prevAlert = newAlert.previousElementSibling;
+
+        this.openAlert(newAlert);
+
+        if (prevAlert) Alert.closeAlert(prevAlert);
+        Methods.disableLinksAndBtns();
+    }
+
+    openAlert(alert) {
+        if (!alert instanceof HTMLElement) return;
+
+        const alertTime = 5;
+        const tl = gsap.timeline();
+
+        tl
+            .set(alert, { xPercent: 120 })
+            .to(alert, { xPercent: 0, opacity: 1, ease: 'back.out(1.7)', })
+            .to(selectWith(alert, ".alert-progress"), { duration: alertTime, width: '100%', ease: 'none', onComplete: () => Alert.closeAlert(alert) })
+    }
+
+    static closeAlert(alert) {
+        if (!alert instanceof HTMLElement) return;
+
+        gsap.to(alert, { x: -80, opacity: 0, delay: 0.5, ease: "expo.out", onComplete: () => alert.remove() })
+    }
+}
+
+new CommonSetup();

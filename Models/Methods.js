@@ -12,7 +12,7 @@ class Methods {
                 /^[a-zA-Z0-9]{8}$/
             ],
             email: [
-                /^[\w.%+-]+@babcock\.edu\.ng$/
+                /.+@.*babcock\.edu\.ng$/
             ],
             name: [
                 /^\w+(\s\w+)?$/
@@ -75,6 +75,16 @@ class Methods {
 
         // Return an error if a unique ID couldn't be generated in the specified attempts
         throw new Error('Unable to generate a unique ID within the specified attempts.');
+    }
+
+    static capitalize(str = '') {
+        const words = str.split(' ');
+
+        const capitalizedWords = words.map(word => word.charAt(0).toUpperCase() + word.slice(1));
+
+        const capitalizedSentence = capitalizedWords.join(' ');
+
+        return capitalizedSentence;
     }
 }
 

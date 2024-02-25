@@ -102,21 +102,49 @@ class Model {
     }
 
     async add() {
+        const columns = Object.keys(this).join(", ");
+        const values = Object.values(this);
+
+        const sql = `INSERT INTO ${this.constructor.tableName} (${columns}) VALUES (${Array(Object.keys(this).length).fill('?').join(', ')})`;
         try {
-            const columns = Object.keys(this).join(", ");
-            const values = Array(Object.keys(this).length).fill('?').join(', ');
-
-            const sql = `INSERT INTO ${this.constructor.tableName} (${columns}) VALUES (${values})`;
-
-            const result = await this.constructor.query(sql, Object.values(this));
+            const result = await this.constructor.query(sql, values);
 
             if (result.affectedRows > 0) {
-                this.id = result.uid;
+                this.id = result.insertId;
                 return result.affectedRows;
             } else {
                 return 0;
             }
         } catch (error) {
+            console.error(`\n-- SQL: ${sql}\n-- Columns: ${columns}\n-- Values: ${values}\n-- ${error}\n`)
+            console.error(error);
+            return 0;
+        }
+    }
+
+    async multiAdd() {
+        if(!this?.columns && !this?.values) return 0;
+
+        const columns = this.columns.join(", ");
+        const values = this.values.map(row => {
+            return row.map(value => {
+                return typeof value === 'string' ? `'${value}'` : value;
+            });
+        });
+        
+        const sql = `INSERT INTO ${this.constructor.tableName} (${columns}) VALUES ${values.map(row => `(${row.join(', ')})`).join(", ")}`;
+
+        try {
+            const result = await this.constructor.query(sql);
+            
+            if (result.affectedRows > 0) {
+                this.id = result.insertId;
+                return result.affectedRows;
+            } else {
+                return 0;
+            }
+        } catch (error) {
+            console.error(`\n-- SQL: ${sql}\n-- Columns: ${columns}\n-- Values: ${values}\n-- ${error}\n`)
             console.error(error);
             return 0;
         }
@@ -152,7 +180,6 @@ class Model {
             throw error;  // Rethrow the error to signal the failure
         }
     }
-
 
     static async query(sql, params = []) {
         if (sql) {
