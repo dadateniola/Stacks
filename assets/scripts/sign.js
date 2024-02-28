@@ -28,7 +28,7 @@ class PageSetup {
                     </div>
                 </div>
                 <div class="form-group">
-                    <button>login</button>
+                    <button type="submit">login</button>
                 </div>
             </form>
             `,
@@ -55,7 +55,7 @@ class PageSetup {
                     <input type="text" name="id" id="id" placeholder="Enter your identification number">
                 </div>
                 <div class="form-group">
-                    <button>request library access</button>
+                    <button type="submit">request library access</button>
                 </div>
             </form>
             `,
@@ -73,8 +73,13 @@ class PageSetup {
         select("form").addEventListener("submit", async (event) => {
             event.preventDefault();
 
-            const formData = new FormData(event.target);
-            const url = event.target.dataset?.url;
+            const form = event.target;
+            const button = selectWith(form, 'button[type="submit"]');
+
+            CommonSetup.attachSpinner({ elem: button });
+
+            const formData = new FormData(form);
+            const url = form.dataset?.url;
 
             if (!url) return location.reload();
 
@@ -89,17 +94,28 @@ class PageSetup {
 
                 const data = await response.json();
 
-                if (data.invalidKeys) Methods.assignErrorMsgs(data.invalidKeys);
+                if (data.invalidKeys) {
+                    //If there are invalid inputs display messages
+                    Methods.assignErrorMsgs(data.invalidKeys);
+                    CommonSetup.detachSpinner({ elem: button });
+                }
                 else {
                     if (response.ok) {
                         if (data?.url) return window.location.href = data?.url || "/";
                         else {
-                            event.target?.reset();
+                            //If request successful, show alert
+                            form?.reset();
                             new Alert(data);
+                            CommonSetup.detachSpinner({ elem: button });
                         }
-                    } else new Alert(data);
+                    } else {
+                        //If there was a problem in the backend, display alert
+                        new Alert(data);
+                        CommonSetup.detachSpinner({ elem: button });
+                    }
                 };
             } catch (error) {
+                new Alert({ message: 'Error submitting the form, please try again', type: 'error' });
                 console.error('Error:', error);
             }
         })

@@ -10,7 +10,7 @@
     flex-direction: column;
     pointer-events: none;
 
-    z-index: 50;
+    z-index: 100;
 }
 
 .alert-box[data-disabled] {

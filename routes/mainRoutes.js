@@ -1,5 +1,5 @@
 const { Router } = require("express");
-const { showDefaultPage, showResourcesPage, getItems, showRequestsPage, handleLogin, handleRequestAccess } = require("../controllers/mainControllers");
+const { showDefaultPage, showResourcesPage, getItems, showRequestsPage, handleLogin, handleRequestAccess, handleUpload } = require("../controllers/mainControllers");
 
 const router = Router();
 
@@ -14,5 +14,7 @@ router.get('/resources', showResourcesPage);
 router.get('/requests', showRequestsPage);
 
 router.post('/get-items', getItems)
+
+router.post('/upload', handleUpload)
 
 module.exports = router;

@@ -97,7 +97,9 @@ const handleRequestAccess = async (req, res) => {
     }
 }
 
-const showResourcesPage = (req, res) => {
+const showResourcesPage = async (req, res) => {
+    // const resources = await 
+
     res.render('resources');
 }
 
@@ -125,7 +127,19 @@ const getItems = async (req, res) => {
     res.json({ course });
 }
 
+const handleUpload = async (req, res) => {
+    const { pdfFile } = req.files;
+
+    if (!pdfFile || pdfFile.mimetype !== 'application/pdf') {
+        return res.status(400).send({ message: 'You can only upload a valid PDF file', type: 'error' });
+    }
+
+    console.log(pdfFile);
+    res.status(200).send('File uploaded successfully.');
+}
+
 module.exports = {
     showDefaultPage, handleLogin, handleRequestAccess,
-    showResourcesPage, showRequestsPage, getItems
+    showResourcesPage, showRequestsPage, getItems,
+    handleUpload
 }

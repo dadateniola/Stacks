@@ -12,6 +12,7 @@
 
 <body> 
 
+    <%- include('partials/alert') %>
     <%- include('partials/overlay') %>
     <div class="container">
         <%- include('partials/sidebar') %>
@@ -43,6 +44,11 @@
                     </div>
                     <div class="section-table">
                         <table>
+                            <colgroup>
+                                <col style="width: 140px;">
+                                <col>
+                                <col span="2" style="width: 140px;">
+                            </colgroup>
                             <tbody>
                                 <tr>
                                     <th>course code</th>
@@ -52,13 +58,13 @@
                                 </tr>
                                 <tr data-trigger="course">
                                     <td>COSC 205</td>
-                                    <td>Module 2: Basic elements in java</td>
+                                    <td><p>Module 2: Basic elements in java</p></td>
                                     <td>26 - aug - 2023</td>
                                     <td>26 - aug - 2023</td>
                                 </tr>
                                 <tr>
                                     <td>SENG 401</td>
-                                    <td>Module 5: Introduction to basic engineering</td>
+                                    <td><p>Module 5: Introduction to basic engineering</p></td>
                                     <td>26 - aug - 2023</td>
                                     <td>26 - aug - 2023</td>
                                 </tr>

@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
+const fileUpload = require("express-fileupload");
 const path = require('path');
 const mainRoutes = require('./routes/mainRoutes');
 
@@ -28,6 +29,9 @@ server.use(session(sess));
 
 //Serving static files
 server.use(express.static(path.join(__dirname, 'assets')));
+
+//Setup file upload
+server.use(fileUpload());
 
 //Setup ejs
 server.set('view engine', 'ejs');

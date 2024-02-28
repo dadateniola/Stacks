@@ -96,7 +96,7 @@ section {
     height: 100vh;
     pointer-events: none;
 
-    z-index: 100;
+    z-index: 50;
     transition: 0.3s;
 }
 
@@ -290,21 +290,25 @@ section {
     --color: 255, 0, 0;
 }
 
+.request-box[data-friend],
 .alert[data-friend],
 .item[data-friend] {
     --color: var(--friend);
 }
 
+.request-box[data-access],
 .alert[data-access],
 .item[data-access] {
     --color: var(--access);
 }
 
+.request-box[data-resource],
 .alert[data-resource],
 .item[data-resource] {
     --color: var(--resource);
 }
 
+.request-box[data-change],
 .alert[data-change],
 .item[data-change] {
     --color: var(--change);
@@ -364,6 +368,10 @@ input.error {
     text-transform: none !important;
 }
 
+.cap {
+    text-transform: capitalize !important;
+}
+
 
 .content {
     position: relative;
@@ -385,6 +393,10 @@ button.form-active {
 
 .stacks-active img {
     filter: invert(100%);
+}
+
+.none >* {
+    display: none;
 }
 
 
@@ -454,6 +466,10 @@ textarea {
     resize: none;
 }
 
+input[type="file"] {
+    display: none;
+}
+
 textarea:focus,
 select:focus,
 input:not([type="checkbox"]):focus {
@@ -509,11 +525,111 @@ button {
     cursor: pointer;
 }
 
+button[disabled="true"] {
+    cursor: initial;
+}
+
 button.null {
     padding: 0;
     color: black;
     background-color: transparent;
     border-radius: 0;
+}
+
+.form-file {
+    width: 100%;
+    flex: 1;
+    overflow: hidden;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.form-file label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.form-file label img {
+    height: 160px;
+}
+
+.form-file-info {
+    /* padding-top: 10px; */
+    /* transform: translateY(100%); */
+    height: 0;
+    overflow: hidden;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.form-file-name {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    height: 100%;
+}
+
+.form-file-name div {
+    display: flex;
+    align-items: center;
+}
+
+.form-file-name span {
+    font-size: 0.75em;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.form-file-name div span:first-child {
+    display: inline-block;
+    max-width: 100px;
+}
+
+.form-file-progress-box {
+    flex: 1;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+}
+
+.form-file-progress {
+    width: 100%;
+    background-color: var(--faint-gray);
+    border-radius: 10px;
+    height: 8px;
+}
+
+.form-file-progress-bar {
+    width: 0;
+    height: 100%;
+    background-color: var(--mandy);
+    border-radius: 10px;
+}
+
+.form-file-info img {
+    width: 15px;
+    height: 15px;
+}
+
+.form-file-cancel {
+    display: flex;
+    align-items: center;
+}
+
+.form-file-cancel button {
+    padding: 0;
+    background-color: transparent;
 }
 
 
@@ -545,6 +661,156 @@ button.null {
     width: 23px;
     height: 23px;
 }
+
+.item-box#request {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.request-box {
+    --gap: 20px;
+
+    width: min(100%, 500px);
+    padding: 5px;
+    border-radius: 15px;
+    background-color: white;
+}
+
+.request-info {
+    padding: calc(var(--gap) - 5px);
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+}
+
+.request-cont {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--gap) / 2);
+}
+
+.title h1 {
+    font-size: var(--text);
+    font-weight: 700;
+}
+
+.message p {
+    font-size: 0.8em;
+    line-height: 1.7;
+    font-weight: 500;
+}
+
+.request-extra {
+    display: flex;
+    justify-content: space-between;
+}
+
+.request-extra p {
+    font-size: 0.8em;
+}
+
+.request-btns {
+    display: flex;
+    gap: calc(var(--gap) / 2);
+}
+
+.request-btns button {
+    padding: 13px 20px;
+    flex: 1;
+    transition: 0.5s;
+}
+
+.request-btns button:first-child {
+    background-color: var(--mandy);
+}
+
+.request-cta-box {
+    width: 100%;
+    height: 0;
+    background-color: var(--faint-white);
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.request-cta {
+    width: 100%;
+    padding: calc(var(--gap) - 5px);
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+}
+
+.request-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+}
+
+.request-inputs>* {
+    display: none;
+}
+
+.request-inputs>*.active {
+    display: initial;
+}
+
+.request-cta label {
+    font-size: 0.8em;
+}
+
+.request-cta textarea,
+.request-cta select,
+.request-cta input {
+    background-color: white;
+    font-size: var(--small-text);
+}
+
+[data-denied] {
+    color: black;
+    background-color: var(--faint-gray) !important;
+}
+
+[data-selected] {
+    background-color: #42AA9E !important;
+}
+
+
+:not(.spinner) > .spinner:first-child {
+    opacity: 1;
+}
+
+.spinner {
+    width: 100%;
+    height: 100%;
+
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+}
+
+[data-spinner] {
+    border: 3px solid white;
+    border-left-color: transparent;
+    width: 20px;
+    height: 20px;
+    border-radius: 100%;
+    animation: spinner 1s linear infinite;
+}
+
+@keyframes spinner {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
 
 main.main-content {
     padding: 30px;
@@ -705,6 +971,7 @@ td {
     text-transform: capitalize;
 }
 
+.form-file-name span,
 th p,
 td p {
     white-space: nowrap;

@@ -58,6 +58,20 @@ CREATE TABLE IF NOT EXISTS courses_lecturers (
   UNIQUE KEY (`course_id`, `lecturer_id`)
 );
 
+--Create table for resources
+CREATE TABLE IF NOT EXISTS resources (
+  `id` INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  `module` INT UNSIGNED NOT NULL,
+  `name` VARCHAR(255) NOT NULL,
+  `course_id` INT UNSIGNED NOT NULL,
+  `type` ENUM('slide', 'past question') NOT NULL,
+  `file` VARCHAR(255) NOT NULL,
+  `description` VARCHAR(255),
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (`course_id`) REFERENCES courses(`id`) ON DELETE CASCADE
+);
+
 -- Create a table for requests
 CREATE TABLE IF NOT EXISTS requests (
   `id` INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
@@ -96,9 +110,10 @@ VALUES
 
 INSERT IGNORE INTO users (`id`, `name`, `email`, `password`, `phone_number`, `role`)
 VALUES
-('20/1554' ,'dada teniola', 'emmatenny2004@gmail.com', 'pass', '09052513369', 'admin'),
-('20/0018' ,'baiyere fikayo', 'fikayo@gmail.com', 'pass', '09052513369', 'admin'),
-('20/0725' ,'ajala oluwaferanmi', 'ajala@gmail.com', 'pass', '09052513369', 'admin');
+('20/1554' ,'dada teniola', 'dada@gmail.com', 'pass', '09052513369', 'admin'),
+('20/0018' ,'baiyere fikayo', 'baiyere@gmail.com', 'pass', '09052513369', 'admin'),
+('20/0725' ,'ajala oluwaferanmi', 'ajala@gmail.com', 'pass', '09052513369', 'admin'),
+('123006' ,'emmanuel samuel', 'emma@gmail.com', 'pass', '09052513369', 'lecturer');
 
 -- Insert courses into the courses table with manually specified id
 INSERT IGNORE INTO courses (`id`, `code`, `name`)
