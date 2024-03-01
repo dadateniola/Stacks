@@ -151,4 +151,5 @@ VALUES
 -- Insert course relationship with lecturers
 INSERT IGNORE INTO courses_lecturers (`course_id`, `lecturer_id`)
 VALUES
-(1 , 123006);
+(1 , 123006),
+(2 , 123006);

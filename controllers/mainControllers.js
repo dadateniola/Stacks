@@ -7,19 +7,28 @@ const Course = require("../Models/Course");
 const User = require("../Models/User");
 const Request = require("../Models/Request");
 const Notification = require("../Models/Notification");
+const Resource = require("../Models/Resource.js");
 const CourseLecturer = require("../Models/CourseLecturer");
 
+const DEFAULT_USER_ID = 123006;
+
 const tempFolder = path.resolve(__dirname, '..', 'temp');
+const uploadsFolder = path.resolve(__dirname, '..', 'uploads', 'resources');
 
 const routeSetup = async (req, res, next) => {
-    req.session.uid = 123006;
-    const id = req.session.uid;
+    req.session.uid = DEFAULT_USER_ID;
+    const userId = req.session.uid;
 
     try {
-        const lecturerCourses = await Course.customSql(`SELECT * FROM courses WHERE id IN (SELECT course_id FROM courses_lecturers WHERE lecturer_id = ${id})`);
+        //Add-resource overlay data
+        const lecturerCourses = await Course.customSql(`SELECT * FROM courses WHERE id IN (SELECT course_id FROM courses_lecturers WHERE lecturer_id = ${userId})`);
+        const filename = `${userId}.pdf`;
+        const filePath = path.join(tempFolder, filename);
+        const previewRoute = (await Methods.checkFileExistence({ filePath })) ? `/get-pdf/${filename}/preview` : null;
 
         res.locals.data = {
             lecturerCourses,
+            previewRoute,
         }
 
         next();
@@ -114,7 +123,7 @@ const handleRequestAccess = async (req, res) => {
         await notification.multiAdd();
 
         res.status(200).send({
-            message: "Access request has been successfully submitted. You will be notified once it is processed.",
+            message: "Access request has been successfully submitted. You will be notified once it is processed",
             type: "success"
         });
     } catch (error) {
@@ -131,24 +140,50 @@ const showResourcesPage = async (req, res) => {
 
 const handleAddingResources = async (req, res) => {
     try {
-        //Validate user information
+        // Validate user information
         const methods = new Methods(req.body);
         const { invalidKeys } = methods.validateData();
 
-        //Check if there is invalid data to send back to user
-        if (Object.keys(invalidKeys).length > 0) return res.send({ invalidKeys });
+        // Check if there is invalid data to send back to the user
+        if (Object.keys(invalidKeys).length > 0) {
+            return res.send({ invalidKeys });
+        }
 
-        const id = req.session.uid || 123006;
-        const filePath = path.join(tempFolder, `${id}.pdf`);
+        const userId = req.session.uid || DEFAULT_USER_ID;
+        const filePath = path.join(tempFolder, `${userId}.pdf`);
 
-        if(!(await Methods.checkFileExistence({ filePath }))) return res.status(400).send({ message: "No file found. Make sure to upload your file before submitting the form", type: 'warning' })
+        if (!(await Methods.checkFileExistence({ filePath }))) {
+            return res.status(400).send({
+                message: "No file found. Make sure to upload your file before submitting the form",
+                type: 'warning'
+            });
+        }
 
-        res.status(500).send({ message: 'Testing in progress', type: 'warning' })
+        const [course] = await Course.find(['id', req.body.course_id]);
+        const filename = `${course.code}-${req.body.name}-${Date.now()}.pdf`;
+        const destinationPath = path.join(uploadsFolder, filename);
+
+        req.body.description = Methods.sentenceCase(req.body.description);
+        req.body.file = filename;
+
+        await fs.rename(filePath, destinationPath);
+
+        const resource = new Resource(req.body);
+        await resource.add();
+
+        res.status(200).send({
+            message: "Resource has been added successfully",
+            type: "success"
+        });
     } catch (error) {
-        console.log(error);
-        res.status(500).send({ message: 'Internal server error, please try again', type: 'error' });
+        console.error(error);
+        res.status(500).send({
+            message: "Internal server error, please try again",
+            type: "error"
+        });
     }
 }
+
 
 const showRequestsPage = async (req, res) => {
     const requests = await Request.find([['receiver', 'admin']]);
@@ -163,15 +198,21 @@ const showRequestsPage = async (req, res) => {
 }
 
 const getItems = async (req, res) => {
-    const { table } = req.body;
+    const { table, custom } = req.body;
 
-    delete req.body.table;
+    if (custom) {
+        const items = await Model.customSql(custom);
 
-    const conditions = Object.entries(req.body);
+        res.json({ items });
+    } else {
+        delete req.body.table;
 
-    const course = await Model.find(conditions, table);
+        const conditions = Object.entries(req.body);
 
-    res.json({ course });
+        const items = await Model.find(conditions, table);
+        
+        res.json({ items });
+    }
 }
 
 const handleUpload = async (req, res) => {

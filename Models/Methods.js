@@ -18,7 +18,7 @@ class Methods {
             ],
             name: [/\S+/],
             module: [/\S+/],
-            course: [/\S+/],
+            course_id: [/\S+/],
             type: [/\S+/],
             description: [/\S+/],
         };
@@ -88,6 +88,10 @@ class Methods {
         const capitalizedSentence = capitalizedWords.join(' ');
 
         return capitalizedSentence;
+    }
+
+    static sentenceCase(str = '') {
+        return str.charAt(0).toUpperCase() + str.slice(1);
     }
 
     static async checkFileExistence(params = {}) {

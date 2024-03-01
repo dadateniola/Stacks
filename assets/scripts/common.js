@@ -388,14 +388,14 @@ class CommonSetup {
         select("form").addEventListener("submit", CommonSetup.handleFormSubmission)
     }
 
-    static async handleFormSubmission (event) {
+    static async handleFormSubmission(event) {
         event.preventDefault();
 
         const form = event.target;
-        if(! (form instanceof HTMLElement)) return new Alert({ message: "Couldn't find form data for submission", type: 'warning' });
+        if (!(form instanceof HTMLElement)) return new Alert({ message: "Couldn't find form data for submission", type: 'warning' });
 
         var button = selectWith(form, 'button[type="submit"]');
-        if(!button) button = select(`button[type="submit"][form=${form?.id}]`);
+        if (!button) button = select(`button[type="submit"][form=${form?.id}]`);
 
         CommonSetup.attachSpinner({ elem: button });
 
@@ -428,6 +428,9 @@ class CommonSetup {
                         //If request successful, show alert
                         form?.reset();
                         new Alert(data);
+
+                        const parent = select('label[data-preview="pdfFile"]');
+                        CommonSetup.resetFileInput(null, parent)
                         CommonSetup.detachSpinner({ elem: button });
                     }
                 } else {
@@ -444,7 +447,23 @@ class CommonSetup {
 
     //Handle file uploads
     initializeFileUpload() {
-        select("input[type='file']")?.addEventListener('change', CommonSetup.handleFileSelect)
+        select("input[type='file']")?.addEventListener('change', CommonSetup.handleFileSelect);
+
+        select("select[data-module-select]")?.addEventListener("change", CommonSetup.changeModule)
+    }
+
+    static async changeModule(event) {
+        const elem = event.target;
+        const toChange = select('#module');
+
+        const allItems = new Items({
+            custom: `SELECT MAX(module) AS module FROM resources WHERE course_id = ${elem.value};`
+        })
+
+        const { items } = await allItems.init();
+        const highest_module = items[0].module;
+
+        toChange.value = highest_module ? highest_module + 1 : 1;
     }
 
     static handleFileSelect(event) {
@@ -514,11 +533,10 @@ class CommonSetup {
                 } else if (xhr.status === 0) {
                     console.log('Upload cancelled by user');
                 } else {
-                    
                     const data = JSON.parse(xhr.responseText)
                     new Alert(data);
                     CommonSetup.resetFileInput(input);
-                    
+
                     //Clean up     
                     cancelBtn.removeEventListener("click", abortXHR);
                     gsap.to('.form-file-info', { paddingTop: 0, height: 0, ease: 'expo.out' });
@@ -530,10 +548,10 @@ class CommonSetup {
         function abortXHR() {
             //Abort the request
             xhr.abort();
-            
+
             new Alert({ message: 'File upload cancelled', type: 'warning' });
             CommonSetup.resetFileInput(input);
-            
+
             //Clean up     
             cancelBtn.removeEventListener("click", abortXHR);
             gsap.to('.form-file-info', { paddingTop: 0, height: 0, ease: 'expo.out' });
@@ -565,16 +583,24 @@ class CommonSetup {
         xhr.send(formData);
     }
 
-    static resetFileInput(input) {
-        input.value = '';
+    static resetFileInput(input, parent) {
+        if (input) {
+            input.value = '';
+        }
+
         select(".form-file-progress-bar").style.width = 0;
+
+        if (parent) {
+            selectWith(parent, 'iframe')?.remove();
+            parent.classList.remove("none");
+        }
     }
 }
 
 class Items {
     constructor(params = {}) {
         Object.assign(this, params);
-        this.init();
+        return this;
     }
 
     async init() {
@@ -595,7 +621,7 @@ class Items {
 
             const items = await response.json();
 
-            console.log(items);
+            return items;
         } catch (error) {
             console.error('Fetch error:', error.message);
         }
