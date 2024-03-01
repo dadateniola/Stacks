@@ -350,7 +350,9 @@ iframe {
     color: var(--mandy);
 }
 
-input.error {
+input.error,
+select.error,
+textarea.error {
     outline: 2px solid var(--mandy);
 }
 
@@ -545,7 +547,7 @@ button.null {
 
 .form-file {
     width: 100%;
-    flex: 1;
+    height: 202px;
     overflow: hidden;
 
     display: flex;

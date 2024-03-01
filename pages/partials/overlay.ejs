@@ -57,7 +57,7 @@
             </div>
         </section>
     </div>
-    <div class="item-box" id="course">
+    <div class="item-box" id="course-box">
         <div class="item-cont">
             <div class="item-left">
                 <div class="overlay-heading">
@@ -196,7 +196,7 @@
             <div class="item-left">
                 <div class="overlay-heading">
                     <h1>module 1: starting</h1>
-                    <p>from: <span class="highlight" data-trigger="course">COSC 205</span></p>
+                    <p>from: <span class="highlight" data-trigger="course-box">COSC 205</span></p>
                 </div>
                 <div class="desc">
                     <p>Far curiosity incommode now led smallness allowance. Favour bed assure son things yet. She
@@ -399,7 +399,7 @@
             <form class="form-grid" action="/add-resource" id="add-resource-form">
                 <div class="form-group">
                     <label for="module">module</label>
-                    <input type="number" name="module" id="module" value="1" disabled>
+                    <input type="number" name="module" id="module" value="1" readonly>
                 </div>
                 <div class="form-group">
                     <label for="name">resource name</label>
@@ -408,14 +408,16 @@
                 <div class="form-group">
                     <label for="course">select course</label>
                     <select name="course" id="course">
-                        <option value="" selected disabled>Select course</option>
-                        <option value="">COSC 205</option>
+                        <option value="" selected>Select course</option>
+                        <% data.lecturerCourses.forEach(course => { %>
+                            <option value=<%= course.id %>><%= course.code %></option>
+                        <% }) %>
                     </select>
                 </div>
                 <div class="form-group">
                     <label for="type">resource type</label>
                     <select name="type" id="type">
-                        <option value="" selected disabled>Select resource type</option>
+                        <option value="" selected>Select resource type</option>
                         <option value="slide">slide</option>
                         <option value="past question">past question</option>
                     </select>

@@ -402,6 +402,8 @@ class CommonSetup {
         const formData = new FormData(form);
         const url = form.action;
 
+        formData.delete('pdfFile');
+
         if (!url) return location.reload();
 
         try {

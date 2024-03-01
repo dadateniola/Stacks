@@ -1,3 +1,5 @@
+const fs = require('fs').promises;
+
 class Methods {
     constructor(params = {}) {
         Object.assign(this, params);
@@ -15,6 +17,7 @@ class Methods {
                 /.+@.*babcock\.edu\.ng$/
             ],
             name: [/\S+/],
+            module: [/\S+/],
             course: [/\S+/],
             type: [/\S+/],
             description: [/\S+/],
@@ -46,7 +49,6 @@ class Methods {
 
         return result;
     }
-
 
     // Static methods
     static generateUniqueID() {
@@ -86,6 +88,22 @@ class Methods {
         const capitalizedSentence = capitalizedWords.join(' ');
 
         return capitalizedSentence;
+    }
+
+    static async checkFileExistence(params = {}) {
+        const { filePath } = params;
+
+        try {
+            await fs.stat(filePath);
+            return true;
+        } catch (err) {
+            if (err.code === 'ENOENT') {
+                return false;
+            } else {
+                console.error('Error checking file:', err);
+                return false;
+            }
+        }
     }
 }
 

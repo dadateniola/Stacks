@@ -107,7 +107,7 @@ VALUES
 (1, 'Software Engineering', 4),
 (2, 'Computer Science', 4);
 
-
+-- Insert information into users table
 INSERT IGNORE INTO users (`id`, `name`, `email`, `password`, `phone_number`, `role`)
 VALUES
 ('20/1554' ,'dada teniola', 'dada@gmail.com', 'pass', '09052513369', 'admin'),
@@ -147,3 +147,8 @@ VALUES
 (1, 10, 400, 'second'), -- SENG 412
 (1, 11, 400, 'second'), -- SENG 490
 (1, 12, 400, 'first');  -- COSC 423
+
+-- Insert course relationship with lecturers
+INSERT IGNORE INTO courses_lecturers (`course_id`, `lecturer_id`)
+VALUES
+(1 , 123006);

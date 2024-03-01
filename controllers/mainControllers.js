@@ -7,6 +7,27 @@ const Course = require("../Models/Course");
 const User = require("../Models/User");
 const Request = require("../Models/Request");
 const Notification = require("../Models/Notification");
+const CourseLecturer = require("../Models/CourseLecturer");
+
+const tempFolder = path.resolve(__dirname, '..', 'temp');
+
+const routeSetup = async (req, res, next) => {
+    req.session.uid = 123006;
+    const id = req.session.uid;
+
+    try {
+        const lecturerCourses = await Course.customSql(`SELECT * FROM courses WHERE id IN (SELECT course_id FROM courses_lecturers WHERE lecturer_id = ${id})`);
+
+        res.locals.data = {
+            lecturerCourses,
+        }
+
+        next();
+    } catch (error) {
+        console.error('Error in routeSetup:', error);
+        res.status(500).send('Internal Server Error');
+    }
+}
 
 const showSignPage = async (req, res) => {
     res.render("sign")
@@ -110,7 +131,6 @@ const showResourcesPage = async (req, res) => {
 
 const handleAddingResources = async (req, res) => {
     try {
-        console.log(req.body);
         //Validate user information
         const methods = new Methods(req.body);
         const { invalidKeys } = methods.validateData();
@@ -118,6 +138,12 @@ const handleAddingResources = async (req, res) => {
         //Check if there is invalid data to send back to user
         if (Object.keys(invalidKeys).length > 0) return res.send({ invalidKeys });
 
+        const id = req.session.uid || 123006;
+        const filePath = path.join(tempFolder, `${id}.pdf`);
+
+        if(!(await Methods.checkFileExistence({ filePath }))) return res.status(400).send({ message: "No file found. Make sure to upload your file before submitting the form", type: 'warning' })
+
+        res.status(500).send({ message: 'Testing in progress', type: 'warning' })
     } catch (error) {
         console.log(error);
         res.status(500).send({ message: 'Internal server error, please try again', type: 'error' });
@@ -149,8 +175,6 @@ const getItems = async (req, res) => {
 }
 
 const handleUpload = async (req, res) => {
-    req.session.uid = 123006;
-
     if (!req?.files) return (req.aborted) ? console.log('Request aborted but still received') : console.log('Files not received');
 
     const { pdfFile } = req.files;
@@ -162,7 +186,6 @@ const handleUpload = async (req, res) => {
 
     if (!id) return res.status(401).send({ message: 'User authentication required, please login', type: 'warning' });
 
-    const tempFolder = path.resolve(__dirname, '..', 'temp');
     const filename = `${id}.pdf`;
 
     try {
@@ -215,6 +238,7 @@ module.exports = getPDF;
 
 
 module.exports = {
+    routeSetup,
     showSignPage, showDashboard, handleLogin, handleRequestAccess,
     showResourcesPage, showRequestsPage, getItems,
     handleUpload, getPDF, handleAddingResources
