@@ -8,12 +8,14 @@ const User = require("../Models/User");
 const Request = require("../Models/Request");
 const Notification = require("../Models/Notification");
 
-const showDefaultPage = async (req, res) => {
-    if (req.session.uid) {
-        const semesterCourses = await Course.customSql("SELECT * FROM courses WHERE id IN (SELECT course_id FROM departments_courses WHERE semester = 'first')")
+const showSignPage = async (req, res) => {
+    res.render("sign")
+}
 
-        res.render('dashboard', { semesterCourses });
-    } else res.render("sign", { alert: { message: 'Login to gain access', type: 'warning' } })
+const showDashboard = async (req, res) => {
+    const semesterCourses = await Course.customSql("SELECT * FROM courses WHERE id IN (SELECT course_id FROM departments_courses WHERE semester = 'first')")
+
+    res.render('dashboard', { semesterCourses });
 }
 
 const handleLogin = async (req, res) => {
@@ -34,7 +36,7 @@ const handleLogin = async (req, res) => {
             //Assign user id to the session
             req.session.uid = id;
 
-            res.status(200).send({ url: "/" });
+            res.status(200).send({ url: "/dashboard" });
         } else {
             res.status(401).send({ message: 'Invalid login credentials', type: 'warning' });
         }
@@ -106,6 +108,22 @@ const showResourcesPage = async (req, res) => {
     res.render('resources');
 }
 
+const handleAddingResources = async (req, res) => {
+    try {
+        console.log(req.body);
+        //Validate user information
+        const methods = new Methods(req.body);
+        const { invalidKeys } = methods.validateData();
+
+        //Check if there is invalid data to send back to user
+        if (Object.keys(invalidKeys).length > 0) return res.send({ invalidKeys });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({ message: 'Internal server error, please try again', type: 'error' });
+    }
+}
+
 const showRequestsPage = async (req, res) => {
     const requests = await Request.find([['receiver', 'admin']]);
     const types = {};
@@ -131,16 +149,33 @@ const getItems = async (req, res) => {
 }
 
 const handleUpload = async (req, res) => {
+    req.session.uid = 123006;
+
+    if (!req?.files) return (req.aborted) ? console.log('Request aborted but still received') : console.log('Files not received');
+
     const { pdfFile } = req.files;
+    const id = req.session?.uid;
 
     if (!pdfFile || pdfFile.mimetype !== 'application/pdf') {
         return res.status(400).send({ message: 'You can only upload a valid PDF file', type: 'error' });
     }
 
+    if (!id) return res.status(401).send({ message: 'User authentication required, please login', type: 'warning' });
+
     const tempFolder = path.resolve(__dirname, '..', 'temp');
+    const filename = `${id}.pdf`;
 
+    try {
+        // Create the "temp" folder if it doesn't exist
+        await fs.mkdir(tempFolder, { recursive: true });
 
-    res.status(200).send('File uploaded successfully.');
+        await pdfFile.mv(path.join(tempFolder, filename));
+
+        return res.status(200).send({ filename });
+    } catch (error) {
+        console.error('Error moving file:', error);
+        res.status(500).send({ message: 'Internal Server Error', type: 'error' });
+    }
 }
 
 const getPDF = async (req, res) => {
@@ -180,7 +215,7 @@ module.exports = getPDF;
 
 
 module.exports = {
-    showDefaultPage, handleLogin, handleRequestAccess,
+    showSignPage, showDashboard, handleLogin, handleRequestAccess,
     showResourcesPage, showRequestsPage, getItems,
-    handleUpload, getPDF
+    handleUpload, getPDF, handleAddingResources
 }

@@ -74,7 +74,7 @@ class Methods {
         //     attributes: Attributes of the element being created, can be array or String
         // }
 
-        const { type, text, append, parent, before, classes, properties, attributes } = params;
+        const { type, text, append, parent, before, classes, properties, attributes, no_data } = params;
 
         if (!type) return null;
 
@@ -107,8 +107,8 @@ class Methods {
         }
 
         if (attributes?.length) {
-            if (Array.isArray(attributes)) attributes.forEach(([a, v]) => element.setAttribute(`data-${a}`, v || ''));
-            else element.setAttribute(`data-${attributes}`, '');
+            if (Array.isArray(attributes)) attributes.forEach(([a, v]) => element.setAttribute(`${no_data ? '' : 'data-'}${a}`, v || ''));
+            else element.setAttribute(`${no_data ? '' : 'data-'}${attributes}`, '');
         }
 
         //Append element to parent
@@ -189,6 +189,7 @@ class CommonSetup {
 
         this.initializeTriggers();
         this.initializeRequestBtns();
+        this.initializeForms();
         this.initializeFileUpload();
     }
 
@@ -382,6 +383,63 @@ class CommonSetup {
         }, 300);
     }
 
+    //Handle form submissions
+    initializeForms() {
+        select("form").addEventListener("submit", CommonSetup.handleFormSubmission)
+    }
+
+    static async handleFormSubmission (event) {
+        event.preventDefault();
+
+        const form = event.target;
+        if(! (form instanceof HTMLElement)) return new Alert({ message: "Couldn't find form data for submission", type: 'warning' });
+
+        var button = selectWith(form, 'button[type="submit"]');
+        if(!button) button = select(`button[type="submit"][form=${form?.id}]`);
+
+        CommonSetup.attachSpinner({ elem: button });
+
+        const formData = new FormData(form);
+        const url = form.action;
+
+        if (!url) return location.reload();
+
+        try {
+            const response = await fetch(url, {
+                method: "POST",
+                body: Methods.formDataToJson(formData),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.invalidKeys) {
+                //If there are invalid inputs display messages
+                Methods.assignErrorMsgs(data.invalidKeys);
+                CommonSetup.detachSpinner({ elem: button });
+            } else {
+                if (response.ok) {
+                    if (data?.url) return window.location.href = data?.url || "/";
+                    else {
+                        //If request successful, show alert
+                        form?.reset();
+                        new Alert(data);
+                        CommonSetup.detachSpinner({ elem: button });
+                    }
+                } else {
+                    //If there was a problem in the backend, display alert
+                    new Alert(data);
+                    CommonSetup.detachSpinner({ elem: button });
+                }
+            };
+        } catch (error) {
+            new Alert({ message: 'Error submitting the form, please try again', type: 'error' });
+            console.error('Error:', error);
+        }
+    }
+
     //Handle file uploads
     initializeFileUpload() {
         select("input[type='file']")?.addEventListener('change', CommonSetup.handleFileSelect)
@@ -436,37 +494,70 @@ class CommonSetup {
         });
 
         // Event listener for cancel button
-        cancelBtn.addEventListener('click', () => {
-            xhr.abort();
-            new Alert({ message: 'File upload canceled', type: 'warning' });
-            CommonSetup.resetFileInput(input);
-            // Hide form upload information        
-            gsap.to('.form-file-info', { paddingTop: 0, height: 0, ease: 'expo.out' });
-        });
+        cancelBtn.addEventListener('click', abortXHR);
 
         // Event listener for state change
         xhr.onreadystatechange = () => {
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 if (xhr.status === 200) {
-                    // displayPreview(file);
+                    const data = JSON.parse(xhr.responseText)
+                    displayPreview(data.filename);
                     new Alert({ message: 'File upload complete', type: 'success' });
                     CommonSetup.resetFileInput(input);
 
-                    //Hide form upload information        
-                    gsap.to('.form-file-info', { paddingTop: 0, height: 0, ease: 'expo.out' })
+                    //Clean up     
+                    cancelBtn.removeEventListener("click", abortXHR);
+                    gsap.to('.form-file-info', { paddingTop: 0, height: 0, ease: 'expo.out' });
 
                 } else if (xhr.status === 0) {
                     console.log('Upload cancelled by user');
                 } else {
+                    
                     const data = JSON.parse(xhr.responseText)
                     new Alert(data);
                     CommonSetup.resetFileInput(input);
-
-                    //Hide form upload information        
+                    
+                    //Clean up     
+                    cancelBtn.removeEventListener("click", abortXHR);
                     gsap.to('.form-file-info', { paddingTop: 0, height: 0, ease: 'expo.out' });
                 }
             }
         };
+
+        //Abort xhr
+        function abortXHR() {
+            //Abort the request
+            xhr.abort();
+            
+            new Alert({ message: 'File upload cancelled', type: 'warning' });
+            CommonSetup.resetFileInput(input);
+            
+            //Clean up     
+            cancelBtn.removeEventListener("click", abortXHR);
+            gsap.to('.form-file-info', { paddingTop: 0, height: 0, ease: 'expo.out' });
+        }
+
+        //Display document preview
+        function displayPreview(filename = '') {
+            const parent = select(`label[data-preview="${input.name}"]`);
+
+            if (!(parent instanceof HTMLElement)) return console.warn('Conditions not met to "displayPreview"');
+
+            selectWith(parent, 'iframe')?.remove();
+
+            if (parent.children.length) parent.classList.add("none");
+
+            Methods.insertToDOM({
+                type: 'iframe',
+                parent,
+                attributes: [
+                    ['src', `/get-pdf/${filename}/preview`],
+                    ['width', '100%'],
+                    ['height', '100%']
+                ],
+                no_data: true
+            })
+        }
 
         xhr.open('POST', '/upload', true);
         xhr.send(formData);

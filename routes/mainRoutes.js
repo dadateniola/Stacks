@@ -1,22 +1,26 @@
 const { Router } = require("express");
-const { showDefaultPage, showResourcesPage, getItems, showRequestsPage, handleLogin, handleRequestAccess, handleUpload, getPDF } = require("../controllers/mainControllers");
+const { showSignPage, showResourcesPage, getItems, showRequestsPage, handleLogin, handleRequestAccess, handleUpload, getPDF, handleAddingResources, showDashboard } = require("../controllers/mainControllers");
 
 const router = Router();
 
-router.get('/', showDefaultPage);
+router.get('/', showSignPage);
 
-router.post('/login', handleLogin)
+router.get('/dashboard', showDashboard);
 
-router.post('/request-access', handleRequestAccess)
+router.post('/login', handleLogin);
+
+router.post('/request-access', handleRequestAccess);
 
 router.get('/resources', showResourcesPage);
 
+router.post('/add-resource', handleAddingResources);
+
 router.get('/requests', showRequestsPage);
 
-router.post('/get-items', getItems)
+router.post('/get-items', getItems);
 
-router.post('/upload', handleUpload)
+router.post('/upload', handleUpload);
 
-router.get('/get-pdf/:file/:type?', getPDF)
+router.get('/get-pdf/:file/:type?', getPDF);
 
 module.exports = router;

@@ -396,10 +396,10 @@
             <div class="overlay-heading">
                 <h1 class="no-cap">Add a new resource</h1>
             </div>
-            <div class="form-grid">
+            <form class="form-grid" action="/add-resource" id="add-resource-form">
                 <div class="form-group">
                     <label for="module">module</label>
-                    <input type="number" name="module" id="module" placeholder="1" min="1">
+                    <input type="number" name="module" id="module" value="1" disabled>
                 </div>
                 <div class="form-group">
                     <label for="name">resource name</label>
@@ -429,8 +429,8 @@
                     <label for="pdfFile">upload resource</label>
                     <div class="form-file">
                         <label for="pdfFile" data-preview="pdfFile">
-                            <iframe src="/get-pdf/Project Handbook.pdf/preview" width="100%" height="100%"></iframe>
-                            <!-- <img src="/images/others/file.jpg" alt="file"> -->
+                            <!-- <iframe src="/get-pdf/Project Handbook.pdf/preview" width="100%" height="100%"></iframe> -->
+                            <img src="/images/others/file.jpg" alt="file">
                         </label>
                         <div class="form-file-info">
                             <div class="form-file-name">
@@ -446,7 +446,7 @@
                                 </div>
                             </div>
                             <div class="form-file-cancel">
-                                <button data-target="pdfFile">
+                                <button type="button" data-target="pdfFile">
                                     <img src="/images/icons/cancel.png" alt="file">
                                 </button>
                             </div>
@@ -454,15 +454,14 @@
                         <input type="file" name="pdfFile" id="pdfFile" accept=".pdf">
                     </div>
                 </div>
-            </div>
+            </form>
             <div class="form-cta">
                 <button data-close>close</button>
-                <button type="submit">submit</button>
+                <button type="submit" form="add-resource-form">submit</button>
             </div>
         </div>
     </div>
     <div class="item-box" id="request">
-        <!-- <div class="loader"></div> -->
         <div class="request-box" data-access>
             <div class="request-info">
                 <div class="heading">

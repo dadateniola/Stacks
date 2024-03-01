@@ -78,6 +78,7 @@ section {
 }
 
 iframe {
+    display: block !important;
     border: none;
     outline: 0;
 }

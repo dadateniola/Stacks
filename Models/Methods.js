@@ -14,9 +14,10 @@ class Methods {
             email: [
                 /.+@.*babcock\.edu\.ng$/
             ],
-            name: [
-                /^\w+(\s\w+)?$/
-            ]
+            name: [/\S+/],
+            course: [/\S+/],
+            type: [/\S+/],
+            description: [/\S+/],
         };
 
         const result = {

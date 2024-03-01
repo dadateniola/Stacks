@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS courses_lecturers (
   UNIQUE KEY (`course_id`, `lecturer_id`)
 );
 
---Create table for resources
+-- Create table for resources
 CREATE TABLE IF NOT EXISTS resources (
   `id` INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
   `module` INT UNSIGNED NOT NULL,

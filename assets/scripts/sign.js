@@ -11,7 +11,7 @@ class PageSetup {
                 <h1>Welcome back</h1>
                 <p>Enter your ID and password to access your account.</p>
             </div>
-            <form class="form-inputs flex-col" data-url="/login">
+            <form class="form-inputs flex-col" action="/login">
                 <div class="form-group">
                     <label for="id">identification number</label>
                     <input type="text" name="id" id="id" placeholder="Enter your identification number">
@@ -41,7 +41,7 @@ class PageSetup {
                 <h1>Request Access</h1>
                 <p>Fill your credentials in order to have an account with us.</p>
             </div>
-            <form class="form-inputs flex-col" data-url="/request-access">
+            <form class="form-inputs flex-col" action="/request-access">
                 <div class="form-group">
                     <label for="email">email</label>
                     <input type="text" name="email" id="email" placeholder="Enter your email">
@@ -67,60 +67,9 @@ class PageSetup {
         PageSetup.assignChange();
     }
 
-
     static assignChange() {
         select(".form-cta button").addEventListener("click", PageSetup.animate);
-        select("form").addEventListener("submit", async (event) => {
-            event.preventDefault();
-
-            const form = event.target;
-            const button = selectWith(form, 'button[type="submit"]');
-
-            CommonSetup.attachSpinner({ elem: button });
-
-            const formData = new FormData(form);
-            const url = form.dataset?.url;
-
-            if (!url) return location.reload();
-
-            try {
-                const response = await fetch(url, {
-                    method: "POST",
-                    body: Methods.formDataToJson(formData),
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                const data = await response.json();
-
-                if (data.invalidKeys) {
-                    //If there are invalid inputs display messages
-                    Methods.assignErrorMsgs(data.invalidKeys);
-                    CommonSetup.detachSpinner({ elem: button });
-                }
-                else {
-                    if (response.ok) {
-                        if (data?.url) return window.location.href = data?.url || "/";
-                        else {
-                            //If request successful, show alert
-                            form?.reset();
-                            new Alert(data);
-                            CommonSetup.detachSpinner({ elem: button });
-                        }
-                    } else {
-                        //If there was a problem in the backend, display alert
-                        new Alert(data);
-                        CommonSetup.detachSpinner({ elem: button });
-                    }
-                };
-            } catch (error) {
-                new Alert({ message: 'Error submitting the form, please try again', type: 'error' });
-                console.error('Error:', error);
-            }
-        })
     }
-
 
     static animate() {
         Methods.disableLinksAndBtns(true);
@@ -170,6 +119,7 @@ class PageSetup {
 
                     .call(() => {
                         PageSetup.assignChange();
+                        select("form").addEventListener("submit", CommonSetup.handleFormSubmission)
                         Methods.disableLinksAndBtns(false);
                     })
             })
