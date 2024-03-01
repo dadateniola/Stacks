@@ -428,8 +428,9 @@
                 <div class="form-group">
                     <label for="pdfFile">upload resource</label>
                     <div class="form-file">
-                        <label for="pdfFile">
-                            <img src="/images/others/file.jpg" alt="file">
+                        <label for="pdfFile" data-preview="pdfFile">
+                            <iframe src="/get-pdf/Project Handbook.pdf/preview" width="100%" height="100%"></iframe>
+                            <!-- <img src="/images/others/file.jpg" alt="file"> -->
                         </label>
                         <div class="form-file-info">
                             <div class="form-file-name">
@@ -445,7 +446,7 @@
                                 </div>
                             </div>
                             <div class="form-file-cancel">
-                                <button>
+                                <button data-target="pdfFile">
                                     <img src="/images/icons/cancel.png" alt="file">
                                 </button>
                             </div>

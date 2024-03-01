@@ -107,7 +107,7 @@ class Methods {
         }
 
         if (attributes?.length) {
-            if (Array.isArray(attributes)) attributes.forEach(a => element.setAttribute(`data-${a}`, ''));
+            if (Array.isArray(attributes)) attributes.forEach(([a, v]) => element.setAttribute(`data-${a}`, v || ''));
             else element.setAttribute(`data-${attributes}`, '');
         }
 
@@ -402,6 +402,12 @@ class CommonSetup {
     static uploadFile(params = {}) {
         const { file, input } = params;
         const fileNameExt = selectAll(".form-file-name-ext span");
+        const cancelBtn = select(`button[data-target="${input.name}"]`);
+
+        if (!file || !input) {
+            new Alert({ message: 'Something went wrong, please try again', type: 'warning' });
+            return console.warn("Conditions not met for upload");
+        }
 
         //Change filename and extension in upload information
         fileNameExt.forEach(span => {
@@ -421,6 +427,7 @@ class CommonSetup {
 
         const xhr = new XMLHttpRequest();
 
+        // Event listener for progress
         xhr.upload.addEventListener('progress', (event) => {
             if (event.lengthComputable) {
                 const percentComplete = ((event.loaded / event.total) * 100).toFixed(1);
@@ -428,6 +435,16 @@ class CommonSetup {
             }
         });
 
+        // Event listener for cancel button
+        cancelBtn.addEventListener('click', () => {
+            xhr.abort();
+            new Alert({ message: 'File upload canceled', type: 'warning' });
+            CommonSetup.resetFileInput(input);
+            // Hide form upload information        
+            gsap.to('.form-file-info', { paddingTop: 0, height: 0, ease: 'expo.out' });
+        });
+
+        // Event listener for state change
         xhr.onreadystatechange = () => {
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 if (xhr.status === 200) {
@@ -438,6 +455,8 @@ class CommonSetup {
                     //Hide form upload information        
                     gsap.to('.form-file-info', { paddingTop: 0, height: 0, ease: 'expo.out' })
 
+                } else if (xhr.status === 0) {
+                    console.log('Upload cancelled by user');
                 } else {
                     const data = JSON.parse(xhr.responseText)
                     new Alert(data);

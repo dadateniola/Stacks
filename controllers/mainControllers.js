@@ -1,3 +1,6 @@
+const path = require('path');
+const fs = require('fs').promises;
+
 const Model = require("../Models/Model");
 const Methods = require("../Models/Methods");
 const Course = require("../Models/Course");
@@ -134,12 +137,50 @@ const handleUpload = async (req, res) => {
         return res.status(400).send({ message: 'You can only upload a valid PDF file', type: 'error' });
     }
 
-    console.log(pdfFile);
+    const tempFolder = path.resolve(__dirname, '..', 'temp');
+
+
     res.status(200).send('File uploaded successfully.');
 }
+
+const getPDF = async (req, res) => {
+    try {
+        const { file, type } = req.params;
+
+        if (!file) return res.status(400).send('File not found');
+
+        const halfPath = (type == 'preview') ?
+            path.resolve('temp', file) :
+            path.resolve('uploads', 'resources', file);
+
+        const filePath = path.resolve(__dirname, '..', halfPath);
+
+        try {
+            await fs.stat(filePath);
+        } catch (error) {
+            console.log(error);
+            return res.status(404).send('File not found');
+        }
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `inline; filename="${file}"`);
+
+        const fileContent = await fs.readFile(filePath);
+        res.send(fileContent);
+    } catch (error) {
+        console.error('Error in getPDF:', error);
+        res.status(500).send('Internal Server Error');
+    }
+}
+
+module.exports = getPDF;
+
+
+module.exports = getPDF;
+
 
 module.exports = {
     showDefaultPage, handleLogin, handleRequestAccess,
     showResourcesPage, showRequestsPage, getItems,
-    handleUpload
+    handleUpload, getPDF
 }
