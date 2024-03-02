@@ -27,12 +27,12 @@ class Model {
         return pluralizedName.replace(/^_/, '').toLowerCase();
     }
 
-    static async find(filters = [], table = null) {
+    static async find(filters = [], table = null, columns = []) {
         let result = [];
         let params = [];
         let val = [];
         let operators = [];
-        let sql = `SELECT * FROM ${table || this.tableName}`;
+        let sql = `SELECT ${columns.length ? columns.join(', ') : '*'} FROM ${table || this.tableName}`;
 
         try {
             if (filters.length) {

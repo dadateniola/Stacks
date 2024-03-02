@@ -26,52 +26,55 @@
                 <div class="content-head">
                     <h1>course resources</h1>
                 </div>
-                <section>
-                    <div class="section-head">
-                        <div class="section-info">
-                            <p>recently added</p>
-                            <div class="line"></div>
+                <% for (const name in courseResources) { %>
+                    <% if (!courseResources[name].length) continue; %>
+                    <section>
+                        <div class="section-head">
+                            <div class="section-info">
+                                <p><%= name %></p>
+                                <div class="line"></div>
+                            </div>
+                            <div class="section-format">
+                                <div class="line"></div>
+                                <button class="stacks-active">
+                                    <img src="/images/icons/row dark.png" alt="icon">
+                                </button>
+                                <button>
+                                    <img src="/images/icons/grid dark.png" alt="icon">
+                                </button>
+                            </div>
                         </div>
-                        <div class="section-format">
-                            <div class="line"></div>
-                            <button class="stacks-active">
-                                <img src="/images/icons/row dark.png" alt="icon">
-                            </button>
-                            <button>
-                                <img src="/images/icons/grid dark.png" alt="icon">
-                            </button>
+                        <div class="section-table">
+                            <table>
+                                <colgroup>
+                                    <col style="width: 140px;">
+                                    <col>
+                                    <col span="2" style="width: 140px;">
+                                </colgroup>
+                                <tbody>
+                                    <tr>
+                                        <th>type</th>
+                                        <th>name</th>
+                                        <th>date added</th>
+                                        <th>last updated</th>
+                                    </tr>
+                                    <% courseResources[name].forEach(resource => { %>
+                                        <% const joinedName = (resource.module) ? 
+                                            `Module ${resource.module}: ${resource.name}` :
+                                            `${resource.year}: ${resource.name}`;
+                                        %>
+                                        <tr data-trigger="resource">
+                                            <td><%= resource.type %></td>
+                                            <td><p><%= joinedName %></p></td>
+                                            <td><%= resource.date_added %></td>
+                                            <td><%= resource.last_updated %></td>
+                                        </tr>
+                                    <% }) %>
+                                </tbody>
+                            </table>
                         </div>
-                    </div>
-                    <div class="section-table">
-                        <table>
-                            <colgroup>
-                                <col style="width: 140px;">
-                                <col>
-                                <col span="2" style="width: 140px;">
-                            </colgroup>
-                            <tbody>
-                                <tr>
-                                    <th>course code</th>
-                                    <th>name</th>
-                                    <th>date added</th>
-                                    <th>last updated</th>
-                                </tr>
-                                <tr data-trigger="course-box">
-                                    <td>COSC 205</td>
-                                    <td><p>Module 2: Basic elements in java</p></td>
-                                    <td>26 - aug - 2023</td>
-                                    <td>26 - aug - 2023</td>
-                                </tr>
-                                <tr>
-                                    <td>SENG 401</td>
-                                    <td><p>Module 5: Introduction to basic engineering</p></td>
-                                    <td>26 - aug - 2023</td>
-                                    <td>26 - aug - 2023</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
+                    </section>
+                <% } %>
             </main>
         </div>
     </div>

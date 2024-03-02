@@ -133,9 +133,28 @@ const handleRequestAccess = async (req, res) => {
 }
 
 const showResourcesPage = async (req, res) => {
-    // const resources = await 
+    try {
+        const lecturerCourses = await CourseLecturer.find(['lecturer_id', req.session.uid], null, ['course_id']);
+        const courseResources = {};
 
-    res.render('resources');
+        for (const course of lecturerCourses) {
+            const [key, value] = Object.entries(course)[0];
+            const [courseDesc] = await Course.find(['id', value], null, ['code']);
+            const resources = await Resource.find(['course_id', value]);
+            
+            resources.forEach(resource => {
+                resource.date_added = Methods.formatDate(resource.created_at);
+                resource.last_updated = Methods.formatDate(resource.updated_at);
+            })
+
+            courseResources[courseDesc.code] = resources;
+        }
+
+        res.render('resources', { courseResources });
+    } catch (error) {
+        console.error('Error in showResourcesPage:', error);
+        res.status(500).send('Internal Server Error');
+    }
 }
 
 const handleAddingResources = async (req, res) => {
@@ -171,8 +190,8 @@ const handleAddingResources = async (req, res) => {
         data.file = filename;
         data.uploaded_by = userId;
 
-        if(!data.start_year && !data.end_year) {
-            if(!data.module) return res.status(500).send({ message: 'Resource data is incomplete, please reload the page and try again', type: 'error' });
+        if (!data.start_year && !data.end_year) {
+            if (!data.module) return res.status(500).send({ message: 'Resource data is incomplete, please reload the page and try again', type: 'error' });
         } else {
             data.year = `${data.start_year} / ${data.end_year}`;
             delete data.start_year;
@@ -222,7 +241,7 @@ const getItems = async (req, res) => {
         const conditions = Object.entries(req.body);
 
         const items = await Model.find(conditions, table);
-        
+
         res.json({ items });
     }
 }
