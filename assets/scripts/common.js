@@ -148,17 +148,25 @@ class Methods {
 
             input.classList.add('error');
             input.addEventListener("focus", Methods.removeErrorMsgs)
+            input.addEventListener("input", Methods.removeErrorMsgs)
         })
     }
 
     static removeErrorMsgs(e) {
         const input = e instanceof Event ? e.target : e;
         const nextSibling = input.nextElementSibling;
-
+        
         if (nextSibling && nextSibling.tagName === 'SPAN' && nextSibling.classList.contains('error')) nextSibling.remove();
-
+        
         input.classList.remove('error');
         input.removeEventListener("focus", Methods.removeErrorMsgs);
+        input.removeEventListener("input", Methods.removeErrorMsgs)
+    }
+
+    static trimLength(event) {
+        const input = (event instanceof Event) ? event.target : event;
+
+        if (input.value.length > 4) input.value = input.value.slice(0, 4);
     }
 }
 
@@ -450,20 +458,81 @@ class CommonSetup {
         select("input[type='file']")?.addEventListener('change', CommonSetup.handleFileSelect);
 
         select("select[data-module-select]")?.addEventListener("change", CommonSetup.changeModule)
+        select("select[data-type-select]")?.addEventListener("change", CommonSetup.changeType)
     }
 
     static async changeModule(event) {
-        const elem = event.target;
+        const elem = (event instanceof Event) ? event.target : event;
         const toChange = select('#module');
 
+        if (!toChange || !elem.value) return;
+
         const allItems = new Items({
-            custom: `SELECT MAX(module) AS module FROM resources WHERE course_id = ${elem.value};`
+            custom: `SELECT MAX(module) AS module FROM resources WHERE course_id = ${elem.value}`
         })
 
         const { items } = await allItems.init();
         const highest_module = items[0].module;
 
         toChange.value = highest_module ? highest_module + 1 : 1;
+    }
+
+    static async changeYear(event) {
+        const input = (event instanceof Event) ? event.target : event;
+        const endInput = select('input[name="end_year"]');
+        const value = parseInt(input.value);
+        const date = new Date();
+        const currentYear = date.getFullYear();
+
+        if(value.toString().length >= 4) {
+            if(value > currentYear) {
+                Methods.assignErrorMsgs({ start_year: `Start year caannot be higher than ${currentYear}` })
+            } else {
+                endInput.value = value + 1;
+            }
+        } else {
+            endInput.value = null;
+        }
+    }
+
+    static changeType(event) {
+        const html = {
+            'past question': `
+                    <label>year</label>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <input type="number" name="start_year" id="start_year" placeholder="0000">
+                        </div>
+                        <div class="form-slash">
+                            <div class="slash-box">
+                                <div class="slash"></div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <input type="number" name="end_year" id="end_year" placeholder="0000" readonly>
+                        </div>
+                    </div>
+                `,
+            slide: `
+                    <label for="module">module</label>
+                    <input type="number" name="module" id="module" value="0" readonly>
+                    `,
+        }
+
+        const elem = event.target;
+        const toChange = select('[data-module-year]');
+        const value = elem.value;
+
+        if (!html[value]) return;
+
+        toChange.innerHTML = html[value];
+
+        if (value == 'slide') CommonSetup.changeModule(select("select[data-module-select]"));
+        if (value == 'past question') {
+            const input = select('input[name="start_year"]');
+            input?.addEventListener('input', Methods.trimLength);
+            input?.addEventListener('input', CommonSetup.changeYear);
+        }
     }
 
     static handleFileSelect(event) {

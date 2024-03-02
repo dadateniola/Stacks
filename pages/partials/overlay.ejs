@@ -397,7 +397,7 @@
                 <h1 class="no-cap">Add a new resource</h1>
             </div>
             <form class="form-grid" action="/add-resource" id="add-resource-form">
-                <div class="form-group">
+                <div class="form-group" data-module-year>
                     <label for="module">module</label>
                     <input type="number" name="module" id="module" value="0" readonly>
                 </div>
@@ -409,16 +409,17 @@
                     <label for="course_id">select course</label>
                     <select name="course_id" id="course_id" data-module-select>
                         <option value="" selected>Select course</option>
-                        <% data.lecturerCourses.forEach(course => { %>
-                            <option value=<%= course.id %>><%= course.code %></option>
-                        <% }) %>
+                        <% data.lecturerCourses.forEach(course=> { %>
+                            <option value=<%=course.id %>><%= course.code %>
+                            </option>
+                            <% }) %>
                     </select>
                 </div>
                 <div class="form-group">
                     <label for="type">resource type</label>
-                    <select name="type" id="type">
-                        <option value="" selected>Select resource type</option>
-                        <option value="slide">slide</option>
+                    <select name="type" id="type" data-type-select>
+                        <option value="">Select resource type</option>
+                        <option value="slide" selected>slide</option>
                         <option value="past question">past question</option>
                     </select>
                 </div>
@@ -431,10 +432,10 @@
                     <label for="pdfFile">upload resource</label>
                     <div class="form-file">
                         <label for="pdfFile" data-preview="pdfFile" <% if (data.previewRoute) { %> class="none" <% } %>>
-                            <% if (data.previewRoute) { %>
-                                <iframe src=<%= data.previewRoute %> width="100%" height="100%"></iframe>
-                            <% } %>
-                            <img src="/images/others/file.jpg" alt="file">
+                                <% if (data.previewRoute) { %>
+                                    <iframe src=<%=data.previewRoute %> width="100%" height="100%"></iframe>
+                                    <% } %>
+                                        <img src="/images/others/file.jpg" alt="file">
                         </label>
                         <div class="form-file-info">
                             <div class="form-file-name">

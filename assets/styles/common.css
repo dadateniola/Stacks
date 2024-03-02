@@ -430,6 +430,15 @@ button.form-active {
     font-size: 0.8em;
 }
 
+.form-row {
+    display: flex;
+    gap: 15px;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
 .form-cta {
     display: flex;
     gap: 10px;
@@ -438,6 +447,26 @@ button.form-active {
 
 .form-cta button {
     min-width: 100px;
+}
+
+.form-slash {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.slash-box {
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.slash {
+    width: 1.5px;
+    height: 60%;
+    background-color: var(--sub-text);
+    transform: rotate(20deg);
 }
 
 button[data-close] {

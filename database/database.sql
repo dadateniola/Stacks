@@ -61,7 +61,8 @@ CREATE TABLE IF NOT EXISTS courses_lecturers (
 -- Create table for resources
 CREATE TABLE IF NOT EXISTS resources (
   `id` INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  `module` INT UNSIGNED NOT NULL,
+  `module` INT UNSIGNED,
+  `year` VARCHAR(255),
   `name` VARCHAR(255) NOT NULL,
   `course_id` INT UNSIGNED NOT NULL,
   `type` ENUM('slide', 'past question') NOT NULL,
