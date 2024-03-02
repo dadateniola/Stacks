@@ -140,8 +140,9 @@ const showResourcesPage = async (req, res) => {
 
 const handleAddingResources = async (req, res) => {
     try {
+        const data = req.body;
         // Validate user information
-        const methods = new Methods(req.body);
+        const methods = new Methods(data);
         const { invalidKeys } = methods.validateData();
 
         // Check if there is invalid data to send back to the user
@@ -150,6 +151,9 @@ const handleAddingResources = async (req, res) => {
         }
 
         const userId = req.session.uid || DEFAULT_USER_ID;
+
+        if (!userId) return res.status(401).send({ message: 'User authentication required, please login', type: 'warning' });
+
         const filePath = path.join(tempFolder, `${userId}.pdf`);
 
         if (!(await Methods.checkFileExistence({ filePath }))) {
@@ -159,16 +163,25 @@ const handleAddingResources = async (req, res) => {
             });
         }
 
-        const [course] = await Course.find(['id', req.body.course_id]);
-        const filename = `${course.code}-${req.body.name}-${Date.now()}.pdf`;
+        const [course] = await Course.find(['id', data.course_id]);
+        const filename = `${course.code}-${data.name}-${Date.now()}.pdf`;
         const destinationPath = path.join(uploadsFolder, filename);
 
-        req.body.description = Methods.sentenceCase(req.body.description);
-        req.body.file = filename;
+        data.description = Methods.sentenceCase(data.description);
+        data.file = filename;
+        data.uploaded_by = userId;
+
+        if(!data.start_year && !data.end_year) {
+            if(!data.module) return res.status(500).send({ message: 'Resource data is incomplete, please reload the page and try again', type: 'error' });
+        } else {
+            data.year = `${data.start_year} / ${data.end_year}`;
+            delete data.start_year;
+            delete data.end_year;
+        }
 
         await fs.rename(filePath, destinationPath);
 
-        const resource = new Resource(req.body);
+        const resource = new Resource(data);
         await resource.add();
 
         res.status(200).send({
@@ -183,7 +196,6 @@ const handleAddingResources = async (req, res) => {
         });
     }
 }
-
 
 const showRequestsPage = async (req, res) => {
     const requests = await Request.find([['receiver', 'admin']]);
@@ -219,15 +231,15 @@ const handleUpload = async (req, res) => {
     if (!req?.files) return (req.aborted) ? console.log('Request aborted but still received') : console.log('Files not received');
 
     const { pdfFile } = req.files;
-    const id = req.session?.uid;
+    const userId = req.session?.uid;
 
     if (!pdfFile || pdfFile.mimetype !== 'application/pdf') {
         return res.status(400).send({ message: 'You can only upload a valid PDF file', type: 'error' });
     }
 
-    if (!id) return res.status(401).send({ message: 'User authentication required, please login', type: 'warning' });
+    if (!userId) return res.status(401).send({ message: 'User authentication required, please login', type: 'warning' });
 
-    const filename = `${id}.pdf`;
+    const filename = `${userId}.pdf`;
 
     try {
         // Create the "temp" folder if it doesn't exist

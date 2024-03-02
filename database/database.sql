@@ -68,9 +68,11 @@ CREATE TABLE IF NOT EXISTS resources (
   `type` ENUM('slide', 'past question') NOT NULL,
   `file` VARCHAR(255) NOT NULL,
   `description` VARCHAR(255),
+  `uploaded_by`  VARCHAR(20) NOT NULL,
   `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
   `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  FOREIGN KEY (`course_id`) REFERENCES courses(`id`) ON DELETE CASCADE
+  FOREIGN KEY (`course_id`) REFERENCES courses(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`uploaded_by`) REFERENCES users(`id`) ON DELETE CASCADE
 );
 
 -- Create a table for requests

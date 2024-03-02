@@ -463,7 +463,7 @@ class CommonSetup {
 
     static async changeModule(event) {
         const elem = (event instanceof Event) ? event.target : event;
-        const toChange = select('#module');
+        const toChange = select('input[name="module"]');
 
         if (!toChange || !elem.value) return;
 

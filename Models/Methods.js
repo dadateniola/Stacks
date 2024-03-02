@@ -21,6 +21,8 @@ class Methods {
             course_id: [/\S+/],
             type: [/\S+/],
             description: [/\S+/],
+            start_year: [/\S+/],
+            end_year: [/\S+/],
         };
 
         const result = {
@@ -90,8 +92,9 @@ class Methods {
         return capitalizedSentence;
     }
 
-    static sentenceCase(str = '') {
-        return str.charAt(0).toUpperCase() + str.slice(1);
+    static sentenceCase(text = '', lowercase = false) {
+        const str = text.replace(/\s+/g, ' ').trim();
+        return (lowercase) ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : str.charAt(0).toUpperCase() + str.slice(1);
     }
 
     static async checkFileExistence(params = {}) {
