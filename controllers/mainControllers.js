@@ -284,12 +284,6 @@ const getPDF = async (req, res) => {
     }
 }
 
-module.exports = getPDF;
-
-
-module.exports = getPDF;
-
-
 module.exports = {
     routeSetup,
     showSignPage, showDashboard, handleLogin, handleRequestAccess,
