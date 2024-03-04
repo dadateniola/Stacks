@@ -475,7 +475,7 @@ button[data-close] {
 }
 
 label {
-    font-size: var(--text);
+    font-size: 0.8em;
     font-weight: 700;
     text-transform: capitalize;
     cursor: pointer;
@@ -910,6 +910,17 @@ main.main-content {
     margin-left: -10px;
 }
 
+.section-empty {
+    padding: 15px;
+    border-radius: 15px;
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.section-empty p {
+    text-align: center;
+    font-size: var(--small-text);
+}
+
 .section-format {
     padding-right: 15px;
     border-left: 2px solid var(--faint-gray);
@@ -1033,7 +1044,7 @@ td.small {
 }
 
 th {
-    font-weight: 800;
+    font-weight: 700;
 }
 
 tr:nth-child(even) {
@@ -1050,6 +1061,10 @@ table tr:last-child td:first-child {
 
 table tr:last-child td:last-child {
     border-bottom-right-radius: 15px;
+}
+
+tr:not(:first-child):hover {
+    background-color: rgba(0, 0, 0, 0.05);
 }
 
 .table-icon {

@@ -16,6 +16,7 @@ class Methods {
             email: [
                 /.+@.*babcock\.edu\.ng$/
             ],
+            message: [/\S+/],
             name: [/\S+/],
             module: [/\S+/],
             course_id: [/\S+/],

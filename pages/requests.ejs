@@ -22,84 +22,86 @@
                             <div class="content-head">
                                 <h1>requests</h1>
                             </div>
-                            <section>
-                                <div class="section-head colored">
-                                    <div class="section-types">
-                                        <div data-radio class="section-type active ">
-                                            <p>all</p>
-                                            <span><%= requests.length %></span>
+                            <% if (requests.length) { %>
+                                <section>
+                                    <div class="section-head colored">
+                                        <div class="section-types">
+                                            <div data-radio class="section-type active ">
+                                                <p>all</p>
+                                                <span><%= requests.length %></span>
+                                            </div>
+                                            <% Object.entries(types).forEach(([key, value]) => { %>
+                                                <div data-radio class="section-type">
+                                                    <p><%= key %> requests</p>
+                                                    <span><%= value %></span>
+                                                </div>
+                                            <% }) %>
                                         </div>
-                                        <% Object.entries(types).forEach(([key, value]) => { %>
-                                            <div data-radio class="section-type">
-                                                <p><%= key %> requests</p>
-                                                <span><%= value %></span>
+                                        <div class="section-format">
+                                            <div class="line"></div>
+                                            <button class="stacks-active">
+                                                <img src="/images/icons/row dark.png" alt="icon">
+                                            </button>
+                                            <button>
+                                                <img src="/images/icons/grid dark.png" alt="icon">
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <!-- <div class="section-grid">
+                                        <% requests.forEach(request => { %>
+                                            <div class="item" data-<%= request.type %>>
+                                                <div class="heading">
+                                                    <div class="type">
+                                                        <p><%= request.type %> request</p>
+                                                    </div>
+                                                    <div class="more">
+                                                        <img src="/images/icons/more.png" alt="more">
+                                                    </div>
+                                                </div>
+                                                <div class="cont">
+                                                    <p><%= request.sender %></p>
+                                                    <span class="no-cap"><%= request.message %></span>
+                                                </div>
+                                                <div class="line-hr"></div>
+                                                <div class="item-extra flex">
+                                                    <p>extra info:</p>
+                                                    <p class="no-cap"><%= request.extra_info %></p>
+                                                </div>
                                             </div>
                                         <% }) %>
-                                    </div>
-                                    <div class="section-format">
-                                        <div class="line"></div>
-                                        <button class="slide stacks-active">
-                                            <img src="/images/icons/row dark.png" alt="icon">
-                                        </button>
-                                        <button>
-                                            <img src="/images/icons/row dark.png" alt="icon">
-                                        </button>
-                                    </div>
-                                </div>
-                                <!-- <div class="section-grid">
-                                    <% requests.forEach(request => { %>
-                                        <div class="item" data-<%= request.type %>>
-                                            <div class="heading">
-                                                <div class="type">
-                                                    <p><%= request.type %> request</p>
-                                                </div>
-                                                <div class="more">
-                                                    <img src="/images/icons/more.png" alt="more">
-                                                </div>
-                                            </div>
-                                            <div class="cont">
-                                                <p><%= request.sender %></p>
-                                                <span class="no-cap"><%= request.message %></span>
-                                            </div>
-                                            <div class="line-hr"></div>
-                                            <div class="item-extra flex">
-                                                <p>extra info:</p>
-                                                <p class="no-cap"><%= request.extra_info %></p>
-                                            </div>
-                                        </div>
-                                    <% }) %>
-                                </div> -->
-                                <div class="section-table">
-                                    <table>
-                                        <colgroup>
-                                            <col style="width: 140px;">
-                                            <col style="width: 90px;">
-                                        </colgroup>
-                                        <tbody>
-                                            <tr>
-                                                <th>request type</th>
-                                                <th>from</th>
-                                                <th>message</th>
-                                                <th>extra info</th>
-                                                <th class="small">action</th>
-                                            </tr>
-                                            <% requests.forEach(request => { %>
+                                    </div> -->
+                                    <div class="section-table">
+                                        <table>
+                                            <colgroup>
+                                                <col style="width: 140px;">
+                                                <col style="width: 90px;">
+                                            </colgroup>
+                                            <tbody>
                                                 <tr>
-                                                    <td><%= request.type %> request</td>
-                                                    <td><%= request.sender %></td>
-                                                    <td class="no-cap"><p><%= request.message %></p></td>
-                                                    <td class="no-cap"><p><%= request.extra_info %></p></td>
-                                                    <td class="flex-j-center small">
-                                                        <div class="table-icon">
-                                                            <img src="/images/icons/next dark.png" alt="cta">
-                                                        </div>
-                                                    </td>
+                                                    <th>request type</th>
+                                                    <th>from</th>
+                                                    <th>message</th>
+                                                    <th>extra info</th>
                                                 </tr>
-                                            <% }) %>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </section>
+                                                <% requests.forEach(request => { %>
+                                                    <tr data-trigger="request" data-identifier=<%= request.id %>>
+                                                        <td><%= request.type %> request</td>
+                                                        <td><%= request.sender %></td>
+                                                        <td class="no-cap"><p><%= request.message %></p></td>
+                                                        <td class="no-cap"><p><%= request.extra_info %></p></td>
+                                                    </tr>
+                                                <% }) %>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </section>
+                            <% } else { %>
+                                <section>
+                                    <div class="section-empty">
+                                        <p>No requests available</p>
+                                    </div>
+                                </section>
+                            <% } %>
                         </main>
                 </div>
         </div>

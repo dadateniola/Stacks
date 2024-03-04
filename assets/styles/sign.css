@@ -48,7 +48,16 @@ main>* {
 
 
 .form {
+    padding: 0 5px;
+    min-width: 450px;
+    max-height: 80%;
     gap: 40px;
+    overflow-x: visible;
+    overflow-y: scroll;
+}
+
+.form::-webkit-scrollbar {
+    display: none;
 }
 
 .form-head {
@@ -58,13 +67,13 @@ main>* {
 
 .form-head h1 {
     font-weight: 800;
-    font-size: 45px;
+    font-size: 40px;
     text-align: center;
 }
 
 .form-head p {
     text-align: center;
-    font-size: var(--text);
+    font-size: 0.8em;
 }
 
 .form-slider-box {

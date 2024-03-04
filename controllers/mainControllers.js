@@ -86,11 +86,11 @@ const handleRequestAccess = async (req, res) => {
         if (Object.keys(invalidKeys).length > 0) return res.send({ invalidKeys });
 
         //Prepare "request" data
-        const { id, name, email } = req.body;
+        const { id, name, email, message } = req.body;
         const data = {
             sender: id,
             receiver: 'admin',
-            message: `Access request received from ${Methods.capitalize(name)}`,
+            message,
             extra_info: email,
             type: 'access'
         }
@@ -169,7 +169,7 @@ const handleAddingResources = async (req, res) => {
             return res.send({ invalidKeys });
         }
 
-        const userId = req.session.uid || DEFAULT_USER_ID;
+        const userId = req.session.uid;
 
         if (!userId) return res.status(401).send({ message: 'User authentication required, please login', type: 'warning' });
 
@@ -234,15 +234,15 @@ const getItems = async (req, res) => {
     if (custom) {
         const items = await Model.customSql(custom);
 
-        res.json({ items });
+        res.json(items);
     } else {
         delete req.body.table;
-
+        
         const conditions = Object.entries(req.body);
-
+        
         const items = await Model.find(conditions, table);
 
-        res.json({ items });
+        res.json(items);
     }
 }
 

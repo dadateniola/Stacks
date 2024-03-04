@@ -155,9 +155,9 @@ class Methods {
     static removeErrorMsgs(e) {
         const input = e instanceof Event ? e.target : e;
         const nextSibling = input.nextElementSibling;
-        
+
         if (nextSibling && nextSibling.tagName === 'SPAN' && nextSibling.classList.contains('error')) nextSibling.remove();
-        
+
         input.classList.remove('error');
         input.removeEventListener("focus", Methods.removeErrorMsgs);
         input.removeEventListener("input", Methods.removeErrorMsgs)
@@ -167,6 +167,21 @@ class Methods {
         const input = (event instanceof Event) ? event.target : event;
 
         if (input.value.length > 4) input.value = input.value.slice(0, 4);
+    }
+
+    static formatDate(str = '') {
+        const date = new Date(str);
+        return date?.toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+        }).split(" ").join(" - ");
+    }
+
+    static joinedName(data = {}) {
+        return (data?.module) ?
+            `Module ${data?.module}: ${data?.name}` :
+            `${data?.year}: ${data?.name}`
     }
 }
 
@@ -195,7 +210,7 @@ class CommonSetup {
             new Alert({ type, message })
         }
 
-        this.initializeTriggers();
+        CommonSetup.initializeTriggers();
         this.initializeRequestBtns();
         this.initializeForms();
         this.initializeFileUpload();
@@ -218,9 +233,14 @@ class CommonSetup {
     }
 
     //Trigger overlay for different cases
-    initializeTriggers() {
-        selectAll('[data-trigger]')?.forEach(trigger => trigger.addEventListener(`${trigger?.dataset?.event || 'click'}`, CommonSetup.openTrigger));
-        selectAll('[data-close]')?.forEach(trigger => trigger.addEventListener('click', CommonSetup.closeTrigger));
+    static initializeTriggers() {
+        //Clear the event from all triggers and close buttons
+        selectAll('[data-trigger]').forEach(trigger => trigger.addEventListener(`${trigger?.dataset?.event || 'click'}`, CommonSetup.openTrigger));
+        selectAll('[data-close]').forEach(trigger => trigger.addEventListener('click', CommonSetup.closeTrigger));
+
+        //Reassign the event to all triggers and close buttons
+        selectAll('[data-trigger]').forEach(trigger => trigger.addEventListener(`${trigger?.dataset?.event || 'click'}`, CommonSetup.openTrigger));
+        selectAll('[data-close]').forEach(trigger => trigger.addEventListener('click', CommonSetup.closeTrigger));
     }
 
     static openTrigger() {
@@ -229,7 +249,7 @@ class CommonSetup {
 
         const animate = select(`.${this.dataset?.affect}`) || this;
         const triggered = select(`#${this.dataset?.trigger}`);
-        const children = (selectAllWith(triggered, 'section > *').length) ? selectAllWith(triggered, 'section > *') : triggered.children;
+        const children = (selectAllWith(triggered, 'section').length) ? selectAllWith(triggered, 'section') : triggered.children;
         const tl = gsap.timeline();
 
         if (currentlyTriggered) {
@@ -255,6 +275,8 @@ class CommonSetup {
                 triggered.setAttribute('data-triggered', '');
 
                 CommonSetup.updateGrid();
+
+                CommonSetup.redirectTriggerHandle(this);
             })
             .set(children, { opacity: 0 })
             .set(triggered, { opacity: 0 })
@@ -280,6 +302,213 @@ class CommonSetup {
                 trigger?.removeAttribute('data-animated', '');
                 triggered?.removeAttribute('data-triggered');
             }, null, '+=0.3')
+    }
+
+    static async redirectTriggerHandle(elem) {
+        if (!(elem instanceof HTMLElement)) {
+            new Alert({ message: "Something went wrong, try again", type: 'error' });
+            return;
+        }
+
+        const trigger = elem.dataset?.trigger;
+        const identifier = elem.dataset?.identifier;
+
+        if (trigger == 'resource') await CommonSetup.handleResourceTrigger(identifier)
+        if (trigger == 'course-box') await CommonSetup.handleCourseTrigger(identifier)
+        
+        CommonSetup.initializeTriggers();
+    }
+
+    //Insert data and sections into the DOM
+    static addItems(data = {}, sections = {}) {
+        const parent = (data?.parent instanceof HTMLElement) ? data.parent : null;
+
+        if (!parent) {
+            console.warn("Conditions not met to 'addItems'");
+            return;
+        }
+
+        delete data.parent;
+
+        selectAllWith(parent, "section[data-delete]").forEach(e => e.remove());
+
+        Object.entries(data).forEach(([key, value]) => {
+            const elem = selectWith(parent, `[data-resource-${key}]`);
+            elem.innerText = value;
+        })
+
+        for (const key in sections) {
+            const sectionData = sections[key];
+            const parent = (sectionData?.parent instanceof HTMLElement) ? sectionData.parent : null;
+            const heading = sectionData.heading || 'no heading';
+
+            if (!parent) continue;
+
+            if (!sectionData.data.length) {
+                const sectionEmpty = `
+                    <div class="section-head">
+                        <div class="section-info">
+                            <p>${heading}</p>
+                            <div class="line"></div>
+                        </div>
+                    </div>
+                    <div class="section-empty">
+                        <p>No ${heading} available</p>
+                    </div>
+                `;
+                const section = Methods.insertToDOM({ type: 'section', text: sectionEmpty, parent, attributes: 'delete' });
+
+                continue;
+            }
+
+            delete sectionData.parent;
+            delete sectionData.heading;
+
+            const sectionHeadHtml = `
+                    <div class="section-info">
+                        <p>${heading}</p>
+                        <div class="line"></div>
+                    </div>
+                    <div class="section-format">
+                        <div class="line"></div>
+                        <button class="stacks-active">
+                            <img src="/images/icons/row dark.png" alt="icon">
+                        </button>
+                        <button>
+                            <img src="/images/icons/grid dark.png" alt="icon">
+                        </button>
+                    </div>
+            `;
+            const sectionHead = Methods.insertToDOM({ type: 'div', text: sectionHeadHtml, classes: 'section-head' });
+            const section = Methods.insertToDOM({ type: 'section', append: sectionHead, parent, attributes: 'delete' });
+
+            var tableRow = '';
+            sectionData.data.forEach(obj => {
+                const data = {
+                    name: Methods.joinedName(obj),
+                    date_added: Methods.formatDate(obj.created_at),
+                    last_updated: Methods.formatDate(obj.updated_at),
+                }
+
+                tableRow += `<tr data-trigger="resource" data-identifier="${obj.id}">`;
+                Object.entries(data).forEach(([key, value]) => {
+                    tableRow += `<td><p>${value}</p></td>`;
+                });
+                tableRow += '</tr>';
+            })
+
+            const sectionTableHtml = `
+                    <table>
+                        <colgroup>
+                            <col>
+                            <col span="2" style="width: 140px;">
+                        </colgroup>
+                        <tbody>
+                            <tr>
+                                <th>name</th>
+                                <th>date added</th>
+                                <th>last updated</th>
+                            </tr>
+                            ${tableRow}
+                        </tbody>
+                    </table>
+            `;
+
+            const section_table = Methods.insertToDOM({ type: 'div', text: sectionTableHtml, classes: 'section-table', parent: section });
+        }
+    }
+
+    //Load correct data when a resource is triggered
+    static async handleResourceTrigger(id = null) {
+        if (!id) {
+            new Alert({ message: "Missing identifier for resource retrieval, please reload the page and try again", type: 'error' });
+            return;
+        }
+
+        try {
+            const initResources = new Items({ table: 'resources', id })
+            const resources = await initResources.find();
+            const resource = resources[0];
+
+            const initCourses = new Items({ table: 'courses', id: resource.course_id })
+            const courses = await initCourses.find();
+            const course = courses[0];
+
+            const initMoreLikeThis = new Items({ table: 'resources', course_id: resource.course_id, 'not id': id })
+            const moreLikeThis = await initMoreLikeThis.find();
+
+            const joinedName = Methods.joinedName(resource);
+
+            const data = {
+                parent: select('#overlay #resource'),
+                joinedName,
+                code: course.code,
+                description: resource.description,
+                type: resource.type,
+                added: Methods.formatDate(resource.created_at),
+                updated: Methods.formatDate(resource.updated_at)
+            }
+
+            const more_like_this = {
+                parent: select('#overlay #resource .item-left'),
+                heading: 'more like this',
+                data: moreLikeThis
+            }
+
+            CommonSetup.addItems(data, { more_like_this });
+
+            //Additional adjustments
+            select('#overlay #resource [data-resource-code]').setAttribute('data-identifier', course.id);
+        } catch (error) {
+            console.error('Error in test:', error);
+            new Alert({ message: "Error retrieving resource information, please try again", type: 'error' });
+        }
+    }
+    
+    //Load correct data when a course is triggered
+    static async handleCourseTrigger(id = null) {
+        if (!id) {
+            new Alert({ message: "Missing identifier for course retrieval, please reload the page and try again", type: 'error' });
+            return;
+        }
+
+        try {
+            const initCourses = new Items({ table: 'courses', id })
+            const courses = await initCourses.find();
+            const course = courses[0];
+    
+            const initCourseLecturers = new Items({ table: 'courses_lecturers', course_id: course.id })
+            const courseLecturers = await initCourseLecturers.find();
+    
+            const initSlides = new Items({ table: 'resources', course_id: course.id, type: 'slide' })
+            const slides = await initSlides.find();
+    
+            const initPQs = new Items({ table: 'resources', course_id: course.id, type: 'past question' })
+            const pqs = await initPQs.find();
+    
+            const data = {
+                parent: select('#overlay #course-box'),
+                code: course.code,
+                name: course.name,
+            }
+    
+            const courseSlides = {
+                parent: select('#overlay #course-box .item-left'),
+                heading: 'course slides',
+                data: slides
+            }
+    
+            const coursePQs = {
+                parent: select('#overlay #course-box .item-left'),
+                heading: 'past questions',
+                data: pqs
+            }
+    
+            CommonSetup.addItems(data, { courseSlides, coursePQs });
+        } catch (error) {
+            console.error('Error in test:', error);
+            new Alert({ message: "Error retrieving course information, please try again", type: 'error' });
+        }
     }
 
     //Handle "call to action" for requests
@@ -471,7 +700,7 @@ class CommonSetup {
             custom: `SELECT MAX(module) AS module FROM resources WHERE course_id = ${elem.value}`
         })
 
-        const { items } = await allItems.init();
+        const items = await allItems.find();
         const highest_module = items[0].module;
 
         toChange.value = highest_module ? highest_module + 1 : 1;
@@ -484,8 +713,8 @@ class CommonSetup {
         const date = new Date();
         const currentYear = date.getFullYear();
 
-        if(value.toString().length >= 4) {
-            if(value > currentYear) {
+        if (value.toString().length >= 4) {
+            if (value > currentYear) {
                 Methods.assignErrorMsgs({ start_year: `Start year caannot be higher than ${currentYear}` })
             } else {
                 endInput.value = value + 1;
@@ -657,7 +886,8 @@ class CommonSetup {
             input.value = '';
         }
 
-        select(".form-file-progress-bar").style.width = 0;
+        const progressBar = select(".form-file-progress-bar");
+        if(progressBar) progressBar.style.width = 0;
 
         if (parent) {
             selectWith(parent, 'iframe')?.remove();
@@ -669,12 +899,9 @@ class CommonSetup {
 class Items {
     constructor(params = {}) {
         Object.assign(this, params);
-        return this;
     }
 
-    async init() {
-        // if (!this?.table || Object.keys(this).length < 2) return console.warn("Couldn't get items because conditions weren't met");
-
+    async find() {
         try {
             const response = await fetch('/get-items', {
                 method: 'POST',
@@ -688,9 +915,7 @@ class Items {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
 
-            const items = await response.json();
-
-            return items;
+            return await response.json();
         } catch (error) {
             console.error('Fetch error:', error.message);
         }

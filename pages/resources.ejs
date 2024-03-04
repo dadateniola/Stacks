@@ -63,7 +63,7 @@
                                             `Module ${resource.module}: ${resource.name}` :
                                             `${resource.year}: ${resource.name}`;
                                         %>
-                                        <tr data-trigger="resource">
+                                        <tr data-trigger="resource" data-identifier=<%= resource.id %>>
                                             <td><%= resource.type %></td>
                                             <td><p><%= joinedName %></p></td>
                                             <td><%= resource.date_added %></td>
