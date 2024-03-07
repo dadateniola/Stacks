@@ -24,6 +24,8 @@ class Methods {
             description: [/\S+/],
             start_year: [/\S+/],
             end_year: [/\S+/],
+            role: [/\S+/],
+            department_id: [/\S+/],
         };
 
         const result = {

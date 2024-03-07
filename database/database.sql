@@ -78,7 +78,8 @@ CREATE TABLE IF NOT EXISTS resources (
 -- Create a table for requests
 CREATE TABLE IF NOT EXISTS requests (
   `id` INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  `sender` VARCHAR(255) NOT NULL,
+  `sender_id` VARCHAR(255) NOT NULL,
+  `sender_name` VARCHAR(255),
   `receiver` VARCHAR(255) NOT NULL,
   `message` VARCHAR(255) NOT NULL,
   `extra_info` VARCHAR(255),

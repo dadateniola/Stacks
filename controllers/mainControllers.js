@@ -88,15 +88,16 @@ const handleRequestAccess = async (req, res) => {
         //Prepare "request" data
         const { id, name, email, message } = req.body;
         const data = {
-            sender: id,
+            sender_id: id,
+            sender_name: name,
             receiver: 'admin',
-            message,
+            message: Methods.sentenceCase(message),
             extra_info: email,
             type: 'access'
         }
 
         //Check if "request" data already exists to throw a warning
-        const sameRequest = await Request.find([['sender', id], ['type', 'access']]);
+        const sameRequest = await Request.find([['sender_id', id], ['type', 'access']]);
 
         if (sameRequest.length) return res.status(409).send({
             message: "Oops! It looks like you've already submitted a similar request, please wait for a response",
@@ -141,7 +142,7 @@ const showResourcesPage = async (req, res) => {
             const [key, value] = Object.entries(course)[0];
             const [courseDesc] = await Course.find(['id', value], null, ['code']);
             const resources = await Resource.find(['course_id', value]);
-            
+
             resources.forEach(resource => {
                 resource.date_added = Methods.formatDate(resource.created_at);
                 resource.last_updated = Methods.formatDate(resource.updated_at);
@@ -228,6 +229,111 @@ const showRequestsPage = async (req, res) => {
     res.render('requests', { requests, types });
 }
 
+const handleAcceptedRequests = async (req, res) => {
+    try {
+        const data = req.body;
+        // Validate user information
+        const methods = new Methods(data);
+        const { invalidKeys } = methods.validateData();
+
+        // Check if there is invalid data to send back to the user
+        if (Object.keys(invalidKeys).length > 0) {
+            return res.send({ invalidKeys });
+        }
+
+        const [requests] = await Request.find(['id', data.request_id]);
+
+        const user_data = {
+            id: requests.sender_id,
+            name: requests.sender_name,
+            email: requests.extra_info,
+            password: 'pass',
+            role: data.role,
+        }
+
+        if (data.role == 'student') {
+            user_data.department_id = data.department_id
+        }
+
+        const user = new User(user_data);
+        const userResult = await user.add();
+
+        if (!userResult) {
+            res.status(500).send({
+                message: "Unable to process request, please try again",
+                type: "error",
+            });
+            return
+        }
+
+        //Update request information
+        const request = new Request({ handled_by: req.session.uid, id: data.request_id });
+        const result = await request.update();
+
+        if (!result) {
+            res.status(500).send({
+                message: "Unable to process request, please try again",
+                type: "error",
+            });
+            return
+        }
+
+        res.status(200).send({
+            message: 'Request accepted successfully',
+            type: 'success',
+            clean_up: 'request',
+            request_id: data.request_id
+        })
+    } catch (error) {
+        console.error('Error in "handleAcceptedRequests": ', error);
+        res.status(500).send({
+            message: "Internal server error, please try again",
+            type: "error"
+        });
+    }
+}
+
+const handleDeclinedRequests = async (req, res) => {
+    try {
+        const data = req.body;
+        // Validate user information
+        const methods = new Methods(data);
+        const { invalidKeys } = methods.validateData();
+
+        // Check if there is invalid data to send back to the user
+        if (Object.keys(invalidKeys).length > 0) {
+            return res.send({ invalidKeys });
+        }
+
+        //Send the message back to the sender
+
+        //Update request information
+        const request = new Request({ handled_by: req.session.uid, id: data.request_id });
+        const result = await request.update();
+
+        if (!result) {
+            res.status(200).send({
+                message: "Unable to process request, please try again",
+                type: "error",
+            });
+            return
+        }
+
+        res.status(200).send({
+            message: "Request successfully declined",
+            type: "success",
+            clean_up: 'request',
+            request_id: data.request_id
+        });
+    } catch (error) {
+        console.error('Error in "handleDeclinedRequests": ', error);
+        res.status(500).send({
+            message: "Internal server error, please try again",
+            type: "error"
+        });
+    }
+}
+
 const getItems = async (req, res) => {
     const { table, custom } = req.body;
 
@@ -237,9 +343,9 @@ const getItems = async (req, res) => {
         res.json(items);
     } else {
         delete req.body.table;
-        
+
         const conditions = Object.entries(req.body);
-        
+
         const items = await Model.find(conditions, table);
 
         res.json(items);
@@ -306,6 +412,7 @@ const getPDF = async (req, res) => {
 module.exports = {
     routeSetup,
     showSignPage, showDashboard, handleLogin, handleRequestAccess,
+    handleAcceptedRequests, handleDeclinedRequests,
     showResourcesPage, showRequestsPage, getItems,
     handleUpload, getPDF, handleAddingResources
 }

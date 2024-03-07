@@ -42,17 +42,23 @@ class PageSetup {
                 <p>Fill your credentials in order to have an account with us.</p>
             </div>
             <form class="form-inputs flex-col" action="/request-access">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id">ID</label>
+                        <input type="text" name="id" id="id" placeholder="Enter your ID">
+                    </div>
+                    <div class="form-group">
+                        <label for="name">full name</label>
+                        <input type="text" name="name" id="name" placeholder="Enter your full name">
+                    </div>
+                </div>
                 <div class="form-group">
                     <label for="email">email</label>
                     <input type="text" name="email" id="email" placeholder="Enter your email">
                 </div>
                 <div class="form-group">
-                    <label for="name">full name</label>
-                    <input type="text" name="name" id="name" placeholder="Enter your full name">
-                </div>
-                <div class="form-group">
-                    <label for="id">identification number</label>
-                    <input type="text" name="id" id="id" placeholder="Enter your identification number">
+                    <label for="message">message</label>
+                    <textarea name="message" id="message" cols="30" rows="3" placeholder="Enter your reasons here..."></textarea>
                 </div>
                 <div class="form-group">
                     <button type="submit">request library access</button>

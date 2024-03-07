@@ -73,7 +73,7 @@ main>* {
 
 .form-head p {
     text-align: center;
-    font-size: 0.8em;
+    font-size: var(--text);
 }
 
 .form-slider-box {

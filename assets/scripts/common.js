@@ -19,6 +19,7 @@ class Methods {
     static preventDefault = (event) => event.preventDefault();
     static disableLinksAndBtns = (condition = false, parent = undefined) => {
         const elements = parent ? selectAllWith(parent, "a, button") : selectAll('a, button');
+
         elements.forEach((element) => {
             if (condition) {
                 element.setAttribute('disabled', 'true');
@@ -31,7 +32,7 @@ class Methods {
                 selectAll('a, button').forEach((element) => {
                     element.removeAttribute('disabled');
 
-                    if (element.tagName === 'A') {
+                    if (element.tagName === 'A' && element.dataset?.href) {
                         element.setAttribute('href', element.dataset.href);
                         element.removeEventListener('click', Methods.preventDefault);
                     }
@@ -126,6 +127,16 @@ class Methods {
 
     static isEmptyObject(obj) {
         return Object.keys(obj).length === 0;
+    }
+
+    static capitalize(str = '') {
+        const words = str.split(' ');
+
+        const capitalizedWords = words.map(word => word.charAt(0).toUpperCase() + word.slice(1));
+
+        const capitalizedSentence = capitalizedWords.join(' ');
+
+        return capitalizedSentence;
     }
 
     static sentenceCase(str = '') {
@@ -257,10 +268,10 @@ class CommonSetup {
             tl
                 .to(currentlyTriggered, { opacity: 0 })
                 .call(() => {
-                    currentTrigger.classList.remove("add");
+                    currentTrigger?.classList.remove("add");
 
-                    currentTrigger.removeAttribute('data-animated', '');
-                    currentlyTriggered.removeAttribute('data-triggered');
+                    currentTrigger?.removeAttribute('data-animated', '');
+                    currentlyTriggered?.removeAttribute('data-triggered');
                 })
         }
 
@@ -315,7 +326,8 @@ class CommonSetup {
 
         if (trigger == 'resource') await CommonSetup.handleResourceTrigger(identifier)
         if (trigger == 'course-box') await CommonSetup.handleCourseTrigger(identifier)
-        
+        if (trigger == 'request') await CommonSetup.handleRequestTrigger(identifier)
+
         CommonSetup.initializeTriggers();
     }
 
@@ -324,7 +336,7 @@ class CommonSetup {
         const parent = (data?.parent instanceof HTMLElement) ? data.parent : null;
 
         if (!parent) {
-            console.warn("Conditions not met to 'addItems'");
+            console.warn("A parent is required in order to 'addItems'");
             return;
         }
 
@@ -332,10 +344,13 @@ class CommonSetup {
 
         selectAllWith(parent, "section[data-delete]").forEach(e => e.remove());
 
-        Object.entries(data).forEach(([key, value]) => {
+        for (const [key, value] of Object.entries(data)) {
             const elem = selectWith(parent, `[data-resource-${key}]`);
+
+            if (!elem) continue;
+
             elem.innerText = value;
-        })
+        }
 
         for (const key in sections) {
             const sectionData = sections[key];
@@ -464,7 +479,7 @@ class CommonSetup {
             new Alert({ message: "Error retrieving resource information, please try again", type: 'error' });
         }
     }
-    
+
     //Load correct data when a course is triggered
     static async handleCourseTrigger(id = null) {
         if (!id) {
@@ -476,38 +491,97 @@ class CommonSetup {
             const initCourses = new Items({ table: 'courses', id })
             const courses = await initCourses.find();
             const course = courses[0];
-    
+
             const initCourseLecturers = new Items({ table: 'courses_lecturers', course_id: course.id })
             const courseLecturers = await initCourseLecturers.find();
-    
+
             const initSlides = new Items({ table: 'resources', course_id: course.id, type: 'slide' })
             const slides = await initSlides.find();
-    
+
             const initPQs = new Items({ table: 'resources', course_id: course.id, type: 'past question' })
             const pqs = await initPQs.find();
-    
+
             const data = {
                 parent: select('#overlay #course-box'),
                 code: course.code,
                 name: course.name,
             }
-    
+
             const courseSlides = {
                 parent: select('#overlay #course-box .item-left'),
                 heading: 'course slides',
                 data: slides
             }
-    
+
             const coursePQs = {
                 parent: select('#overlay #course-box .item-left'),
                 heading: 'past questions',
                 data: pqs
             }
-    
+
             CommonSetup.addItems(data, { courseSlides, coursePQs });
         } catch (error) {
             console.error('Error in test:', error);
             new Alert({ message: "Error retrieving course information, please try again", type: 'error' });
+        }
+    }
+
+    //Load correct data when a request is triggered
+    static async handleRequestTrigger(id = null) {
+        CommonSetup.closeRequestCTA();
+
+        if (!id) {
+            new Alert({ message: "Missing identifier for resource retrieval, please reload the page and try again", type: 'error' });
+            return;
+        }
+
+        try {
+            const initRequests = new Items({ table: 'requests', id });
+            const requests = await initRequests.find();
+            const request = requests[0];
+
+            var handled_by = null;
+
+            if (request.handled_by) {
+                const initUsers = new Items({ table: 'users', id: request.handled_by });
+                const [user] = await initUsers.find();
+
+                handled_by = `Request handled by ${Methods.capitalize(user.name)}`;
+
+                select(".request-box")?.classList.add("handled");
+            } else {
+                select(".request-box")?.classList.remove("handled");
+            }
+
+            const data = {
+                parent: select("#overlay #request"),
+                type: `${request.type} request`,
+                title: `Received an ${request.type} request from ${Methods.capitalize(request.sender_name)}`,
+                message: request.message,
+                sender_id: request.sender_id,
+                extra_info: request.extra_info,
+                handled_by
+            }
+
+            const hiddenInput = select("#request-id");
+            const buttonsCTA = selectAll("[data-request-cta] button");
+            var open = (request.type == 'access') ? ['message', 'select'] : ['message', 'message'];
+
+            hiddenInput.value = id;
+
+            buttonsCTA.forEach((button, index) => {
+                if (button.nextElementSibling instanceof HTMLElement) {
+                    button.setAttribute('data-response', 'decline');
+                } else {
+                    button.setAttribute('data-response', 'accept');
+                }
+                button.setAttribute('data-open', open[index]);
+            })
+
+            CommonSetup.addItems(data);
+        } catch (error) {
+            console.error('Error in handleRequestTrigger:', error);
+            new Alert({ message: "Error retrieving resource information, please try again", type: 'error' });
         }
     }
 
@@ -520,17 +594,48 @@ class CommonSetup {
         select("[data-request-back]")?.addEventListener("click", CommonSetup.closeRequestCTA);
     }
 
+    static getRequestInputs(open = '') {
+        const hidden = select("#overlay .hidden#hidden");
+        const inputs = selectWith(hidden, `#${open}`);
+        const requestInputs = select("[data-request-inputs]");
+
+        if (!inputs) return false;
+
+        selectAll("[data-request-inputs] >*").forEach(e => e.remove());
+
+        requestInputs.append(inputs.cloneNode(true));
+        selectAll("[data-request-inputs] >*").forEach(elem => elem.setAttribute("id", `${open}-clone`))
+
+        return true;
+    }
+
     static openRequestCTA() {
         Methods.disableLinksAndBtns(true, select("[data-request-cta]"));
 
         const elem = this;
+        const response = this.dataset?.response;
+
+        if (!response) return new Alert({ message: 'Something went wrong, please try again', type: 'error' })
+
+        select("form.request-cta").setAttribute('action', `${response}-request`)
 
         CommonSetup.attachSpinner({ elem });
 
         const cta = select(".request-cta-box");
         const open = elem?.dataset.open;
+
+        if (!CommonSetup.getRequestInputs(open)) {
+            new Alert({
+                message: "Couldn't process the request, please try again",
+                type: 'error'
+            })
+            Methods.disableLinksAndBtns(false, select("[data-request-cta]"))
+            CommonSetup.detachSpinner({ elem });
+            return;
+        }
+
         const requestInputs = select("[data-request-inputs]");
-        const toOpen = selectWith(requestInputs, `#${open}`);
+        const toOpen = selectWith(requestInputs, `#${open}-clone`);
 
         const tl = gsap.timeline();
         tl
@@ -545,9 +650,9 @@ class CommonSetup {
     }
 
     static closeRequestCTA(event) {
-        const elem = event.target;
+        const elem = (event instanceof Event) ? event.target : event;
 
-        CommonSetup.attachSpinner({ elem });
+        if (elem) CommonSetup.attachSpinner({ elem });
 
         const cta = select(".request-cta-box");
         const canOpen = selectAll("[data-request-inputs] >*");
@@ -558,20 +663,57 @@ class CommonSetup {
             .to(cta.children, { opacity: 0 })
             .to(cta, { height: 0, ease: 'expo.out' }, '-=0.31')
             .call(() => {
-                canOpen.forEach(e => e.classList.remove("active"))
+                canOpen.forEach(e => e.remove())
                 Methods.disableLinksAndBtns(false, select("[data-request-cta]"))
             })
 
-        select(".request-btns [data-selected]").removeAttribute("data-selected");
-        select(".request-btns [data-denied]").removeAttribute("data-denied");
-        CommonSetup.detachSpinner({ elem });
+        select(".request-btns [data-selected]")?.removeAttribute("data-selected");
+        select(".request-btns [data-denied]")?.removeAttribute("data-denied");
+        if (elem) CommonSetup.detachSpinner({ elem });
+    }
+
+    static async cleanUpRequest(id = null) {
+        CommonSetup.closeRequestCTA();
+
+        if (!id) {
+            new Alert({ message: "Missing identifier for complete clean up, please reload the page", type: 'error' });
+            return;
+        }
+
+        try {
+            const initRequests = new Items({ table: 'requests', id });
+            const [request] = await initRequests.find();
+
+            var handled_by = null;
+
+            if (request.handled_by) {
+                const initUsers = new Items({ table: 'users', id: request.handled_by });
+                const [user] = await initUsers.find();
+
+                handled_by = `Request handled by ${Methods.capitalize(user.name)}`;
+
+                const data = {
+                    parent: select("#overlay #request"),
+                    handled_by
+                }
+
+                CommonSetup.addItems(data);
+
+                select(".request-box")?.classList.add("handled");
+            } else {
+                select(".request-box")?.classList.remove("handled");
+            }
+        } catch (error) {
+            console.error('Error in cleanUpRequest:', error);
+            new Alert({ message: "There was a problem during cleanup, please reload the page", type: 'error' });
+        }
     }
 
     //Attach spinner to elements
     static attachSpinner(params = {}) {
         const { elem } = params;
 
-        if (!(elem instanceof HTMLElement)) return console.warn('Conditions not met to "attachSpinner"');
+        if (!(elem instanceof HTMLElement)) return console.warn('No element specified to "attachSpinner"');
 
         const spinner = selectWith(elem, ".spinner");
 
@@ -585,7 +727,7 @@ class CommonSetup {
 
         if (elem.children.length) elem.classList.add("none")
         else {
-            elem.dataset.innerText = elem.innerText;
+            elem.setAttribute('data-inner-text', elem.innerText)
             elem.innerText = '';
         }
 
@@ -603,7 +745,7 @@ class CommonSetup {
     static detachSpinner(params = {}) {
         const { elem } = params;
 
-        if (!(elem instanceof HTMLElement)) return console.warn('Conditions not met to "detachSpinner"');
+        if (!(elem instanceof HTMLElement)) return console.warn('No element specified to "detachSpinner"');
 
         setTimeout(() => {
             const spinner = selectWith(elem, ".spinner");
@@ -612,17 +754,20 @@ class CommonSetup {
 
             spinner.remove();
 
+            elem.style.width = 'auto';
+            elem.style.height = 'auto';
+
             if (elem.children.length) elem.classList.remove("none")
             else {
                 elem.innerText = elem.dataset?.innerText;
-                elem.removeAttribute("data-innerText");
+                elem.removeAttribute("data-inner-text");
             }
         }, 300);
     }
 
     //Handle form submissions
     initializeForms() {
-        select("form").addEventListener("submit", CommonSetup.handleFormSubmission)
+        selectAll("form").forEach(form => form.addEventListener("submit", CommonSetup.handleFormSubmission))
     }
 
     static async handleFormSubmission(event) {
@@ -665,6 +810,10 @@ class CommonSetup {
                         //If request successful, show alert
                         form?.reset();
                         new Alert(data);
+
+                        if (data?.clean_up) {
+                            if (data.clean_up == 'request') CommonSetup.cleanUpRequest(data.request_id);
+                        }
 
                         const parent = select('label[data-preview="pdfFile"]');
                         CommonSetup.resetFileInput(null, parent)
@@ -783,7 +932,7 @@ class CommonSetup {
 
         if (!file || !input) {
             new Alert({ message: 'Something went wrong, please try again', type: 'warning' });
-            return console.warn("Conditions not met for upload");
+            return console.warn("Both a file and its input are required to 'uploadFile'");
         }
 
         //Change filename and extension in upload information
@@ -859,7 +1008,7 @@ class CommonSetup {
         function displayPreview(filename = '') {
             const parent = select(`label[data-preview="${input.name}"]`);
 
-            if (!(parent instanceof HTMLElement)) return console.warn('Conditions not met to "displayPreview"');
+            if (!(parent instanceof HTMLElement)) return console.warn('A parent is required to "displayPreview"');
 
             selectWith(parent, 'iframe')?.remove();
 
@@ -887,7 +1036,7 @@ class CommonSetup {
         }
 
         const progressBar = select(".form-file-progress-bar");
-        if(progressBar) progressBar.style.width = 0;
+        if (progressBar) progressBar.style.width = 0;
 
         if (parent) {
             selectWith(parent, 'iframe')?.remove();
@@ -931,7 +1080,7 @@ class Alert {
     init() {
         Methods.disableLinksAndBtns(true);
 
-        if (!this?.type && !this?.message) return console.warn("Conditions weren't met for Alert");
+        if (!this?.type && !this?.message) return console.warn("Both type and message are required for 'Alert'");
 
         const html = `
             <div class="alert-progress"></div>
@@ -979,3 +1128,5 @@ class Alert {
 }
 
 new CommonSetup();
+
+CommonSetup.handleRequestTrigger(1);

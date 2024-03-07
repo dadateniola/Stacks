@@ -82,13 +82,19 @@
                                                     <th>from</th>
                                                     <th>message</th>
                                                     <th>extra info</th>
+                                                    <th class="small">action</th>
                                                 </tr>
                                                 <% requests.forEach(request => { %>
                                                     <tr data-trigger="request" data-identifier=<%= request.id %>>
                                                         <td><%= request.type %> request</td>
-                                                        <td><%= request.sender %></td>
+                                                        <td><%= request.sender_id %></td>
                                                         <td class="no-cap"><p><%= request.message %></p></td>
                                                         <td class="no-cap"><p><%= request.extra_info %></p></td>
+                                                        <td class="small">
+                                                            <div class="table-icon">
+                                                                <img src="/images/icons/<% if (request.handled_by) { %>success.png<% } else { %>arrow right.png<% } %>" alt="icon">
+                                                            </div>
+                                                        </td>
                                                     </tr>
                                                 <% }) %>
                                             </tbody>
