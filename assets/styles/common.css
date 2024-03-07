@@ -147,6 +147,21 @@ iframe {
     height: 100dvh;
 }
 
+.search-box > section {
+    padding-bottom: 60px;
+    max-height: 100%;
+    overflow-y: scroll;
+}
+
+.search-box > section::-webkit-scrollbar {
+    display: none;
+}
+
+.search-box .section-head {
+    position: sticky;
+    top: 0;
+}
+
 .item-box {
     position: relative;
     padding: 60px 0;
@@ -880,6 +895,13 @@ button.null {
     animation: spinner 1s linear infinite;
 }
 
+.section-loader [data-spinner] {
+    width: 25px;
+    height: 25px;
+    border-color: var(--mandy);
+    border-left-color: transparent;
+}
+
 @keyframes spinner {
     0% {
         transform: rotate(0deg);
@@ -917,6 +939,10 @@ main.main-content {
     padding: 15px;
     padding-right: 0;
     border-radius: 15px;
+}
+
+.section-head.colored .section-format button {
+    background-color: var(--faint-white);
 }
 
 .section-types,
@@ -1011,13 +1037,17 @@ main.main-content {
     width: 20px;
     height: 20px;
     font-size: 0.6em;
-    background-color: var(--faint-gray);
+    background-color: var(--faint-white);
     border-radius: 5px;
 }
 
 .section-type.active {
     background-color: black;
     color: white;
+}
+
+.section-type.active span {
+    background-color: var(--faint-gray);
 }
 
 

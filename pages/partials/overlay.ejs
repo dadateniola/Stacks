@@ -1,41 +1,44 @@
-<div id="overlay" class="actives">
-    <div class="search" data-avoid>
+<div id="overlay" class="active-search">
+    <div class="search active" data-avoid>
         <input type="text" placeholder="Search." data-trigger="search-box" data-event="focus" data-affect="search">
         <div class="search-img">
             <img src="/images/icons/search.png" alt="icon">
         </div>
     </div>
-    <div class="search-box" id="search-box">
+    <div class="search-box" id="search-box" data-triggered>
         <section>
             <div class="section-head colored">
                 <div class="section-types">
-                    <div class="section-type active ">
+                    <div data-radio class="section-type active ">
                         <p>all</p>
-                        <span>12</span>
+                        <span data-resource-all>-</span>
                     </div>
-                    <div class="section-type">
+                    <div data-radio class="section-type">
+                        <p>courses</p>
+                        <span data-resource-courses>-</span>
+                    </div>
+                    <div data-radio class="section-type">
                         <p>slides</p>
-                        <span>2</span>
+                        <span data-resource-slides>-</span>
                     </div>
-                    <div class="section-type">
+                    <div data-radio class="section-type">
                         <p>past questions</p>
-                        <span>5</span>
+                        <span data-resource-pqs>-</span>
                     </div>
                 </div>
                 <div class="section-format">
                     <div class="section-type" data-close>
                         <p>close</p>
                     </div>
-                    <div class="line"></div>
-                    <button class="slide stacks-active">
+                    <button class="stacks-active">
                         <img src="/images/icons/row dark.png" alt="icon">
                     </button>
                     <button>
-                        <img src="/images/icons/row dark.png" alt="icon">
+                        <img src="/images/icons/grid dark.png" alt="icon">
                     </button>
                 </div>
             </div>
-            <div class="section-grid">
+            <!-- <div class="section-grid">
                 <div class="item" data-course>
                     <div class="heading">
                         <div class="type">
@@ -54,7 +57,7 @@
                         <img src="/images/no-avatar/no-img-2.png" alt="lecturer" class="no-img">
                     </div>
                 </div>
-            </div>
+            </div> -->
         </section>
     </div>
     <div class="item-box" id="course-box">
