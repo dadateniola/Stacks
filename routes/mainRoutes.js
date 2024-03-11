@@ -1,5 +1,5 @@
 const { Router } = require("express");
-const { showSignPage, showResourcesPage, getItems, showRequestsPage, handleLogin, handleRequestAccess, handleUpload, getPDF, handleAddingResources, showDashboard, routeSetup, handleAcceptedRequests, handleDeclinedRequests } = require("../controllers/mainControllers");
+const { showSignPage, showResourcesPage, getItems, showRequestsPage, handleLogin, handleRequestAccess, handleUpload, getPDF, handleAddingResources, showDashboard, routeSetup, handleAcceptedRequests, handleDeclinedRequests, showHistoryPage } = require("../controllers/mainControllers");
 
 const router = Router();
 
@@ -24,6 +24,8 @@ router.get('/dashboard', showDashboard);
 router.get('/', showSignPage);
 
 router.get('/resources', showResourcesPage);
+
+router.get('/history', showHistoryPage);
 
 router.get('/requests', showRequestsPage);
 

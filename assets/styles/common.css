@@ -91,6 +91,10 @@ iframe {
     background-color: var(--faint-white);
 }
 
+[data-radio]:hover span {
+    background-color: white;
+}
+
 
 /* Page overlay */
 #overlay {
@@ -883,7 +887,7 @@ button.null {
     display: flex !important;
     align-items: center;
     justify-content: center;
-    opacity: 0;
+    /* opacity: 0; */
 }
 
 [data-spinner] {

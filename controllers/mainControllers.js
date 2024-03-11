@@ -9,6 +9,7 @@ const Request = require("../Models/Request");
 const Notification = require("../Models/Notification");
 const Resource = require("../Models/Resource.js");
 const CourseLecturer = require("../Models/CourseLecturer");
+const History = require("../Models/History");
 
 const DEFAULT_USER_ID = 123006;
 
@@ -217,6 +218,16 @@ const handleAddingResources = async (req, res) => {
     }
 }
 
+const showHistoryPage = async (req, res) => {
+    const id = req.session.uid;
+    const courseHistory = await History.find([['user_id', id], ['type', 'course']]);
+    const resourceHistory = await History.find([['user_id', id], ['type', 'resource']]);
+    
+    console.log(courseHistory, resourceHistory);
+
+    res.render("history");
+}
+
 const showRequestsPage = async (req, res) => {
     const requests = await Request.find([['receiver', 'admin']]);
     const types = {};
@@ -412,7 +423,7 @@ const getPDF = async (req, res) => {
 module.exports = {
     routeSetup,
     showSignPage, showDashboard, handleLogin, handleRequestAccess,
-    handleAcceptedRequests, handleDeclinedRequests,
+    handleAcceptedRequests, handleDeclinedRequests, showHistoryPage,
     showResourcesPage, showRequestsPage, getItems,
     handleUpload, getPDF, handleAddingResources
 }

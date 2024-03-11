@@ -10,6 +10,22 @@ const getStyle = (e, style) => window.getComputedStyle(e)[style];
 let resizeTimer;
 gsap.registerPlugin(ScrollTrigger);
 
+function capitalize(text = '') {
+    const splitText = text.split(" ");
+
+    splitText.forEach((word, index) => {
+        const hasSpan = (word.indexOf('<span>') == -1) ? null : word.indexOf('<span>');
+
+        //Capitalize letters after space
+        splitText[index] = splitText[index].charAt(0).toUpperCase() + splitText[index].slice(1);
+
+        if (hasSpan == null) return;
+        if (hasSpan == 0) splitText[index] = "<span>" + splitText[index].charAt(6).toUpperCase() + splitText[index].slice(7)
+    })
+
+    return splitText.join(" ")
+}
+
 class Methods {
     constructor(params = {}) {
         Object.assign(this, params);
@@ -193,7 +209,7 @@ class Methods {
         return (data?.module) ?
             `Module ${data?.module}: ${data?.name}` :
             (data?.year) ? `${data?.year}: ${data?.name}` :
-            `${data?.code}: ${data?.name}`;
+                `${data?.code}: ${data?.name}`;
     }
 }
 
@@ -204,13 +220,13 @@ class CommonSetup {
         return this;
     }
 
-    init() {
+    async init() {
         CommonSetup.updateGrid();
         window.addEventListener('resize', CommonSetup.handleResize);
 
         select(`a[href='${window.location.pathname}']`)?.classList.add("stacks-active");
 
-        if (window.location.pathname.includes("dashboard")) CommonSetup.recentlyAdded();
+        if (window.location.pathname.includes("dashboard")) await CommonSetup.recentlyAdded();
 
         // Change this later
         const info = select(".alert-box [data-info]");
@@ -225,6 +241,7 @@ class CommonSetup {
         }
 
         CommonSetup.initializeTriggers();
+        this.initializeSearch();
         this.initializeRequestBtns();
         this.initializeForms();
         this.initializeFileUpload();
@@ -330,6 +347,7 @@ class CommonSetup {
         if (trigger == 'resource') await CommonSetup.handleResourceTrigger(identifier)
         if (trigger == 'course-box') await CommonSetup.handleCourseTrigger(identifier)
         if (trigger == 'request') await CommonSetup.handleRequestTrigger(identifier)
+        if (trigger == 'search-box') CommonSetup.handleSearchTrigger(elem);
 
         CommonSetup.initializeTriggers();
     }
@@ -358,13 +376,15 @@ class CommonSetup {
             const heading = sectionData.heading || null;
             const code = sectionData?.code;
             const type = sectionData?.type;
+            const added = (sectionData.hasOwnProperty('added')) ? sectionData.added : true;
+            const updated = (sectionData.hasOwnProperty('updated')) ? sectionData.updated : true;
 
             if (!parent) continue;
 
             if (!sectionData.data.length) {
                 const sectionEmpty = `
-                    ${heading ? 
-                    `
+                    ${heading ?
+                        `
                     <div class="section-head">
                         <div class="section-info">
                             <p>${heading}</p>
@@ -408,14 +428,19 @@ class CommonSetup {
                 const data = {};
                 const trigger = (obj?.code) ? 'course-box' : 'resource';
 
-                const extra_data_obj = extra_data.find(extra_obj => extra_obj.id == obj.course_id)
+                const extra_data_obj = extra_data.find(extra_obj => {
+                    const condition = obj?.course_id || obj?.id;
 
-                if (code) data.code = extra_data_obj.code;
+                    return extra_obj.id == condition;
+                })
+
+                if (code) data.code = extra_data_obj?.code;
                 if (type) data.type = obj?.type || 'course';
 
                 data.name = Methods.joinedName(obj);
-                data.date_added = Methods.formatDate(obj.created_at);
-                data.last_updated = Methods.formatDate(obj.updated_at);
+
+                if (added) data.date_added = Methods.formatDate(obj.created_at);
+                if (updated) data.last_updated = Methods.formatDate(obj.updated_at);
 
                 tableRow += `<tr data-trigger=${trigger} data-identifier="${obj.id}">`;
                 Object.entries(data).forEach(([key, value]) => {
@@ -430,15 +455,16 @@ class CommonSetup {
                             ${code ? '<col style="width: 100px;">' : ''}
                             ${type ? '<col style="width: 140px;">' : ''}
                             <col>
-                            <col span="2" style="width: 140px;">
+                            ${added ? '<col style="width: 140px;">' : ''}
+                            ${updated ? '<col style="width: 140px;">' : ''}
                         </colgroup>
                         <tbody>
                             <tr>
                                 ${code ? '<th>code</th>' : ''}
                                 ${type ? '<th>type</th>' : ''}
                                 <th>name</th>
-                                <th>date added</th>
-                                <th>last updated</th>
+                                ${added ? '<th>date added</th>' : ''}
+                                ${updated ? '<th>last updated</th>' : ''}
                             </tr>
                             ${tableRow}
                         </tbody>
@@ -599,6 +625,94 @@ class CommonSetup {
             console.error('Error in handleRequestTrigger:', error);
             new Alert({ message: "Error retrieving resource information, please try again", type: 'error' });
         }
+    }
+
+    //Load correct data when search is triggered
+    static handleSearchTrigger(input) {
+        const value = input?.value || "";
+
+        CommonSetup.search(value);
+    }
+
+    initializeSearch() {
+        const inputElement = select("input[data-trigger='search-box']");
+        const loader = inputElement.nextElementSibling;
+        let timeout;
+
+        inputElement.addEventListener("input", function () {
+            const input = this;
+            const value = input.value;
+            const sectionTable = select(".search-box section [data-delete]");
+
+            if (sectionTable) gsap.to(sectionTable, { opacity: 0, duration: 0.3 })
+
+            CommonSetup.attachSpinner({ elem: loader });
+
+            clearTimeout(timeout);
+
+            timeout = setTimeout(() => {
+
+                CommonSetup.search(value, loader)
+            }, 500);
+        });
+    }
+
+    static async search(str = '', loader = '') {
+        const initCourses = new Items({ table: 'courses', name: `%${str}%`, code: `%${str}%`, like: null, or: null })
+        const courses = await initCourses.find();
+
+        const initSlides = new Items({ table: 'resources', name: `%${str}%`, module: `%${str}%`, like: null, or: null })
+        const unfilteredSlides = await initSlides.find();
+        const slides = unfilteredSlides.filter(item => item.type !== 'past question');
+
+        const initPQs = new Items({ table: 'resources', name: `%${str}%`, year: `%${str}%`, like: null, or: null })
+        const unfilteredPqs = await initPQs.find();
+        const pqs = unfilteredPqs.filter(item => item.type !== 'slide');
+
+        const initResourceCourses = new Items({ custom: 'SELECT code, id FROM courses' })
+        const resourceCourses = await initResourceCourses.find();
+
+        const data = {
+            parent: select('#overlay #search-box'),
+            all: slides.length + pqs.length + courses.length,
+            courses: courses.length,
+            slides: slides.length,
+            pqs: pqs.length,
+        }
+
+        const all = courses.concat(slides, pqs);
+
+        // Randomize the order (using Fisher-Yates shuffle algorithm)
+        for (let i = all.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [all[i], all[j]] = [all[j], all[i]];
+        }
+
+        const allSearch = {
+            parent: select('#overlay #search-box section'),
+            data: all,
+            type: true,
+            code: true,
+            updated: false
+        }
+
+        CommonSetup.addItems(data, { allSearch }, resourceCourses);
+        CommonSetup.initializeTriggers();
+
+        const names = selectAll('#overlay #search-box section table tr td:nth-child(3) p')
+
+        if (str.length) {
+            names.forEach(elem => {
+                var text = elem.innerText.toLowerCase().split(str);
+                text = text.join(`<span>${str}</span>`);
+
+                elem.style.textTransform = 'none';
+                elem.innerHTML = capitalize(text);
+                selectAllWith(elem, 'span').forEach(e => e.classList.add('highlight'));
+            })
+        }
+
+        if (loader instanceof HTMLElement) CommonSetup.detachSpinner({ elem: loader, auto: true })
     }
 
     //Load "Recently Added" data if the page is dashboard
@@ -777,7 +891,7 @@ class CommonSetup {
     }
 
     static detachSpinner(params = {}) {
-        const { elem } = params;
+        const { elem, auto } = params;
 
         if (!(elem instanceof HTMLElement)) return console.warn('No element specified to "detachSpinner"');
 
@@ -788,8 +902,10 @@ class CommonSetup {
 
             spinner.remove();
 
-            elem.style.width = 'auto';
-            elem.style.height = 'auto';
+            if (!auto) {
+                elem.style.width = 'auto';
+                elem.style.height = 'auto';
+            }
 
             if (elem.children.length) elem.classList.remove("none")
             else {
@@ -1162,70 +1278,3 @@ class Alert {
 }
 
 new CommonSetup();
-
-async function test(str = '') {
-    const initCourses = new Items({ table: 'courses', name: `%${str}%`, code: `%${str}%`, like: null, or: null })
-    const courses = await initCourses.find();
-
-    const initSlides = new Items({ table: 'resources', name: `%${str}%`, module: `%${str}%`, like: null, or: null })
-    const unfilteredSlides = await initSlides.find();
-    const slides = unfilteredSlides.filter(item => item.type !== 'past question');
-
-    const initPQs = new Items({ table: 'resources', name: `%${str}%`, year: `%${str}%`, like: null, or: null })
-    const unfilteredPqs = await initPQs.find();
-    const pqs = unfilteredPqs.filter(item => item.type !== 'slide');
-
-    const data = {
-        parent: select('#overlay #search-box'),
-        all: slides.length + pqs.length + courses.length,
-        courses: courses.length,
-        slides: slides.length,
-        pqs: pqs.length
-    }
-
-    const all = courses.concat(slides, pqs);
-
-    // Randomize the order (using Fisher-Yates shuffle algorithm)
-    for (let i = all.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [all[i], all[j]] = [all[j], all[i]];
-    }
-
-    const allSearch = {
-        parent: select('#overlay #search-box section'),
-        data: all,
-        type: true
-    }
-
-    CommonSetup.addItems(data, { allSearch });
-    CommonSetup.initializeTriggers();
-
-    const names = selectAll('#overlay #search-box section table tr td:nth-child(2) p')
-
-    names.forEach(elem => {
-        var text = elem.innerText.toLowerCase().split(str);
-        text = text.join(`<span>${str}</span>`);
-
-        elem.style.textTransform = 'none';
-        elem.innerHTML = capitalize(text);
-        selectAllWith(elem, 'span').forEach(e => e.classList.add('highlight'));
-    })
-}
-
-function capitalize(text = '') {
-    const splitText = text.split(" ");
-
-    splitText.forEach((word, index) => {
-        const hasSpan = (word.indexOf('<span>') == -1) ? null : word.indexOf('<span>');
-
-        //Capitalize letters after space
-        splitText[index] = splitText[index].charAt(0).toUpperCase() + splitText[index].slice(1);
-
-        if (hasSpan == null) return;
-        if (hasSpan == 0) splitText[index] = "<span>" + splitText[index].charAt(6).toUpperCase() + splitText[index].slice(7)
-    })
-
-    return splitText.join(" ")
-}
-
-test('2021')

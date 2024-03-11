@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Stacks</title>
+
+    <%- include('partials/head') %>
+</head>
+
+<body> 
+
+    <%- include('partials/alert') %>
+    <%- include('partials/overlay') %>
+    <div class="container">
+        <%- include('partials/sidebar') %>
+        <div class="content">
+            <%- include('partials/navbar') %>
+            <main class="main-content flex-col">
+                <div class="content-head">
+                    <h1>history</h1>
+                </div>
+                <section>
+                    <div class="section-head">
+                        <div class="section-info">
+                            <p>course history</p>
+                            <div class="line"></div>
+                            <div class="user-img flex">
+                                <img src="/images/avatars/avatar-1.png" alt="lecturer">
+                                <img src="/images/avatars/avatar-2.png" alt="lecturer">
+                            </div>
+                        </div>
+                        <div class="section-format">
+                            <div class="line"></div>
+                            <button class="slide stacks-active">
+                                <img src="/images/icons/row dark.png" alt="icon">
+                            </button>
+                            <button>
+                                <img src="/images/icons/row dark.png" alt="icon">
+                            </button>
+                        </div>
+                    </div>
+                </section>
+                <section>
+                    <div class="section-head">
+                        <div class="section-info">
+                            <p>resource history</p>
+                            <div class="line"></div>
+                            <div class="user-img flex">
+                                <img src="/images/avatars/avatar-6.png" alt="lecturer">
+                                <img src="/images/avatars/avatar-7.png" alt="lecturer">
+                                <img src="/images/avatars/avatar-8.png" alt="lecturer">
+                                <img src="/images/avatars/avatar-9.png" alt="lecturer">
+                            </div>
+                        </div>
+                        <div class="section-format">
+                            <div class="line"></div>
+                            <button class="slide stacks-active">
+                                <img src="/images/icons/row dark.png" alt="icon">
+                            </button>
+                            <button>
+                                <img src="/images/icons/row dark.png" alt="icon">
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <%- include('partials/foot') %>
+
+</body>
+
+</html>
