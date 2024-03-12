@@ -91,7 +91,6 @@ class Model {
                     sql += ` WHERE ${params} = ?`;
                 }
             }
-
             let rows = await this.query(sql, val);
             for (const row of rows) {
                 result.push(new this(row));
@@ -176,7 +175,8 @@ class Model {
     static async customSql(sql, val = '') {
         try {
             const rows = await this.query(sql, val);
-            return rows.map(row => new this(row));
+
+            return (Array.isArray(rows)) ? rows?.map(row => new this(row)) : rows.affectedRows;
         } catch (error) {
             console.error(`Error executing custom SQL query:`, error);
             throw error;  // Rethrow the error to signal the failure

@@ -10,6 +10,8 @@ const Notification = require("../Models/Notification");
 const Resource = require("../Models/Resource.js");
 const CourseLecturer = require("../Models/CourseLecturer");
 const History = require("../Models/History");
+const Collection = require("../Models/Collection");
+const CollectionResource = require("../Models/CollectionResource.js");
 
 const DEFAULT_USER_ID = 123006;
 
@@ -220,12 +222,43 @@ const handleAddingResources = async (req, res) => {
 
 const showHistoryPage = async (req, res) => {
     const id = req.session.uid;
-    const courseHistory = await History.find([['user_id', id], ['type', 'course']]);
-    const resourceHistory = await History.find([['user_id', id], ['type', 'resource']]);
-    
-    console.log(courseHistory, resourceHistory);
 
-    res.render("history");
+    const allCourses = await Course.find();
+    const allResources = await Resource.find();
+
+    const courses = await History.find([['user_id', id], ['type', 'course'], ['order by', 'updated_at desc']]);
+    const resources = await History.find([['user_id', id], ['type', 'resource'], ['order by', 'updated_at desc']]);
+
+    const courseHistory = []
+    const resourceHistory = []
+
+    courses.forEach(course => {
+        const courseInfo = allCourses.find(info => info.id == course.content_id)
+        const data = {
+            id: courseInfo.id,
+            code: courseInfo.code,
+            name: courseInfo.name,
+            last_visited: Methods.formatDate(course.updated_at)
+        }
+
+        courseHistory.push(data);
+    })
+
+    resources.forEach(resource => {
+        const resourceInfo = allResources.find(info => info.id == resource.content_id)
+        const courseInfo = allCourses.find(info => info.id == resourceInfo.course_id)
+        const data = {
+            id: resourceInfo.id,
+            code: courseInfo.code,
+            type: resourceInfo.type,
+            name: Methods.joinedName(resourceInfo),
+            last_visited: Methods.formatDate(resource.updated_at)
+        }
+
+        resourceHistory.push(data);
+    })
+
+    res.render("history", { courseHistory, resourceHistory });
 }
 
 const showRequestsPage = async (req, res) => {
@@ -278,7 +311,7 @@ const handleAcceptedRequests = async (req, res) => {
         }
 
         //Update request information
-        const request = new Request({ handled_by: req.session.uid, id: data.request_id });
+        const request = new Request({ handled_by: req.session.uid, id: data.request_id, status: 'accepted' });
         const result = await request.update();
 
         if (!result) {
@@ -319,7 +352,7 @@ const handleDeclinedRequests = async (req, res) => {
         //Send the message back to the sender
 
         //Update request information
-        const request = new Request({ handled_by: req.session.uid, id: data.request_id });
+        const request = new Request({ handled_by: req.session.uid, id: data.request_id, status: 'rejected' });
         const result = await request.update();
 
         if (!result) {
@@ -343,6 +376,135 @@ const handleDeclinedRequests = async (req, res) => {
             type: "error"
         });
     }
+}
+
+const handleHistory = async (req, res) => {
+    try {
+        const { id, type } = req.body;
+        const userId = req.session.uid;
+
+        // Check if the history entry already exists
+        const existingHistory = await History.find([['user_id', userId], ['content_id', id], ['type', type]]);
+
+        if (existingHistory.length) {
+            // If the entry exists, update the 'updated_at' timestamp
+            await History.customSql(`
+                UPDATE histories
+                SET updated_at = CURRENT_TIMESTAMP
+                WHERE user_id = ${userId} AND content_id = ${id} AND type = '${type}'
+            `);
+        } else {
+            // If the entry doesn't exist, create a new history entry
+            const newHistory = new History({
+                user_id: userId,
+                content_id: id,
+                type
+            });
+            await newHistory.add();
+        }
+
+        res.status(200).send("Success");
+    } catch (error) {
+        console.error('Error in handleHistory', error);
+        res.status(500).send('Internal Server Error');
+    }
+}
+
+const getUserCollections = async (req, res) => {
+    try {
+        const userId = req.session.uid;
+        const collections = await Collection.find(['user_id', userId])
+
+        res.status(200).send(collections)
+    } catch (error) {
+        console.log('Error in getUserCollections ', error);
+        res.status(500).send([])
+    }
+}
+
+const handleAddingCollection = async (req, res) => {
+    try {
+        const data = req.body;
+        // Validate user information
+        const methods = new Methods(data);
+        const { invalidKeys } = methods.validateData();
+
+        // Check if there is invalid data to send back to the user
+        if (Object.keys(invalidKeys).length > 0) {
+            return res.send({ invalidKeys });
+        }
+
+        const userId = req.session.uid;
+        const { resource_id } = data;
+
+        if (!userId) return res.status(401).send({ message: 'User authentication required, please login', type: 'warning' });
+
+        if (!resource_id) return res.status(400).send({ message: "Request is missing important information, please try again", type: 'error' });
+
+        data.user_id = userId;
+        delete data.resource_id;
+
+        const collectionNameExists = await Collection.find(['collection_name', data.collection_name])
+
+        if (collectionNameExists.length) return res.status(409).send({ message: `Collection name "${data.collection_name}" is already in use`, type: 'warning' });
+
+        const collection = new Collection(data);
+        await collection.add();
+
+        const collectionResourceExists = await CollectionResource.find([['collection_id', collection.id], ['resource_id	', resource_id]]);
+
+        if (collectionResourceExists.length) return res.status(409).send({ message: 'This resource already exists in this collection', type: 'warning' });
+
+        const collectionResource = new CollectionResource({
+            resource_id,
+            collection_id: collection.id
+        })
+        await collectionResource.add();
+
+        res.status(200).send({
+            message: `Created "${data.collection_name}" and added a resource`,
+            type: 'success'
+        })
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({
+            message: "Internal server error, please try again",
+            type: "error"
+        });
+    }
+}
+
+const handleCollectionResouorce = async (req, res) => {
+    try {
+        const { resource_id, collection_id } = req.body;
+
+        const collectionResourceExists = await CollectionResource.find([['collection_id', collection_id], ['resource_id	', resource_id]]);
+        
+        const [collection] = await Collection.find(['id', collection_id], null, ['collection_name']);
+
+        if (collectionResourceExists.length) return res.status(409).send({ message: `This resource already exists in collection "${collection.collection_name}"`, type: 'warning' });
+
+        const collectionResource = new CollectionResource({
+            resource_id,
+            collection_id
+        })
+        await collectionResource.add();
+
+        res.status(200).send({
+            message: `Added a resource to "${collection.collection_name}"`,
+            type: 'success'
+        })
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({
+            message: "Internal server error, please try again",
+            type: "error"
+        });
+    }
+}
+
+const showCollectionsPage = (req, res) => {
+    res.send("collections")
 }
 
 const getItems = async (req, res) => {
@@ -424,6 +586,7 @@ module.exports = {
     routeSetup,
     showSignPage, showDashboard, handleLogin, handleRequestAccess,
     handleAcceptedRequests, handleDeclinedRequests, showHistoryPage,
-    showResourcesPage, showRequestsPage, getItems,
-    handleUpload, getPDF, handleAddingResources
+    showResourcesPage, showRequestsPage, getItems, getUserCollections,
+    handleUpload, getPDF, handleAddingResources, handleHistory,
+    handleAddingCollection, handleCollectionResouorce, showCollectionsPage
 }

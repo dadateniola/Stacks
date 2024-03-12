@@ -106,12 +106,34 @@ CREATE TABLE IF NOT EXISTS notifications (
 -- Create a table for histories
 CREATE TABLE IF NOT EXISTS histories (
   `id` INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  `user_id`  VARCHAR(20) NOT NULL,
+  `user_id` VARCHAR(20) NOT NULL,
   `content_id` INT UNSIGNED NOT NULL,
   `type` ENUM('resource', 'course') NOT NULL,
   `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
   `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (`user_id`) REFERENCES users(`id`) ON DELETE CASCADE
+);
+
+-- Create a table for collections
+CREATE TABLE IF NOT EXISTS collections (
+  `id` INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  `collection_name`  VARCHAR(255) NOT NULL,
+  `description` VARCHAR(255),
+  `user_id` VARCHAR(20) NOT NULL,
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (`user_id`) REFERENCES users(`id`) ON DELETE CASCADE
+);
+
+-- Create a table to for the relationship between collections and resources
+CREATE TABLE IF NOT EXISTS collections_resources (
+  `id` INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  `resource_id` INT UNSIGNED NOT NULL,
+  `collection_id` INT UNSIGNED NOT NULL,
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+   FOREIGN KEY (`resource_id`) REFERENCES resources(`id`) ON DELETE CASCADE,
+   FOREIGN KEY (`collection_id`) REFERENCES collections(`id`) ON DELETE CASCADE
 );
 
 

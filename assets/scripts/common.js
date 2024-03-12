@@ -8,6 +8,7 @@ const root = (e) => getComputedStyle(select(":root")).getPropertyValue(e);
 const getStyle = (e, style) => window.getComputedStyle(e)[style];
 
 let resizeTimer;
+let tracking = [];
 gsap.registerPlugin(ScrollTrigger);
 
 function capitalize(text = '') {
@@ -55,6 +56,26 @@ class Methods {
                 });
             }
         });
+    }
+
+    static trackOutsideClick(elem, animation) {
+        if (!(elem instanceof HTMLElement)) return console.warn("Cannon track mouse clicks of a Non-HTML Element");
+
+        tracking.push([elem, animation]);
+    }
+    static trackClick(event) {
+        if (!tracking.length) return;
+
+        const { target } = event
+
+        tracking.forEach(([elem, animation], index) => {
+            if (!elem.contains(target)) {
+                animation();
+
+                tracking.splice(index, 1);
+            }
+        })
+
     }
 
     static formDataToJson = (formData) => {
@@ -240,6 +261,8 @@ class CommonSetup {
             new Alert({ type, message })
         }
 
+        document.body.addEventListener('click', Methods.trackClick);
+
         CommonSetup.initializeTriggers();
         this.initializeSearch();
         this.initializeRequestBtns();
@@ -266,12 +289,22 @@ class CommonSetup {
     //Trigger overlay for different cases
     static initializeTriggers() {
         //Clear the event from all triggers and close buttons
-        selectAll('[data-trigger]').forEach(trigger => trigger.addEventListener(`${trigger?.dataset?.event || 'click'}`, CommonSetup.openTrigger));
-        selectAll('[data-close]').forEach(trigger => trigger.addEventListener('click', CommonSetup.closeTrigger));
+        selectAll('[data-trigger]').forEach(trigger => trigger.removeEventListener(`${trigger?.dataset?.event || 'click'}`, CommonSetup.openTrigger));
+        selectAll('[data-close]').forEach(trigger => trigger.removeEventListener('click', CommonSetup.closeTrigger));
+
+        //Other buttons
+        selectAll('[data-share]').forEach(share => share.removeEventListener("click", CommonSetup.share));
+        selectAll('[data-collection]').forEach(share => share.removeEventListener("click", CommonSetup.collection));
+
+        //---------------------------------------------------------------------------------
 
         //Reassign the event to all triggers and close buttons
         selectAll('[data-trigger]').forEach(trigger => trigger.addEventListener(`${trigger?.dataset?.event || 'click'}`, CommonSetup.openTrigger));
         selectAll('[data-close]').forEach(trigger => trigger.addEventListener('click', CommonSetup.closeTrigger));
+
+        //Other buttons
+        selectAll('[data-share]').forEach(share => share.addEventListener("click", CommonSetup.share));
+        selectAll('[data-collection]').forEach(share => share.addEventListener("click", CommonSetup.collection));
     }
 
     static openTrigger() {
@@ -344,12 +377,81 @@ class CommonSetup {
         const trigger = elem.dataset?.trigger;
         const identifier = elem.dataset?.identifier;
 
+        CommonSetup.handleHistory(identifier, trigger);
+
         if (trigger == 'resource') await CommonSetup.handleResourceTrigger(identifier)
         if (trigger == 'course-box') await CommonSetup.handleCourseTrigger(identifier)
         if (trigger == 'request') await CommonSetup.handleRequestTrigger(identifier)
         if (trigger == 'search-box') CommonSetup.handleSearchTrigger(elem);
 
         CommonSetup.initializeTriggers();
+    }
+
+    static async share() {
+        const url = window.location.href;
+
+        this.innerHTML = 'link copied';
+        this.classList.add("active")
+
+        setTimeout(() => {
+            this.innerHTML = 'share';
+            this.classList.remove("active")
+        }, 5000);
+
+        try {
+            await navigator.clipboard.writeText(url);
+            new Alert({
+                message: 'Link copied to clipboard',
+                type: 'success'
+            })
+        } catch (err) {
+            console.error('Unable to copy to clipboard', err);
+            new Alert({
+                message: 'Unable to copy link to clipboard',
+                type: 'error'
+            })
+        }
+    }
+
+    static collection() {
+        const collectionBox = select(".add-to-collection-box");
+        const collectionCont = select(".add-to-collection-cont");
+        const background = select(".item-box#resource .item-cont");
+
+        const tl = gsap.timeline();
+
+        tl
+            .call(() => {
+                this.classList.add("active");
+                CommonSetup.attachSpinner({ elem: this });
+                CommonSetup.handleCollectionTrigger();
+            })
+
+            .set(collectionCont, { opacity: 0, yPercent: 100 })
+            .set(collectionBox, { display: 'block' })
+            .to(background, { scale: 0.9, opacity: 0.5, ease: 'expo.inOut', duration: 2 })
+            .to(collectionCont, { opacity: 1, yPercent: 0, ease: 'expo.out' }, "-=1")
+            .call(() => {
+                Methods.trackOutsideClick(select(".add-to-collection-cont"), CommonSetup.closeCollection)
+            })
+    }
+
+    static closeCollection() {
+        const collectionBox = select(".add-to-collection-box");
+        const collectionCont = select(".add-to-collection-cont");
+        const background = select(".item-box#resource .item-cont");
+        const collectionBtn = select(".item-box#resource [data-collection]")
+
+        const tl = gsap.timeline();
+
+        tl
+            .to(collectionCont, { opacity: 0, yPercent: 100 })
+            .to(background, { scale: 1, opacity: 1, ease: 'expo.inOut', duration: 2 }, "<")
+            .set(collectionBox, { display: 'none' })
+            .call(() => {
+                CommonSetup.detachSpinner({ elem: collectionBtn });
+                collectionBtn.classList.remove("active");
+            })
     }
 
     //Insert data and sections into the DOM
@@ -484,12 +586,10 @@ class CommonSetup {
 
         try {
             const initResources = new Items({ table: 'resources', id })
-            const resources = await initResources.find();
-            const resource = resources[0];
+            const [resource] = await initResources.find();
 
             const initCourses = new Items({ table: 'courses', id: resource.course_id })
-            const courses = await initCourses.find();
-            const course = courses[0];
+            const [course] = await initCourses.find();
 
             const initMoreLikeThis = new Items({ table: 'resources', course_id: resource.course_id, 'not id': id })
             const moreLikeThis = await initMoreLikeThis.find();
@@ -516,6 +616,9 @@ class CommonSetup {
 
             //Additional adjustments
             select('#overlay #resource [data-resource-code]').setAttribute('data-identifier', course.id);
+            select('#overlay #resource [data-resource-read]').setAttribute('href', `/get-pdf/${resource.file}`)
+            select('#overlay #resource .add-to-collection-box').setAttribute('data-identifier', id)
+            select("input[name='resource_id']").value = id;
         } catch (error) {
             console.error('Error in test:', error);
             new Alert({ message: "Error retrieving resource information, please try again", type: 'error' });
@@ -634,12 +737,132 @@ class CommonSetup {
         CommonSetup.search(value);
     }
 
+    //Load correct data when collection is triggered
+    static async handleCollectionTrigger() {
+        const existingCollections = select(".item-box#resource .existing-collections");
+
+        try {
+            const response = await fetch('/get-user-collections', {
+                method: 'POST'
+            })
+
+            if (!response.ok) throw new Error('Unable to fetch user collections')
+
+            const data = await response.json();
+
+            if (!data.length) {
+                existingCollections.innerHTML = `
+                <div class="section-empty">
+                    <p>No user collections available</p>
+                </div>
+            `;
+
+                return;
+            }
+
+            existingCollections.innerHTML = '';
+
+            data.forEach(collection => {
+                const html = `
+                <p>${collection.collection_name}</p>
+                <div class="collection-cta">
+                    <img src="/images/icons/arrow right.png" alt="icon">
+                </div>
+            `;
+
+                Methods.insertToDOM({
+                    type: 'button',
+                    parent: existingCollections,
+                    text: html,
+                    classes: 'collection',
+                    attributes: [['identifier', collection.id]]
+                })
+            })
+
+            selectAllWith(existingCollections, 'button').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const identifier = e.target?.dataset?.identifier;
+                    CommonSetup.handleCollectionResource(identifier)
+                })
+            })
+        } catch (error) {
+            console.error('Error fetching user collections:', error);
+            existingCollections.innerHTML = `
+                <div class="section-empty">
+                    <p class="error">Couldn't get user collections</p>
+                </div>
+        `;
+        }
+    }
+
+    static async handleCollectionResource(collection_id = null) {
+        try {
+            const resource_id = select(".add-to-collection-box")?.dataset?.identifier;
+
+            if (!collection_id || !resource_id) {
+                new Alert({ message: "Missing identifier for adding resource to collection, please reload the page and try again", type: 'error' });
+                return;
+            }
+
+            const response = await fetch('/add-collection-resource', {
+                method: 'POST',
+                body: JSON.stringify({
+                    resource_id,
+                    collection_id
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            })
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                new Alert(data);
+                return;
+            }
+
+            new Alert(data);
+        } catch (error) {
+            console.error('Error adding resource to collection:', error);
+            new Alert({
+                message: "Couldn't add resource to the collection, please try again",
+                type: 'error'
+            })
+        }
+    }
+
+    //Stores viewed resource into history
+    static async handleHistory(id = null, trigger) {
+        if (!id) return;
+
+        const type = trigger.includes("course") ? 'course' : trigger;
+
+        try {
+            const response = await fetch('/add-history', {
+                method: 'POST',
+                body: JSON.stringify({ id, type }),
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            });
+
+            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        } catch (error) {
+            console.error('Fetch error:', error.message);
+            new Alert({
+                message: "Couldn't update user history",
+                type: 'error'
+            })
+        }
+    }
+
     initializeSearch() {
         const inputElement = select("input[data-trigger='search-box']");
-        const loader = inputElement.nextElementSibling;
+        const loader = inputElement?.nextElementSibling;
         let timeout;
 
-        inputElement.addEventListener("input", function () {
+        inputElement?.addEventListener("input", function () {
             const input = this;
             const value = input.value;
             const sectionTable = select(".search-box section [data-delete]");
@@ -977,6 +1200,7 @@ class CommonSetup {
             };
         } catch (error) {
             new Alert({ message: 'Error submitting the form, please try again', type: 'error' });
+            CommonSetup.detachSpinner({ elem: button });
             console.error('Error:', error);
         }
     }

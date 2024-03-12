@@ -19,6 +19,7 @@ class Methods {
             ],
             message: [/\S+/],
             name: [/\S+/],
+            collection_name: [/\S+/],
             module: [/\S+/],
             course_id: [/\S+/],
             type: [/\S+/],
@@ -149,6 +150,13 @@ class Methods {
             console.error('Error sending email:', error.message);
             throw new Error('Failed to send email');
         }
+    }
+
+    static joinedName(data = {}) {
+        return (data?.module) ?
+            `Module ${data?.module}: ${data?.name}` :
+            (data?.year) ? `${data?.year}: ${data?.name}` :
+                `${data?.code}: ${data?.name}`;
     }
 }
 

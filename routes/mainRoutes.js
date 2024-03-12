@@ -1,5 +1,5 @@
 const { Router } = require("express");
-const { showSignPage, showResourcesPage, getItems, showRequestsPage, handleLogin, handleRequestAccess, handleUpload, getPDF, handleAddingResources, showDashboard, routeSetup, handleAcceptedRequests, handleDeclinedRequests, showHistoryPage } = require("../controllers/mainControllers");
+const { showSignPage, showResourcesPage, getItems, showRequestsPage, handleLogin, handleRequestAccess, handleUpload, getPDF, handleAddingResources, showDashboard, routeSetup, handleAcceptedRequests, handleDeclinedRequests, showHistoryPage, handleHistory, getUserCollections, handleAddingCollection, handleCollectionResouorce, showCollectionsPage } = require("../controllers/mainControllers");
 
 const router = Router();
 
@@ -17,6 +17,14 @@ router.post('/accept-request', handleAcceptedRequests);
 
 router.post('/decline-request', handleDeclinedRequests);
 
+router.post('/add-history', handleHistory)
+
+router.post('/get-user-collections', getUserCollections)
+
+router.post("/add-to-collection", handleAddingCollection)
+
+router.post("/add-collection-resource", handleCollectionResouorce)
+
 router.use(routeSetup);
 
 router.get('/dashboard', showDashboard);
@@ -28,6 +36,8 @@ router.get('/resources', showResourcesPage);
 router.get('/history', showHistoryPage);
 
 router.get('/requests', showRequestsPage);
+
+router.get("/collections", showCollectionsPage)
 
 router.get('/get-pdf/:file/:type?', getPDF);
 

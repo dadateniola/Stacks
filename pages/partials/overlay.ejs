@@ -110,10 +110,31 @@
                     <div class="line-hr"></div>
                     <div class="item-info-section">
                         <h1>actions</h1>
-                        <button class="form-active">read</button>
-                        <button>share</button>
-                        <button>add to collection</button>
+                        <a href="" target="_blank" class="form-active" data-resource-read>read</a>
+                        <button data-share>share</button>
+                        <button data-collection>add to collection</button>
                         <button data-close>close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="add-to-collection-box">
+            <div class="add-to-collection-cont">
+                <div class="add-to-collection-section">
+                    <h1>Add to collection</h1>
+                    <form action="/add-to-collection" method="post" class="form-row">
+                        <div class="form-group">
+                            <input type="text" name="collection_name" id="collection_name" placeholder="Create a new collection">
+                            <input type="hidden" name="resource_id">
+                        </div>
+                        <button type="submit" class="stacks-active">Create</button>
+                    </form>
+                </div>
+                <div class="line-hr"></div>
+                <div class="add-to-collection-section">
+                    <h1>Use an existing collection</h1>
+                    <div class="existing-collections">
+                        <div class="collection empty"></div>
                     </div>
                 </div>
             </div>
@@ -366,7 +387,8 @@
         <div id="message">
             <div class="form-group">
                 <label for="message">message</label>
-                <textarea name="message" id="message" cols="30" rows="3" placeholder="Enter response here..."></textarea>
+                <textarea name="message" id="message" cols="30" rows="3"
+                    placeholder="Enter response here..."></textarea>
             </div>
         </div>
         <div id="select">

@@ -92,7 +92,7 @@
                                                         <td class="no-cap"><p><%= request.extra_info %></p></td>
                                                         <td class="small">
                                                             <div class="table-icon">
-                                                                <img src="/images/icons/<% if (request.handled_by) { %>success.png<% } else { %>arrow right.png<% } %>" alt="icon">
+                                                                <img src="/images/icons/<% if (!request.handled_by) { %>arrow right.png<% } else { %><%= request.status %>.png<% } %>" alt="icon">
                                                             </div>
                                                         </td>
                                                     </tr>
