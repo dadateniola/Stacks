@@ -382,6 +382,7 @@ class CommonSetup {
         if (trigger == 'resource') await CommonSetup.handleResourceTrigger(identifier)
         if (trigger == 'course-box') await CommonSetup.handleCourseTrigger(identifier)
         if (trigger == 'request') await CommonSetup.handleRequestTrigger(identifier)
+        if (trigger == 'collection') await CommonSetup.handleCollectionInfoTrigger(identifier);
         if (trigger == 'search-box') CommonSetup.handleSearchTrigger(elem);
 
         CommonSetup.initializeTriggers();
@@ -666,7 +667,7 @@ class CommonSetup {
 
             CommonSetup.addItems(data, { courseSlides, coursePQs });
         } catch (error) {
-            console.error('Error in test:', error);
+            console.error('Error in handleCourseTrigger:', error);
             new Alert({ message: "Error retrieving course information, please try again", type: 'error' });
         }
     }
@@ -737,9 +738,76 @@ class CommonSetup {
         CommonSetup.search(value);
     }
 
-    //Load correct data when collection is triggered
+    //Load correct data when collection is triggered (when opening a collections information)
+    static async handleCollectionInfoTrigger(id = null) {
+        if (!id) {
+            new Alert({ message: "Missing identifier for collection retrieval, please reload the page and try again", type: 'error' });
+            return;
+        }
+
+        try {
+            const initCollections = new Items({ table: 'collections', id })
+            const [collection] = await initCollections.find();
+
+            const initSlides = new Items({
+                custom: `
+                        SELECT * FROM resources
+                        WHERE id IN (
+                            SELECT resource_id FROM collections_resources
+                            WHERE collection_id = ${collection.id}
+                        ) AND type = 'slide';
+                        `
+            });
+            const slides = await initSlides.find();
+
+            const initPQs = new Items({
+                custom: `
+                        SELECT * FROM resources
+                        WHERE id IN (
+                            SELECT resource_id FROM collections_resources
+                            WHERE collection_id = ${collection.id}
+                        ) AND type = 'past question';
+                        `
+            });
+            const pqs = await initPQs.find();
+
+            const initCourses = new Items({ custom: 'SELECT code, id FROM courses' })
+            const courses = await initCourses.find();
+
+            const data = {
+                parent: select('#overlay #collection'),
+                name: Methods.sentenceCase(collection.collection_name),
+                slides: slides.length,
+                pqs: pqs.length
+            }
+
+            const courseSlides = {
+                parent: select('#overlay #collection .item-left'),
+                heading: 'slides',
+                data: slides,
+                code: true,
+                updated: false
+            }
+
+            const coursePQs = {
+                parent: select('#overlay #collection .item-left'),
+                heading: 'past questions',
+                data: pqs,
+                code: true,
+                updated: false
+            }
+
+            CommonSetup.addItems(data, { courseSlides, coursePQs }, courses);
+        } catch (error) {
+            console.error('Error in handleCollectionInfoTrigger:', error);
+            new Alert({ message: "Error retrieving collection information, please try again", type: 'error' });
+        }
+    }
+
+    //Load correct data when collection is triggered (when attempting to add a resources to a collection)
     static async handleCollectionTrigger() {
         const existingCollections = select(".item-box#resource .existing-collections");
+        const resource_id = select(".add-to-collection-box")?.dataset?.identifier;
 
         try {
             const response = await fetch('/get-user-collections', {
@@ -762,13 +830,18 @@ class CommonSetup {
 
             existingCollections.innerHTML = '';
 
-            data.forEach(collection => {
+            for (const collection of data) {
+                const initHasResource = new Items({ table: 'collections_resources', collection_id: collection.id, resource_id })
+                const hasResource = await initHasResource.find();
+
+                const disable = (hasResource.length) ? true : false;
+
                 const html = `
-                <p>${collection.collection_name}</p>
-                <div class="collection-cta">
-                    <img src="/images/icons/arrow right.png" alt="icon">
-                </div>
-            `;
+                        <p>${collection.collection_name}</p>
+                        <div class="collection-cta">
+                            <img src="/images/icons/${disable ? 'accepted.png' : 'arrow right.png'}" alt="icon">
+                        </div>
+                    `;
 
                 Methods.insertToDOM({
                     type: 'button',
@@ -777,7 +850,7 @@ class CommonSetup {
                     classes: 'collection',
                     attributes: [['identifier', collection.id]]
                 })
-            })
+            }
 
             selectAllWith(existingCollections, 'button').forEach(button => {
                 button.addEventListener('click', (e) => {

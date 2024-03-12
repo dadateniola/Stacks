@@ -531,6 +531,7 @@ const showCollectionsPage = async (req, res) => {
         );
 
         const data = {
+            id: collection.id,
             name: collection.collection_name,
             slides: slides.count,
             pqs: pqs.count,

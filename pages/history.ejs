@@ -46,7 +46,7 @@
                         <div class="section-table">
                             <table>
                                 <colgroup>
-                                    <col style="width: 140px;">
+                                    <col style="width: 100px;">
                                     <col>
                                     <col style="width: 140px;">
                                 </colgroup>
@@ -59,7 +59,7 @@
                                     <% courseHistory.forEach(course => { %>
                                         <tr data-trigger="course-box" data-identifier=<%= course.id %>>
                                             <td><%= course.code %></td>
-                                            <td><%= course.name %></td>
+                                            <td><p><%= course.name %></p></td>
                                             <td><%= course.last_visited %></td>
                                         </tr>
                                     <% }) %>
@@ -94,7 +94,8 @@
                         <div class="section-table">
                             <table>
                                 <colgroup>
-                                    <col span="2" style="width: 140px;">
+                                    <col style="width: 100px;">
+                                    <col style="width: 140px;">
                                     <col>
                                     <col style="width: 140px;">
                                 </colgroup>
@@ -109,7 +110,7 @@
                                         <tr data-trigger="resource" data-identifier=<%= resource.id %>>
                                             <td><%= resource.code %></td>
                                             <td><%= resource.type %></td>
-                                            <td><%= resource.name %></td>
+                                            <td><p><%= resource.name %></p></td>
                                             <td><%= resource.last_visited %></td>
                                         </tr>
                                     <% }) %>
