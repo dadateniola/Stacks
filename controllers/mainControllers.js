@@ -479,7 +479,7 @@ const handleCollectionResouorce = async (req, res) => {
         const { resource_id, collection_id } = req.body;
 
         const collectionResourceExists = await CollectionResource.find([['collection_id', collection_id], ['resource_id	', resource_id]]);
-        
+
         const [collection] = await Collection.find(['id', collection_id], null, ['collection_name']);
 
         if (collectionResourceExists.length) return res.status(409).send({ message: `This resource already exists in collection "${collection.collection_name}"`, type: 'warning' });
@@ -503,8 +503,44 @@ const handleCollectionResouorce = async (req, res) => {
     }
 }
 
-const showCollectionsPage = (req, res) => {
-    res.send("collections")
+const showCollectionsPage = async (req, res) => {
+    const userId = req.session.uid;
+
+    const userCollections = await Collection.find(['user_id', userId]);
+
+    const collections = [];
+
+    for (const collection of userCollections) {
+        const [slides] = await Resource.customSql(
+            `
+            SELECT COUNT(*) AS count FROM resources
+            WHERE id IN (
+                SELECT resource_id FROM collections_resources
+                WHERE collection_id = ${collection.id}
+            ) AND type = 'slide';
+            `
+        );
+        const [pqs] = await Resource.customSql(
+            `
+            SELECT COUNT(*) AS count FROM resources
+            WHERE id IN (
+                SELECT resource_id FROM collections_resources
+                WHERE collection_id = ${collection.id}
+            ) AND type = 'past question';
+            `
+        );
+
+        const data = {
+            name: collection.collection_name,
+            slides: slides.count,
+            pqs: pqs.count,
+            added: Methods.formatDate(collection.created_at)
+        }
+
+        collections.push(data);
+    }
+
+    res.render("collections", { collections });
 }
 
 const getItems = async (req, res) => {

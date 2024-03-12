@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Stacks</title>
+
+    <%- include('partials/head') %>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+</head>
+
+<body>
+
+    <%- include('partials/alert') %>
+    <%- include('partials/overlay') %>
+        <div class="container">
+            <%- include('partials/sidebar') %>
+                <div class="content">
+                    <%- include('partials/navbar') %>
+                        <main class="main-content flex-col">
+                            <div class="content-head">
+                                <h1>collections</h1>
+                            </div>
+                            <% if (collections.length) { %>
+                                <section>
+                                    <div class="section-head">
+                                        <div class="section-info">
+                                            <p>your collections</p>
+                                            <div class="line"></div>
+                                            <div class="user-img flex">
+                                                <img src="/images/avatars/avatar-6.png" alt="lecturer">
+                                            </div>
+                                        </div>
+                                        <div class="section-format">
+                                            <div class="line"></div>
+                                            <button class="stacks-active">
+                                                <img src="/images/icons/row dark.png" alt="icon">
+                                            </button>
+                                            <button>
+                                                <img src="/images/icons/grid dark.png" alt="icon">
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="section-table">
+                                        <table>
+                                            <colgroup>
+                                                <col>
+                                                <col span="3" style="width: 140px;">
+                                            </colgroup>
+                                            <tbody>
+                                                <tr>
+                                                    <th>name</th>
+                                                    <th>slides</th>
+                                                    <th>past questions</th>
+                                                    <th>date added</th>
+                                                </tr>
+                                                <% collections.forEach(collection => { %>
+                                                    <tr data-trigger="collection" data-identifier=<%= collection.id %>>
+                                                        <td><%= collection.name %></td>
+                                                        <td><%= collection.slides %></td>
+                                                        <td><%= collection.pqs %></td>
+                                                        <td><%= collection.added %></td>
+                                                    </tr>
+                                                <% }) %>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </section>
+                            <% } else { %>
+                                <section>
+                                    <div class="section-empty">
+                                        <p>No collections available</p>
+                                    </div>
+                                </section>
+                            <% } %>
+                        </main>
+                </div>
+        </div>
+
+        <%- include('partials/foot') %>
+
+</body>
+
+</html>
