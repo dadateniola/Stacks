@@ -23,6 +23,8 @@ const routeSetup = async (req, res, next) => {
     const userId = req.session.uid;
 
     try {
+        const allCourses = await Course.find();
+
         //Add-resource overlay data
         const lecturerCourses = await Course.customSql(`SELECT * FROM courses WHERE id IN (SELECT course_id FROM courses_lecturers WHERE lecturer_id = ${userId})`);
         const filename = `${userId}.pdf`;
@@ -32,6 +34,7 @@ const routeSetup = async (req, res, next) => {
         res.locals.data = {
             lecturerCourses,
             previewRoute,
+            allCourses
         }
 
         next();
@@ -46,9 +49,30 @@ const showSignPage = async (req, res) => {
 }
 
 const showDashboard = async (req, res) => {
+    const userId = req.session.uid;
+
     const semesterCourses = await Course.customSql("SELECT * FROM courses WHERE id IN (SELECT course_id FROM departments_courses WHERE semester = 'first')")
 
-    res.render('dashboard', { semesterCourses });
+    const allCourses = await Course.find();
+
+    const resources = await Resource.find([['order by', 'created_at desc']]);
+
+    const recentlyAdded = [];
+
+    resources.forEach(resource => {
+        const courseInfo = allCourses.find(info => info.id == resource.course_id)
+        const data = {
+            id: resource.id,
+            code: courseInfo.code,
+            type: resource.type,
+            name: Methods.joinedName(resource),
+            last_visited: Methods.formatDate(resource.created_at)
+        }
+
+        recentlyAdded.push(data);
+    })
+
+    res.render('dashboard', { semesterCourses, recentlyAdded });
 }
 
 const handleLogin = async (req, res) => {
@@ -282,6 +306,7 @@ const handleAcceptedRequests = async (req, res) => {
 
         // Check if there is invalid data to send back to the user
         if (Object.keys(invalidKeys).length > 0) {
+            invalidKeys.scope = '#select-clone';
             return res.send({ invalidKeys });
         }
 
@@ -308,6 +333,14 @@ const handleAcceptedRequests = async (req, res) => {
                 type: "error",
             });
             return
+        }
+
+        if (data.role == 'lecturer') {
+            const courseLecturers = new CourseLecturer({
+                course_id: data.course_id,
+                lecturer_id: user_data.id
+            });
+            await courseLecturers.add();
         }
 
         //Update request information
@@ -463,7 +496,8 @@ const handleAddingCollection = async (req, res) => {
 
         res.status(200).send({
             message: `Created "${data.collection_name}" and added a resource`,
-            type: 'success'
+            type: 'success',
+            clean_up: 'create-collection'
         })
     } catch (error) {
         console.error(error);
@@ -545,7 +579,7 @@ const showCollectionsPage = async (req, res) => {
 }
 
 const getItems = async (req, res) => {
-    const { table, custom } = req.body;
+    const { table, custom, columns } = req.body;
 
     if (custom) {
         const items = await Model.customSql(custom);
@@ -553,10 +587,11 @@ const getItems = async (req, res) => {
         res.json(items);
     } else {
         delete req.body.table;
+        delete req.body.columns;
 
         const conditions = Object.entries(req.body);
 
-        const items = await Model.find(conditions, table);
+        const items = await Model.find(conditions, table, columns);
 
         res.json(items);
     }

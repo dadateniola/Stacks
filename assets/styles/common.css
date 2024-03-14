@@ -132,6 +132,14 @@ iframe {
     pointer-events: none;
 }
 
+#select-clone .form-group:not([data-request-select]) {
+    display: none;
+}
+
+#select-clone .form-group.active {
+    display: flex !important;
+}
+
 #overlay.active-search,
 #overlay.active {
     pointer-events: all;
@@ -1014,7 +1022,7 @@ button.null {
 
 [data-spinner] {
     border: 3px solid white;
-    border-left-color: transparent;
+    border-left-color: transparent !important;
     width: 20px;
     height: 20px;
     border-radius: 100%;

@@ -62,20 +62,24 @@ class Methods {
         if (!(elem instanceof HTMLElement)) return console.warn("Cannon track mouse clicks of a Non-HTML Element");
 
         tracking.push([elem, animation]);
+
+        return tracking.length - 1;
     }
     static trackClick(event) {
         if (!tracking.length) return;
 
-        const { target } = event
+        const target = (event instanceof Event) ? event.target : event;
 
         tracking.forEach(([elem, animation], index) => {
             if (!elem.contains(target)) {
                 animation();
-
-                tracking.splice(index, 1);
+                Methods.stopTracking(index);
             }
         })
 
+    }
+    static stopTracking(index) {
+        tracking.splice(index, 1);
     }
 
     static formDataToJson = (formData) => {
@@ -181,8 +185,12 @@ class Methods {
     }
 
     static assignErrorMsgs(data) {
+        const { scope } = data;
+        
+        delete data.scope;
+
         Object.entries(data).forEach(([key, value]) => {
-            const input = select(`[name=${key}]`);
+            const input = scope ? select(`${scope} [name=${key}]`) : select(`[name=${key}]`);
             const parent = input.parentNode;
 
             Methods.removeErrorMsgs(input);
@@ -246,8 +254,6 @@ class CommonSetup {
         window.addEventListener('resize', CommonSetup.handleResize);
 
         select(`a[href='${window.location.pathname}']`)?.classList.add("stacks-active");
-
-        if (window.location.pathname.includes("dashboard")) await CommonSetup.recentlyAdded();
 
         // Change this later
         const info = select(".alert-box [data-info]");
@@ -323,6 +329,8 @@ class CommonSetup {
                 .call(() => {
                     currentTrigger?.classList.remove("add");
 
+                    CommonSetup.clearTriggered();
+
                     currentTrigger?.removeAttribute('data-animated', '');
                     currentlyTriggered?.removeAttribute('data-triggered');
                 })
@@ -363,9 +371,19 @@ class CommonSetup {
                     (trigger?.dataset?.affect && trigger?.dataset?.affect == "search") ? 'active-search' : 'active'
                 );
 
+                CommonSetup.clearTriggered();
+
                 trigger?.removeAttribute('data-animated', '');
                 triggered?.removeAttribute('data-triggered');
             }, null, '+=0.3')
+    }
+
+    static clearTriggered() {
+        selectAll("[data-resource-inserted]").forEach(elem => {
+            elem.innerHTML = '-';
+            elem.removeAttribute('data-resource-inserted');
+        });
+        selectAll('[data-delete]').forEach(elem => elem.remove());
     }
 
     static async redirectTriggerHandle(elem) {
@@ -470,6 +488,7 @@ class CommonSetup {
                 if (!elem) continue;
 
                 elem.innerText = value;
+                elem.setAttribute("data-resource-inserted", "")
             }
         }
 
@@ -478,7 +497,9 @@ class CommonSetup {
             const parent = (sectionData?.parent instanceof HTMLElement) ? sectionData.parent : null;
             const heading = sectionData.heading || null;
             const code = sectionData?.code;
+
             const type = sectionData?.type;
+            const stay = sectionData?.stay;
             const added = (sectionData.hasOwnProperty('added')) ? sectionData.added : true;
             const updated = (sectionData.hasOwnProperty('updated')) ? sectionData.updated : true;
 
@@ -524,7 +545,7 @@ class CommonSetup {
                     </div>
             `;
             const sectionHead = Methods.insertToDOM({ type: 'div', text: sectionHeadHtml, classes: 'section-head' });
-            const section = Methods.insertToDOM({ type: 'section', append: heading ? sectionHead : null, parent, attributes: 'delete' });
+            const section = Methods.insertToDOM({ type: 'section', append: heading ? sectionHead : null, parent, attributes: stay ? 'stay' : 'delete' });
 
             var tableRow = '';
             sectionData.data.forEach(obj => {
@@ -854,8 +875,12 @@ class CommonSetup {
 
             selectAllWith(existingCollections, 'button').forEach(button => {
                 button.addEventListener('click', (e) => {
-                    const identifier = e.target?.dataset?.identifier;
-                    CommonSetup.handleCollectionResource(identifier)
+                    const button = e.target;
+                    const identifier = button.dataset?.identifier;
+
+                    CommonSetup.attachSpinner({ elem: selectWith(button, '.collection-cta'), color: 'var(--faint-gray)' })
+
+                    CommonSetup.handleCollectionResource(identifier, button);
                 })
             })
         } catch (error) {
@@ -868,7 +893,7 @@ class CommonSetup {
         }
     }
 
-    static async handleCollectionResource(collection_id = null) {
+    static async handleCollectionResource(collection_id = null, button) {
         try {
             const resource_id = select(".add-to-collection-box")?.dataset?.identifier;
 
@@ -892,16 +917,32 @@ class CommonSetup {
 
             if (!response.ok) {
                 new Alert(data);
+
+                CommonSetup.detachSpinner({ elem: selectWith(button, '.collection-cta') });
+
                 return;
             }
 
+            const imgPath = '/images/icons/accepted.png';
+            const img = selectWith(button, '.collection-cta img');
+
+            img.setAttribute("src", imgPath);
+
             new Alert(data);
+
+            CommonSetup.detachSpinner({ elem: selectWith(button, '.collection-cta') })
+            setTimeout(() => {
+                Methods.trackClick(document.body);
+            }, 500);
         } catch (error) {
             console.error('Error adding resource to collection:', error);
+
             new Alert({
                 message: "Couldn't add resource to the collection, please try again",
                 type: 'error'
-            })
+            });
+
+            CommonSetup.detachSpinner({ elem: selectWith(button, '.collection-cta') });
         }
     }
 
@@ -1009,24 +1050,6 @@ class CommonSetup {
         }
 
         if (loader instanceof HTMLElement) CommonSetup.detachSpinner({ elem: loader, auto: true })
-    }
-
-    //Load "Recently Added" data if the page is dashboard
-    static async recentlyAdded() {
-        const initResources = new Items({ table: 'resources', 'order by': 'created_at desc', limit: 10 })
-        const resources = await initResources.find();
-
-        const initCourses = new Items({ custom: 'SELECT code, id FROM courses WHERE id IN (SELECT DISTINCT course_id FROM resources)' })
-        const courses = await initCourses.find();
-
-        const recentlyAdded = {
-            parent: select('.main-content'),
-            heading: 'recently added',
-            data: resources,
-            code: true
-        }
-
-        CommonSetup.addItems(null, { recentlyAdded }, courses);
     }
 
     //Handle "call to action" for requests
@@ -1155,7 +1178,7 @@ class CommonSetup {
 
     //Attach spinner to elements
     static attachSpinner(params = {}) {
-        const { elem } = params;
+        const { elem, color } = params;
 
         if (!(elem instanceof HTMLElement)) return console.warn('No element specified to "attachSpinner"');
 
@@ -1180,7 +1203,8 @@ class CommonSetup {
             parent: elem,
             append: Methods.insertToDOM({
                 type: 'span',
-                attributes: 'spinner'
+                attributes: 'spinner',
+                properties: { border: `3px solid ${color || 'white'}` },
             }),
             classes: 'spinner'
         })
@@ -1258,7 +1282,8 @@ class CommonSetup {
                         new Alert(data);
 
                         if (data?.clean_up) {
-                            if (data.clean_up == 'request') CommonSetup.cleanUpRequest(data.request_id);
+                            if (data.clean_up == 'request') await CommonSetup.cleanUpRequest(data.request_id);
+                            if (data.clean_up == 'create-collection') Methods.trackClick(document.body);
                         }
 
                         const parent = select('label[data-preview="pdfFile"]');
@@ -1575,3 +1600,14 @@ class Alert {
 }
 
 new CommonSetup();
+
+function test(elem) {
+    const value = elem.value;
+    const toChange = select(`#select-clone [data-request="${value}"]`);
+
+    selectAll("#select-clone .form-group").forEach(e => e.classList.remove("active"))
+    selectAll("#select-clone .form-group:not([data-request-select]) select").forEach(e => e.disabled = true)
+
+    toChange.classList.add("active");
+    selectWith(toChange, 'select').disabled = false;
+}

@@ -79,6 +79,54 @@
                                     <div class="swiper-pagination"></div>
                                 </div>
                             </section>
+                            <% if (recentlyAdded.length) { %>
+                                <section>
+                                    <div class="section-head">
+                                        <div class="section-info">
+                                            <p>recently added</p>
+                                            <div class="line"></div>
+                                            <div class="user-img flex">
+                                                <img src="/images/avatars/avatar-6.png" alt="lecturer">
+                                            </div>
+                                        </div>
+                                        <div class="section-format">
+                                            <div class="line"></div>
+                                            <button class="stacks-active">
+                                                <img src="/images/icons/row dark.png" alt="icon">
+                                            </button>
+                                            <button>
+                                                <img src="/images/icons/grid dark.png" alt="icon">
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="section-table">
+                                        <table>
+                                            <colgroup>
+                                                <col style="width: 100px;">
+                                                <col style="width: 140px;">
+                                                <col>
+                                                <col style="width: 140px;">
+                                            </colgroup>
+                                            <tbody>
+                                                <tr>
+                                                    <th>code</th>
+                                                    <th>type</th>
+                                                    <th>name</th>
+                                                    <th>date added</th>
+                                                </tr>
+                                                <% recentlyAdded.forEach(resource => { %>
+                                                    <tr data-trigger="resource" data-identifier=<%= resource.id %>>
+                                                        <td><%= resource.code %></td>
+                                                        <td><%= resource.type %></td>
+                                                        <td><p><%= resource.name %></p></td>
+                                                        <td><%= resource.last_visited %></td>
+                                                    </tr>
+                                                <% }) %>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </section>
+                            <% } %>
                         </main>
                 </div>
         </div>

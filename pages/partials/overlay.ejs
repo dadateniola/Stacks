@@ -313,20 +313,29 @@
             </div>
         </div>
         <div id="select">
-            <div class="form-group">
+            <div class="form-group" data-request-select>
                 <label for="role">assign user role</label>
-                <select name="role" id="role">
+                <select name="role" id="role" onchange="test(this)">
                     <option value="" selected>Select user role</option>
                     <option value="student">student</option>
                     <option value="lecturer">lecturer</option>
                 </select>
             </div>
-            <div class="form-group">
+            <div class="form-group" data-request="student">
                 <label for="department_id">assign department</label>
-                <select name="department_id" id="department_id">
+                <select name="department_id" id="department_id" disabled>
                     <option value="" selected>Select user department</option>
                     <option value="1">software engineering</option>
                     <option value="2">computer science</option>
+                </select>
+            </div>
+            <div class="form-group" data-request="lecturer">
+                <label for="course_id">assign lecturers course</label>
+                <select name="course_id" id="course_id" disabled>
+                    <option value="" selected>Select lecturers course</option>
+                    <% data.allCourses.forEach(course => { %>
+                        <option value=<%= course.id %>><%= course.code %>: <%= course.name %></option>
+                    <% }) %>
                 </select>
             </div>
         </div>

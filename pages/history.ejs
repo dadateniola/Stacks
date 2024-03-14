@@ -22,100 +22,108 @@
                 <div class="content-head">
                     <h1>history</h1>
                 </div>
-                <% if (courseHistory.length) { %>
-                    <section>
-                        <div class="section-head">
-                            <div class="section-info">
-                                <p>course history</p>
-                                <div class="line"></div>
-                                <div class="user-img flex">
-                                    <img src="/images/avatars/avatar-1.png" alt="lecturer">
-                                    <img src="/images/avatars/avatar-2.png" alt="lecturer">
+                <% if (courseHistory.length || resourceHistory.length) { %>
+                    <% if (courseHistory.length) { %>
+                        <section>
+                            <div class="section-head">
+                                <div class="section-info">
+                                    <p>course history</p>
+                                    <div class="line"></div>
+                                    <div class="user-img flex">
+                                        <img src="/images/avatars/avatar-1.png" alt="lecturer">
+                                        <img src="/images/avatars/avatar-2.png" alt="lecturer">
+                                    </div>
+                                </div>
+                                <div class="section-format">
+                                    <div class="line"></div>
+                                    <button class="stacks-active">
+                                        <img src="/images/icons/row dark.png" alt="icon">
+                                    </button>
+                                    <button>
+                                        <img src="/images/icons/grid dark.png" alt="icon">
+                                    </button>
                                 </div>
                             </div>
-                            <div class="section-format">
-                                <div class="line"></div>
-                                <button class="slide stacks-active">
-                                    <img src="/images/icons/row dark.png" alt="icon">
-                                </button>
-                                <button>
-                                    <img src="/images/icons/row dark.png" alt="icon">
-                                </button>
-                            </div>
-                        </div>
-                        <div class="section-table">
-                            <table>
-                                <colgroup>
-                                    <col style="width: 100px;">
-                                    <col>
-                                    <col style="width: 140px;">
-                                </colgroup>
-                                <tbody>
-                                    <tr>
-                                        <th>code</th>
-                                        <th>name</th>
-                                        <th>last visited</th>
-                                    </tr>
-                                    <% courseHistory.forEach(course => { %>
-                                        <tr data-trigger="course-box" data-identifier=<%= course.id %>>
-                                            <td><%= course.code %></td>
-                                            <td><p><%= course.name %></p></td>
-                                            <td><%= course.last_visited %></td>
+                            <div class="section-table">
+                                <table>
+                                    <colgroup>
+                                        <col style="width: 100px;">
+                                        <col>
+                                        <col style="width: 140px;">
+                                    </colgroup>
+                                    <tbody>
+                                        <tr>
+                                            <th>code</th>
+                                            <th>name</th>
+                                            <th>last visited</th>
                                         </tr>
-                                    <% }) %>
-                                </tbody>
-                            </table>
-                        </div>
-                    </section>
-                <% } %>
-                <% if (resourceHistory.length) { %>
-                    <section>
-                        <div class="section-head">
-                            <div class="section-info">
-                                <p>resource history</p>
-                                <div class="line"></div>
-                                <div class="user-img flex">
-                                    <img src="/images/avatars/avatar-6.png" alt="lecturer">
-                                    <img src="/images/avatars/avatar-7.png" alt="lecturer">
-                                    <img src="/images/avatars/avatar-8.png" alt="lecturer">
-                                    <img src="/images/avatars/avatar-9.png" alt="lecturer">
+                                        <% courseHistory.forEach(course => { %>
+                                            <tr data-trigger="course-box" data-identifier=<%= course.id %>>
+                                                <td><%= course.code %></td>
+                                                <td><p><%= course.name %></p></td>
+                                                <td><%= course.last_visited %></td>
+                                            </tr>
+                                        <% }) %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+                    <% } %>
+                    <% if (resourceHistory.length) { %>
+                        <section>
+                            <div class="section-head">
+                                <div class="section-info">
+                                    <p>resource history</p>
+                                    <div class="line"></div>
+                                    <div class="user-img flex">
+                                        <img src="/images/avatars/avatar-6.png" alt="lecturer">
+                                        <img src="/images/avatars/avatar-7.png" alt="lecturer">
+                                        <img src="/images/avatars/avatar-8.png" alt="lecturer">
+                                        <img src="/images/avatars/avatar-9.png" alt="lecturer">
+                                    </div>
+                                </div>
+                                <div class="section-format">
+                                    <div class="line"></div>
+                                    <button class="stacks-active">
+                                        <img src="/images/icons/row dark.png" alt="icon">
+                                    </button>
+                                    <button>
+                                        <img src="/images/icons/grid dark.png" alt="icon">
+                                    </button>
                                 </div>
                             </div>
-                            <div class="section-format">
-                                <div class="line"></div>
-                                <button class="slide stacks-active">
-                                    <img src="/images/icons/row dark.png" alt="icon">
-                                </button>
-                                <button>
-                                    <img src="/images/icons/row dark.png" alt="icon">
-                                </button>
-                            </div>
-                        </div>
-                        <div class="section-table">
-                            <table>
-                                <colgroup>
-                                    <col style="width: 100px;">
-                                    <col style="width: 140px;">
-                                    <col>
-                                    <col style="width: 140px;">
-                                </colgroup>
-                                <tbody>
-                                    <tr>
-                                        <th>code</th>
-                                        <th>type</th>
-                                        <th>name</th>
-                                        <th>last visited</th>
-                                    </tr>
-                                    <% resourceHistory.forEach(resource => { %>
-                                        <tr data-trigger="resource" data-identifier=<%= resource.id %>>
-                                            <td><%= resource.code %></td>
-                                            <td><%= resource.type %></td>
-                                            <td><p><%= resource.name %></p></td>
-                                            <td><%= resource.last_visited %></td>
+                            <div class="section-table">
+                                <table>
+                                    <colgroup>
+                                        <col style="width: 100px;">
+                                        <col style="width: 140px;">
+                                        <col>
+                                        <col style="width: 140px;">
+                                    </colgroup>
+                                    <tbody>
+                                        <tr>
+                                            <th>code</th>
+                                            <th>type</th>
+                                            <th>name</th>
+                                            <th>last visited</th>
                                         </tr>
-                                    <% }) %>
-                                </tbody>
-                            </table>
+                                        <% resourceHistory.forEach(resource => { %>
+                                            <tr data-trigger="resource" data-identifier=<%= resource.id %>>
+                                                <td><%= resource.code %></td>
+                                                <td><%= resource.type %></td>
+                                                <td><p><%= resource.name %></p></td>
+                                                <td><%= resource.last_visited %></td>
+                                            </tr>
+                                        <% }) %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+                    <% } %>
+                <% } else { %>
+                    <section>
+                        <div class="section-empty">
+                            <p>No history available</p>
                         </div>
                     </section>
                 <% } %>
