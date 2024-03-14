@@ -119,7 +119,7 @@ class Model {
         } catch (error) {
             console.error(`\n-- SQL: ${sql}\n-- Columns: ${columns}\n-- Values: ${values}\n-- ${error}\n`)
             console.error(error);
-            return 0;
+            return { no: error.errno, message: error.sqlMessage };
         }
     }
 

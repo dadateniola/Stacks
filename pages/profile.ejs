@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Stacks</title>
+
+    <%- include('partials/head') %>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+</head>
+
+<body>
+
+    <%- include('partials/alert') %>
+    <%- include('partials/overlay') %>
+        <div class="container">
+            <%- include('partials/sidebar') %>
+                <div class="content">
+                    <%- include('partials/navbar') %>
+                        <main class="main-content flex-col">
+                            <div class="content-head">
+                                <h1><%= user.name %></h1>
+                            </div>
+                            <section>
+                                <div class="section-head">
+                                    <div class="section-info">
+                                        <p><%= heading %> information</p>
+                                        <div class="line"></div>
+                                        <div class="user-img flex">
+                                            <img src="/images/avatars/avatar-6.png" alt="lecturer">
+                                        </div>
+                                    </div>
+                                    <div class="section-format">
+                                        <div class="line"></div>
+                                        <button class="stacks-active">
+                                            <img src="/images/icons/row dark.png" alt="icon">
+                                        </button>
+                                        <button>
+                                            <img src="/images/icons/grid dark.png" alt="icon">
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="section-table">
+                                    <table>
+                                        <colgroup>
+                                            <col style="width: 140px;">
+                                        </colgroup>
+                                        <tbody>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>department</th>
+                                                <th>email</th>
+                                                <th>phone number</th>
+                                            </tr>
+                                            <tr data-trigger="user" data-identifier=<%= user.id %>>
+                                                <td><p><%= user.id %></p></td>
+                                                <td><%= user.department || 'NULL' %></td>
+                                                <td><p class="no-cap"><%= user.email %></p></td>
+                                                <td><%= user.phone_number || 'NULL' %></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </section>
+                            <% if (extra_info.length) { %>
+                                <section>
+                                    <div class="section-head">
+                                        <div class="section-info">
+                                            <p><%= extra_info[0].head %></p>
+                                        </div>
+                                        <div class="section-format">
+                                            <div class="line"></div>
+                                            <button class="stacks-active">
+                                                <img src="/images/icons/row dark.png" alt="icon">
+                                            </button>
+                                            <button>
+                                                <img src="/images/icons/grid dark.png" alt="icon">
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="section-table">
+                                        <table>
+                                            <%- col_group %>
+                                            <tbody>
+                                                <tr>
+                                                    <% for (const key in extra_info[0]) { %>
+                                                        <% if(key == "id") continue; %>
+                                                        <% if(key == "head") continue; %>
+                                                        <th><%= key.split("_").join(" ") %></th>
+                                                    <% } %>
+                                                </tr>
+                                                <% extra_info.forEach(collection => { %>
+                                                    <tr data-trigger=<%= trigger %> data-identifier=<%= collection.id %>>
+                                                        <% for (const key in collection) { %>
+                                                            <% if(key == "id") continue; %>
+                                                            <% if(key == "head") continue; %>
+                                                            <th><p><%= collection[key] %></p></th>
+                                                        <% } %>
+                                                    </tr>
+                                                <% }) %>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </section>
+                            <% }%>
+                        </main>
+                </div>
+        </div>
+
+        <%- include('partials/foot') %>
+
+</body>
+
+</html>

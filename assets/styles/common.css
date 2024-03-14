@@ -1053,7 +1053,7 @@ main.main-content {
     width: 100%;
     background-color: var(--faint-white);
 
-    gap: 30px;
+    gap: 40px;
 }
 
 .content-head h1 {
@@ -1090,6 +1090,7 @@ main.main-content {
     width: 160px;
     text-transform: capitalize;
     font-weight: 700;
+    font-size: 0.9em;
 
     display: flex;
     align-items: center;
@@ -1410,11 +1411,6 @@ tr:nth-child(odd) .table-icon {
 
     .content-head h1 {
         font-size: 27px;
-    }
-
-    .section-info p {
-        font-size: var(--text);
-        width: 140px;
     }
 
     .section-format button {

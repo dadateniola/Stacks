@@ -45,4 +45,4 @@ class Updater {
 
 // new Updater({ id: 123006 });
 
-CommonSetup.handleRequestTrigger(8)
+// CommonSetup.handleRequestTrigger(8)

@@ -107,11 +107,13 @@ CREATE TABLE IF NOT EXISTS notifications (
 CREATE TABLE IF NOT EXISTS histories (
   `id` INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
   `user_id` VARCHAR(20) NOT NULL,
-  `content_id` INT UNSIGNED NOT NULL,
-  `type` ENUM('resource', 'course') NOT NULL,
+  `course_id` INT UNSIGNED DEFAULT NULL,
+  `resource_id` INT UNSIGNED DEFAULT NULL,
   `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
   `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  FOREIGN KEY (`user_id`) REFERENCES users(`id`) ON DELETE CASCADE
+  FOREIGN KEY (`user_id`) REFERENCES users(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`course_id`) REFERENCES courses(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`resource_id`) REFERENCES resources(`id`) ON DELETE CASCADE
 );
 
 -- Create a table for collections

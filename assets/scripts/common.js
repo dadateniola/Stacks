@@ -698,7 +698,7 @@ class CommonSetup {
         CommonSetup.closeRequestCTA();
 
         if (!id) {
-            new Alert({ message: "Missing identifier for resource retrieval, please reload the page and try again", type: 'error' });
+            new Alert({ message: "Missing identifier for request retrieval, please reload the page and try again", type: 'error' });
             return;
         }
 
@@ -708,6 +708,8 @@ class CommonSetup {
             const request = requests[0];
 
             var handled_by = null;
+
+            if(!request) return new Alert({ message: "Request not found", type: "warning" })
 
             if (request.handled_by) {
                 const initUsers = new Items({ table: 'users', id: request.handled_by });
@@ -748,7 +750,7 @@ class CommonSetup {
             CommonSetup.addItems(data);
         } catch (error) {
             console.error('Error in handleRequestTrigger:', error);
-            new Alert({ message: "Error retrieving resource information, please try again", type: 'error' });
+            new Alert({ message: "Error retrieving request information, please try again", type: 'error' });
         }
     }
 
@@ -951,6 +953,9 @@ class CommonSetup {
         if (!id) return;
 
         const type = trigger.includes("course") ? 'course' : trigger;
+        const column = (type == 'course') ? 'course_id' : (type == 'resource') ? 'resource_id' : null;
+
+        if(!column) return;
 
         try {
             const response = await fetch('/add-history', {

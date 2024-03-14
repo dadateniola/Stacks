@@ -158,6 +158,14 @@ class Methods {
             (data?.year) ? `${data?.year}: ${data?.name}` :
                 `${data?.code}: ${data?.name}`;
     }
+
+    static isObject(value) {
+        return (typeof value === 'object' && value !== null && !Array.isArray(value));
+    }
+
+    static isEmptyObject(obj) {
+        return Object.keys(obj).length === 0;
+    }
 }
 
 module.exports = Methods;

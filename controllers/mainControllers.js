@@ -12,11 +12,49 @@ const CourseLecturer = require("../Models/CourseLecturer");
 const History = require("../Models/History");
 const Collection = require("../Models/Collection");
 const CollectionResource = require("../Models/CollectionResource.js");
+const Department = require("../Models/Department.js");
 
-const DEFAULT_USER_ID = 123006;
+const DEFAULT_USER_ID = '123006';
 
 const tempFolder = path.resolve(__dirname, '..', 'temp');
 const uploadsFolder = path.resolve(__dirname, '..', 'uploads', 'resources');
+
+async function getCollections(userCollections = {}) {
+    const collections = [];
+
+    for (const collection of userCollections) {
+        const [slides] = await Resource.customSql(
+            `
+            SELECT COUNT(*) AS count FROM resources
+            WHERE id IN (
+                SELECT resource_id FROM collections_resources
+                WHERE collection_id = ${collection.id}
+            ) AND type = 'slide';
+            `
+        );
+        const [pqs] = await Resource.customSql(
+            `
+            SELECT COUNT(*) AS count FROM resources
+            WHERE id IN (
+                SELECT resource_id FROM collections_resources
+                WHERE collection_id = ${collection.id}
+            ) AND type = 'past question';
+            `
+        );
+
+        const data = {
+            id: collection.id,
+            name: collection.collection_name,
+            slides: slides.count,
+            pqs: pqs.count,
+            added: Methods.formatDate(collection.created_at)
+        }
+
+        collections.push(data);
+    }
+
+    return collections;
+}
 
 const routeSetup = async (req, res, next) => {
     req.session.uid = DEFAULT_USER_ID;
@@ -26,8 +64,8 @@ const routeSetup = async (req, res, next) => {
         const allCourses = await Course.find();
 
         //Add-resource overlay data
-        const lecturerCourses = await Course.customSql(`SELECT * FROM courses WHERE id IN (SELECT course_id FROM courses_lecturers WHERE lecturer_id = ${userId})`);
-        const filename = `${userId}.pdf`;
+        const lecturerCourses = await Course.customSql(`SELECT * FROM courses WHERE id IN (SELECT course_id FROM courses_lecturers WHERE lecturer_id = '${userId}')`);
+        const filename = `${userId?.split("/").join("-")}.pdf`;
         const filePath = path.join(tempFolder, filename);
         const previewRoute = (await Methods.checkFileExistence({ filePath })) ? `/get-pdf/${filename}/preview` : null;
 
@@ -124,12 +162,26 @@ const handleRequestAccess = async (req, res) => {
         }
 
         //Check if "request" data already exists to throw a warning
-        const sameRequest = await Request.find([['sender_id', id], ['type', 'access']]);
+        const sameID = await Request.find([['sender_id', id], ['type', 'access']]);
+        const IDExists = await User.find([['id', id]]);
+        const emailExists = await User.find([['email', email]]);
 
-        if (sameRequest.length) return res.status(409).send({
-            message: "Oops! It looks like you've already submitted a similar request, please wait for a response",
-            type: 'warning'
-        });
+        if (sameID.length) {
+            return res.status(409).send({
+                message: "Oops! It looks like you've already submitted a similar request, please wait for a response",
+                type: 'warning'
+            });
+        } else if (IDExists.length) {
+            return res.status(409).send({
+                message: "The ID is already being used in the system",
+                type: 'warning'
+            });
+        } else if (emailExists.length) {
+            return res.status(409).send({
+                message: "The email is already being used in the system",
+                type: 'warning'
+            });
+        }
 
         //Add request to database
         const request = new Request(data);
@@ -245,44 +297,48 @@ const handleAddingResources = async (req, res) => {
 }
 
 const showHistoryPage = async (req, res) => {
-    const id = req.session.uid;
+    try {
+        const id = req.session.uid;
 
-    const allCourses = await Course.find();
-    const allResources = await Resource.find();
+        const allCourses = await Course.find();
+        const allResources = await Resource.find();
 
-    const courses = await History.find([['user_id', id], ['type', 'course'], ['order by', 'updated_at desc']]);
-    const resources = await History.find([['user_id', id], ['type', 'resource'], ['order by', 'updated_at desc']]);
+        const history = await History.find([['user_id', id], ['order by', 'updated_at desc']]);
 
-    const courseHistory = []
-    const resourceHistory = []
+        const courseHistory = []
+        const resourceHistory = []
 
-    courses.forEach(course => {
-        const courseInfo = allCourses.find(info => info.id == course.content_id)
-        const data = {
-            id: courseInfo.id,
-            code: courseInfo.code,
-            name: courseInfo.name,
-            last_visited: Methods.formatDate(course.updated_at)
-        }
+        history.forEach(content => {
+            const isCourse = content?.course_id;
+            const isResource = content?.resource_id;
 
-        courseHistory.push(data);
-    })
+            var contentInfo;
+            var extra_info;
 
-    resources.forEach(resource => {
-        const resourceInfo = allResources.find(info => info.id == resource.content_id)
-        const courseInfo = allCourses.find(info => info.id == resourceInfo.course_id)
-        const data = {
-            id: resourceInfo.id,
-            code: courseInfo.code,
-            type: resourceInfo.type,
-            name: Methods.joinedName(resourceInfo),
-            last_visited: Methods.formatDate(resource.updated_at)
-        }
+            if (isCourse) contentInfo = allCourses.find(info => info.id == content.course_id)
+            if (isResource) {
+                contentInfo = allResources.find(info => info.id == content.resource_id);
+                extra_info = allCourses.find(info => info.id == contentInfo.course_id);
+                contentInfo.name = Methods.joinedName(contentInfo);
+            }
 
-        resourceHistory.push(data);
-    })
+            const data = {
+                id: contentInfo.id,
+                code: contentInfo?.code || extra_info?.code,
+                type: contentInfo?.type,
+                name: contentInfo.name,
+                last_visited: Methods.formatDate(content.updated_at)
+            }
 
-    res.render("history", { courseHistory, resourceHistory });
+            if (isCourse) courseHistory.push(data);
+            if (isResource) resourceHistory.push(data);
+        })
+
+        res.render("history", { courseHistory, resourceHistory });
+    } catch (error) {
+        console.error('Error in "showHistoryPage": ', error);
+        res.status(500).send('Internal Server Error');
+    }
 }
 
 const showRequestsPage = async (req, res) => {
@@ -327,9 +383,11 @@ const handleAcceptedRequests = async (req, res) => {
         const user = new User(user_data);
         const userResult = await user.add();
 
-        if (!userResult) {
+        if (!userResult || Methods.isObject(userResult)) {
+            const message = (Methods.isObject(userResult)) ? userResult.message : "Unable to process request, please try again";
+
             res.status(500).send({
-                message: "Unable to process request, please try again",
+                message,
                 type: "error",
             });
             return
@@ -347,9 +405,11 @@ const handleAcceptedRequests = async (req, res) => {
         const request = new Request({ handled_by: req.session.uid, id: data.request_id, status: 'accepted' });
         const result = await request.update();
 
-        if (!result) {
+        if (!result || Methods.isObject(result)) {
+            const message = (Methods.isObject(result)) ? result.message : "Unable to process request, please try again";
+
             res.status(500).send({
-                message: "Unable to process request, please try again",
+                message,
                 type: "error",
             });
             return
@@ -415,24 +475,30 @@ const handleHistory = async (req, res) => {
     try {
         const { id, type } = req.body;
         const userId = req.session.uid;
+        const column = (type == 'course') ? 'course_id' : (type == 'resource') ? 'resource_id' : null;
+
+        if(!column) return res.status(200).send("Success");
 
         // Check if the history entry already exists
-        const existingHistory = await History.find([['user_id', userId], ['content_id', id], ['type', type]]);
+        const existingHistory = await History.find([['user_id', userId], [column, id]]);
 
         if (existingHistory.length) {
             // If the entry exists, update the 'updated_at' timestamp
-            await History.customSql(`
-                UPDATE histories
-                SET updated_at = CURRENT_TIMESTAMP
-                WHERE user_id = ${userId} AND content_id = ${id} AND type = '${type}'
-            `);
+            await History.customSql(
+                `UPDATE histories
+                 SET updated_at = CURRENT_TIMESTAMP
+                 WHERE user_id = ? AND ${column} = ?`,
+                [userId, id]
+            );
+
         } else {
             // If the entry doesn't exist, create a new history entry
             const newHistory = new History({
                 user_id: userId,
-                content_id: id,
-                type
             });
+
+            newHistory[column] = id;
+
             await newHistory.add();
         }
 
@@ -542,40 +608,85 @@ const showCollectionsPage = async (req, res) => {
 
     const userCollections = await Collection.find(['user_id', userId]);
 
-    const collections = [];
-
-    for (const collection of userCollections) {
-        const [slides] = await Resource.customSql(
-            `
-            SELECT COUNT(*) AS count FROM resources
-            WHERE id IN (
-                SELECT resource_id FROM collections_resources
-                WHERE collection_id = ${collection.id}
-            ) AND type = 'slide';
-            `
-        );
-        const [pqs] = await Resource.customSql(
-            `
-            SELECT COUNT(*) AS count FROM resources
-            WHERE id IN (
-                SELECT resource_id FROM collections_resources
-                WHERE collection_id = ${collection.id}
-            ) AND type = 'past question';
-            `
-        );
-
-        const data = {
-            id: collection.id,
-            name: collection.collection_name,
-            slides: slides.count,
-            pqs: pqs.count,
-            added: Methods.formatDate(collection.created_at)
-        }
-
-        collections.push(data);
-    }
+    const collections = await getCollections(userCollections);
 
     res.render("collections", { collections });
+}
+
+const showUserProfile = async (req, res) => {
+    const { id } = req.params;
+    const userId = id ? id.split('-').join('/') : null;
+
+    const [user] = await User.find(['id', userId])
+
+    if (!user) return res.send("User not found");
+
+    const [department] = await Department.find(['id', user.department_id]);
+    var extra_info = [];
+    var col_group;
+    var trigger;
+    var heading;
+
+    if (user.role == 'student') {
+        trigger = 'collection';
+        heading = 'user';
+        col_group = `
+            <colgroup>
+                <col>
+                <col span="3" style="width: 140px;">
+            </colgroup>
+        `;
+        const userCollections = await Collection.find(['user_id', userId]);
+        const collections = await getCollections(userCollections);
+
+        collections.forEach(collection => {
+            const data = {
+                head: 'user collections',
+                id: collection.id,
+                name: collection.name,
+                slides: collection.slides,
+                past_questions: collection.pqs,
+                date_added: collection.added
+            }
+
+            extra_info.push(data);
+        })
+    } else if (user.role == 'lecturer') {
+        trigger = 'course-box';
+        heading = 'lecturer';
+        col_group = `
+            <colgroup>
+                <col style="width: 140px;">
+                <col>
+                <col style="width: 140px;">
+            </colgroup>
+        `;
+
+        const courses = await Course.customSql(
+            `
+            SELECT * FROM courses 
+            WHERE id IN (
+                SELECT course_id FROM courses_lecturers
+                WHERE lecturer_id = ?
+            )
+            `, [userId]
+        )
+
+        courses.forEach(course => {
+            const data = {
+                head: 'lecturers courses',
+                id: course.id,
+                code: course.code,
+                name: course.name,
+                date_added: Methods.formatDate(course.updated_at)
+            }
+
+            extra_info.push(data);
+        });
+    }
+    user.department = department?.name;
+
+    res.render("profile", { user, extra_info, col_group, trigger, heading })
 }
 
 const getItems = async (req, res) => {
@@ -609,7 +720,7 @@ const handleUpload = async (req, res) => {
 
     if (!userId) return res.status(401).send({ message: 'User authentication required, please login', type: 'warning' });
 
-    const filename = `${userId}.pdf`;
+    const filename = `${userId.split("/").join("-")}.pdf`;
 
     try {
         // Create the "temp" folder if it doesn't exist
@@ -660,5 +771,6 @@ module.exports = {
     handleAcceptedRequests, handleDeclinedRequests, showHistoryPage,
     showResourcesPage, showRequestsPage, getItems, getUserCollections,
     handleUpload, getPDF, handleAddingResources, handleHistory,
-    handleAddingCollection, handleCollectionResouorce, showCollectionsPage
+    handleAddingCollection, handleCollectionResouorce, showCollectionsPage,
+    showUserProfile
 }
