@@ -65,7 +65,7 @@ const routeSetup = async (req, res, next) => {
 
         //Add-resource overlay data
         const lecturerCourses = await Course.customSql(`SELECT * FROM courses WHERE id IN (SELECT course_id FROM courses_lecturers WHERE lecturer_id = '${userId}')`);
-        const filename = `${userId?.split("/").join("-")}.pdf`;
+        const filename = Methods.tempFilename(userId);
         const filePath = path.join(tempFolder, filename);
         const previewRoute = (await Methods.checkFileExistence({ filePath })) ? `/get-pdf/${filename}/preview` : null;
 
@@ -253,7 +253,7 @@ const handleAddingResources = async (req, res) => {
 
         if (!userId) return res.status(401).send({ message: 'User authentication required, please login', type: 'warning' });
 
-        const filePath = path.join(tempFolder, `${userId}.pdf`);
+        const filePath = path.join(tempFolder, Methods.tempFilename(userId));
 
         if (!(await Methods.checkFileExistence({ filePath }))) {
             return res.status(400).send({
@@ -285,7 +285,9 @@ const handleAddingResources = async (req, res) => {
 
         res.status(200).send({
             message: "Resource has been added successfully",
-            type: "success"
+            type: "success",
+            clean_up: 'add-resource',
+            lecturer_id: userId
         });
     } catch (error) {
         console.error(error);
@@ -342,7 +344,7 @@ const showHistoryPage = async (req, res) => {
 }
 
 const showRequestsPage = async (req, res) => {
-    const requests = await Request.find([['receiver', 'admin']]);
+    const requests = await Request.find([['receiver', 'admin'], ['order by', 'created_at desc']]);
     const types = {};
 
     requests.forEach(request => {
@@ -613,6 +615,10 @@ const showCollectionsPage = async (req, res) => {
     res.render("collections", { collections });
 }
 
+const showManageUsersPage = async (req, res) => {
+    res.render("manage-users");
+}
+
 const showUserProfile = async (req, res) => {
     const { id } = req.params;
     const userId = id ? id.split('-').join('/') : null;
@@ -720,7 +726,7 @@ const handleUpload = async (req, res) => {
 
     if (!userId) return res.status(401).send({ message: 'User authentication required, please login', type: 'warning' });
 
-    const filename = `${userId.split("/").join("-")}.pdf`;
+    const filename = Methods.tempFilename(userId);
 
     try {
         // Create the "temp" folder if it doesn't exist
@@ -772,5 +778,5 @@ module.exports = {
     showResourcesPage, showRequestsPage, getItems, getUserCollections,
     handleUpload, getPDF, handleAddingResources, handleHistory,
     handleAddingCollection, handleCollectionResouorce, showCollectionsPage,
-    showUserProfile
+    showUserProfile, showManageUsersPage
 }

@@ -118,6 +118,10 @@ class Methods {
         }
     }
 
+    static tempFilename(id = null) {
+        return id?.split("/").join("-") + '.pdf';
+    }
+
     static formatDate(date = '') {
         return date?.toLocaleDateString('en-GB', {
             day: '2-digit',

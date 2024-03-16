@@ -4,8 +4,14 @@ class Updater {
         this.init();
     }
 
-    init() {
-        this.resources();
+    async init() {
+        const type = this?.type;
+        const id = this?.id;
+
+        if(!type) return console.warn("Failed to update DOM as 'type' isn't defined");
+        if(!id) return console.warn("Failed to update DOM as 'id' isn't defined");
+    
+        if(type == 'resource') await this.resources();
     }
 
     async resources() {
@@ -35,14 +41,12 @@ class Updater {
                 heading: courseDesc.code,
                 data: resources,
                 type: true,
-                stay: true
+                stay: true,
+                empty: 'resource'
             };
         }
     
         CommonSetup.addItems(null, courseResources);
+        CommonSetup.initializeTriggers();
     }
 }
-
-// new Updater({ id: 123006 });
-
-// CommonSetup.handleRequestTrigger(8)

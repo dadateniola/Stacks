@@ -186,7 +186,7 @@ class Methods {
 
     static assignErrorMsgs(data) {
         const { scope } = data;
-        
+
         delete data.scope;
 
         Object.entries(data).forEach(([key, value]) => {
@@ -497,6 +497,7 @@ class CommonSetup {
             const parent = (sectionData?.parent instanceof HTMLElement) ? sectionData.parent : null;
             const heading = sectionData.heading || null;
             const code = sectionData?.code;
+            const empty = sectionData?.empty;
 
             const type = sectionData?.type;
             const stay = sectionData?.stay;
@@ -514,14 +515,23 @@ class CommonSetup {
                             <p>${heading}</p>
                             <div class="line"></div>
                         </div>
+                        <div class="section-format">
+                            <div class="line"></div>
+                            <button class="stacks-active">
+                                <img src="/images/icons/row dark.png" alt="icon">
+                            </button>
+                            <button>
+                                <img src="/images/icons/grid dark.png" alt="icon">
+                            </button>
+                        </div>
                     </div>
                     ` : ''
                     }
                     <div class="section-empty">
-                        <p>No ${heading || 'results'} available</p>
+                        <p>No ${empty || heading || 'results'} available</p>
                     </div>
                 `;
-                const section = Methods.insertToDOM({ type: 'section', text: sectionEmpty, parent, attributes: 'delete' });
+                const section = Methods.insertToDOM({ type: 'section', text: sectionEmpty, parent, attributes: stay ? 'stay' : 'delete' });
 
                 continue;
             }
@@ -709,7 +719,7 @@ class CommonSetup {
 
             var handled_by = null;
 
-            if(!request) return new Alert({ message: "Request not found", type: "warning" })
+            if (!request) return new Alert({ message: "Request not found", type: "warning" })
 
             if (request.handled_by) {
                 const initUsers = new Items({ table: 'users', id: request.handled_by });
@@ -955,7 +965,7 @@ class CommonSetup {
         const type = trigger.includes("course") ? 'course' : trigger;
         const column = (type == 'course') ? 'course_id' : (type == 'resource') ? 'resource_id' : null;
 
-        if(!column) return;
+        if (!column) return;
 
         try {
             const response = await fetch('/add-history', {
@@ -1153,10 +1163,14 @@ class CommonSetup {
         }
 
         try {
+            const img = select(`main.main-content .section-table [data-trigger="request"][data-identifier="${id}"] img`);
             const initRequests = new Items({ table: 'requests', id });
             const [request] = await initRequests.find();
+            const { status } = request;
 
             var handled_by = null;
+
+            img.src = `/images/icons/${(status == 'pending') ? 'arrow right' : status}.png`;
 
             if (request.handled_by) {
                 const initUsers = new Items({ table: 'users', id: request.handled_by });
@@ -1289,6 +1303,7 @@ class CommonSetup {
                         if (data?.clean_up) {
                             if (data.clean_up == 'request') await CommonSetup.cleanUpRequest(data.request_id);
                             if (data.clean_up == 'create-collection') Methods.trackClick(document.body);
+                            if (data.clean_up == 'add-resource') new Updater({ id: data.lecturer_id, type: 'resource' });
                         }
 
                         const parent = select('label[data-preview="pdfFile"]');

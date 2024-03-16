@@ -26,60 +26,68 @@
                 <div class="content-head">
                     <h1>course resources</h1>
                 </div>
-                <% for (const name in courseResources) { %>
-                    <section>
-                        <div class="section-head">
-                            <div class="section-info">
-                                <p><%= name %></p>
-                                <div class="line"></div>
-                            </div>
-                            <div class="section-format">
-                                <div class="line"></div>
-                                <button class="stacks-active">
-                                    <img src="/images/icons/row dark.png" alt="icon">
-                                </button>
-                                <button>
-                                    <img src="/images/icons/grid dark.png" alt="icon">
-                                </button>
-                            </div>
-                        </div>
-                        <% if (courseResources[name].length) { %>
-                            <div class="section-table">
-                                <table>
-                                    <colgroup>
-                                        <col style="width: 140px;">
-                                        <col>
-                                        <col span="2" style="width: 140px;">
-                                    </colgroup>
-                                    <tbody>
-                                        <tr>
-                                            <th>type</th>
-                                            <th>name</th>
-                                            <th>date added</th>
-                                            <th>last updated</th>
-                                        </tr>
-                                        <% courseResources[name].forEach(resource => { %>
-                                            <% const joinedName = (resource.module) ? 
-                                                `Module ${resource.module}: ${resource.name}` :
-                                                `${resource.year}: ${resource.name}`;
-                                            %>
-                                            <tr data-trigger="resource" data-identifier=<%= resource.id %>>
-                                                <td><%= resource.type %></td>
-                                                <td><p><%= joinedName %></p></td>
-                                                <td><%= resource.date_added %></td>
-                                                <td><%= resource.last_updated %></td>
-                                            </tr>
-                                        <% }) %>
-                                    </tbody>
-                                </table>
-                            </div>
-                        <% } else { %>
-                            <section>
-                                <div class="section-empty">
-                                    <p>No resources available</p>
+                <% if (Object.keys(courseResources).length) { %>
+                    <% for (const name in courseResources) { %>
+                        <section>
+                            <div class="section-head">
+                                <div class="section-info">
+                                    <p><%= name %></p>
+                                    <div class="line"></div>
                                 </div>
-                            </section>
-                        <% } %>
+                                <div class="section-format">
+                                    <div class="line"></div>
+                                    <button class="stacks-active">
+                                        <img src="/images/icons/row dark.png" alt="icon">
+                                    </button>
+                                    <button>
+                                        <img src="/images/icons/grid dark.png" alt="icon">
+                                    </button>
+                                </div>
+                            </div>
+                            <% if (courseResources[name].length) { %>
+                                <div class="section-table">
+                                    <table>
+                                        <colgroup>
+                                            <col style="width: 140px;">
+                                            <col>
+                                            <col span="2" style="width: 140px;">
+                                        </colgroup>
+                                        <tbody>
+                                            <tr>
+                                                <th>type</th>
+                                                <th>name</th>
+                                                <th>date added</th>
+                                                <th>last updated</th>
+                                            </tr>
+                                            <% courseResources[name].forEach(resource => { %>
+                                                <% const joinedName = (resource.module) ? 
+                                                    `Module ${resource.module}: ${resource.name}` :
+                                                    `${resource.year}: ${resource.name}`;
+                                                %>
+                                                <tr data-trigger="resource" data-identifier=<%= resource.id %>>
+                                                    <td><%= resource.type %></td>
+                                                    <td><p><%= joinedName %></p></td>
+                                                    <td><%= resource.date_added %></td>
+                                                    <td><%= resource.last_updated %></td>
+                                                </tr>
+                                            <% }) %>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            <% } else { %>
+                                <section>
+                                    <div class="section-empty">
+                                        <p>No resources available</p>
+                                    </div>
+                                </section>
+                            <% } %>
+                        </section>
+                    <% } %>
+                <% } else { %>
+                    <section>
+                        <div class="section-empty">
+                            <p>No courses resource available</p>
+                        </div>
                     </section>
                 <% } %>
             </main>
