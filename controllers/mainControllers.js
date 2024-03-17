@@ -62,6 +62,8 @@ const routeSetup = async (req, res, next) => {
 
     try {
         const allCourses = await Course.find();
+        const allDepartments = await Department.find();
+        const allRoles = await User.customSql('SELECT DISTINCT role FROM users');
 
         //Add-resource overlay data
         const lecturerCourses = await Course.customSql(`SELECT * FROM courses WHERE id IN (SELECT course_id FROM courses_lecturers WHERE lecturer_id = '${userId}')`);
@@ -72,7 +74,9 @@ const routeSetup = async (req, res, next) => {
         res.locals.data = {
             lecturerCourses,
             previewRoute,
-            allCourses
+            allCourses,
+            allDepartments,
+            allRoles
         }
 
         next();
@@ -479,7 +483,7 @@ const handleHistory = async (req, res) => {
         const userId = req.session.uid;
         const column = (type == 'course') ? 'course_id' : (type == 'resource') ? 'resource_id' : null;
 
-        if(!column) return res.status(200).send("Success");
+        if (!column) return res.status(200).send("Success");
 
         // Check if the history entry already exists
         const existingHistory = await History.find([['user_id', userId], [column, id]]);
@@ -616,7 +620,109 @@ const showCollectionsPage = async (req, res) => {
 }
 
 const showManageUsersPage = async (req, res) => {
-    res.render("manage-users");
+    const users = await User.find([['order by', 'created_at desc']]);
+    const roles = {};
+
+    users.forEach(user => {
+        const { role } = user;
+        roles[role] = (roles[role] || 0) + 1;
+    });
+
+    res.render("manage-users", { users, roles });
+}
+
+const handleAddUser = async (req, res) => {
+    try {
+        const data = req.body;
+        // Validate user information
+        const methods = new Methods(data);
+        const { invalidKeys } = methods.validateData();
+
+        // Check if there is invalid data to send back to the user
+        if (Object.keys(invalidKeys).length > 0) {
+            invalidKeys.scope = '#add-user';
+            return res.send({ invalidKeys });
+        }
+
+        var userId = req.session.uid;
+        userId = DEFAULT_USER_ID;
+
+        if (!userId) return res.status(401).send({ message: 'User authentication required, please login', type: 'warning' });
+
+        //Check if id or email already exists
+        const IDExists = await User.find([['id', data.id]])
+        const emailExists = await User.find([['email', data.email]])
+
+        if (IDExists.length) {
+            invalidKeys.id = 'Id is already in use';
+        } else if (emailExists.length) {
+            invalidKeys.email = 'Email is already in use';
+        }
+
+        if (Object.keys(invalidKeys).length > 0) {
+            invalidKeys.scope = '#add-user';
+            return res.send({ invalidKeys });
+        }
+
+        //Remove department_id if role isnt student
+        if (data.role != 'student') delete data.department_id;
+
+        //Add new user to database
+        const user = new User(data);
+        const result = await user.add();
+
+        if (!result || Methods.isObject(result)) {
+            const message = (Methods.isObject(result)) ? result.message : "Unable to add user, please try again";
+
+            res.status(500).send({
+                message,
+                type: "error",
+            });
+            return
+        }
+
+        res.status(200).send({
+            message: "User has been added successfully",
+            type: "success",
+            clean_up: 'add-user'
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({
+            message: "Internal server error, please try again",
+            type: "error"
+        });
+    }
+}
+
+const handleDelete = async (req, res) => {
+    try {
+        const { id, type } = req.body;
+        const send = {
+            message: 'Data successfully deleted',
+            type: "success",
+            clean_up: 'delete'
+        }
+
+        if (type == 'user') {
+            await User.delete(id);
+            send.message = 'User successfully deleted';
+            send.clean_up = 'delete-user'
+        }
+
+        if (type == 'resource') {
+            await Resource.delete(id);
+            send.message = 'Resource successfully deleted';
+        }
+
+        res.status(200).send(send);
+    } catch (error) {
+        console.error(error)
+        res.status(500).send({
+            message: "Internal server error, please try again",
+            type: "error"
+        });
+    }
 }
 
 const showUserProfile = async (req, res) => {
@@ -778,5 +884,5 @@ module.exports = {
     showResourcesPage, showRequestsPage, getItems, getUserCollections,
     handleUpload, getPDF, handleAddingResources, handleHistory,
     handleAddingCollection, handleCollectionResouorce, showCollectionsPage,
-    showUserProfile, showManageUsersPage
+    showUserProfile, showManageUsersPage, handleAddUser, handleDelete
 }

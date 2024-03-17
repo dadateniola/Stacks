@@ -18,10 +18,74 @@
         <%- include('partials/sidebar') %>
         <div class="content">
             <%- include('partials/navbar') %>
+            <button class="add-resource" data-trigger="add-user">
+                <img src="/images/icons/plus.png" alt="add">
+                <p>add a new user</p>
+            </button>
             <main class="main-content flex-col">
                 <div class="content-head">
                     <h1>manage users</h1>
                 </div>
+                <% if (users.length) { %>
+                    <section>
+                        <div class="section-head colored">
+                            <div class="section-types">
+                                <div data-radio class="section-type active ">
+                                    <p>all</p>
+                                    <span data-resource-all><%= users.length %></span>
+                                </div>
+                                <% Object.entries(roles).forEach(([key, value]) => { %>
+                                    <div data-radio class="section-type">
+                                        <p><%= key %>s</p>
+                                        <span data-resource-<%= key %>><%= value %></span>
+                                    </div>
+                                <% }) %>
+                            </div>
+                            <div class="section-format">
+                                <div class="line"></div>
+                                <button class="stacks-active">
+                                    <img src="/images/icons/row dark.png" alt="icon">
+                                </button>
+                                <button>
+                                    <img src="/images/icons/grid dark.png" alt="icon">
+                                </button>
+                            </div>
+                        </div>
+                        <div class="section-table">
+                            <table>
+                                <colgroup>
+                                    <col span="2" style="width: 120px;">
+                                    <col span="2">
+                                    <col style="width: 160px;">
+                                </colgroup>
+                                <tbody>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>role</th>
+                                        <th>name</th>
+                                        <th>email</th>
+                                        <th>phone number</th>
+                                    </tr>
+                                    <% users.forEach(user => { %>
+                                        <tr data-trigger="user" data-identifier=<%= user.id %>>
+                                            <td><%= user.id %></td>
+                                            <td><%= user.role %></td>
+                                            <td><%= user.name %></td>
+                                            <td class="no-cap"><p><%= user.email %></p></td>
+                                            <td><%= user.phone_number || 'NULL' %></td>
+                                        </tr>
+                                    <% }) %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                <% } else { %>
+                    <section>
+                        <div class="section-empty">
+                            <p>No users available</p>
+                        </div>
+                    </section>
+                <% } %>
             </main>
         </div>
     </div>

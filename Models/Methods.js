@@ -19,7 +19,9 @@ class Methods {
             ],
             message: [/\S+/],
             name: [/\S+/],
+            password: [/\w{4,}/],
             collection_name: [/\S+/],
+            phone_number: [/\S+/],
             module: [/\S+/],
             course_id: [/\S+/],
             type: [/\S+/],
@@ -49,6 +51,11 @@ class Methods {
                 }
 
                 const isValid = validationRules[key].some(rule => rule.test(value));
+
+                if(!isValid && key == 'password') {
+                    result.invalidKeys[key] = 'Password cannot be shorter than 4 digits';
+                    continue;
+                }
 
                 if (!isValid) result.invalidKeys[key] = `The format for ${name} is invalid`;
             } else result.unknownKeys.push(key);

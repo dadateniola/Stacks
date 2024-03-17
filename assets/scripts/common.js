@@ -33,6 +33,60 @@ class Methods {
         return this;
     }
 
+    static customAdd(obj = {}, params = {}) {
+        const { parent, heading } = params;
+
+        var row = '<tr>';
+        var head = '<tr>';
+
+        Object.entries(obj).forEach(([key, value]) => {
+            const isMail = (key == 'email' || key == 'password') ? 'class="no-cap"' : '';
+            row += `<td><p ${isMail}>` + value + '</p></td>';
+            head += '<td>' + key.split('_').join(' ') + '</td>';
+        })
+
+        row += '</tr>';
+        head += '</tr>';
+
+
+        const sectionHeadHtml = `
+            <div class="section-info">
+                <p>${heading}</p>
+                <div class="line"></div>
+            </div>
+        `;
+        const sectionTableHtml = `
+            <table>
+                <colgroup>
+                    
+                </colgroup>
+                <tbody>
+                    ${head}
+                    ${row}
+                </tbody>
+            </table>
+        `;
+
+
+        const sectionHead = Methods.insertToDOM({
+            type: 'div',
+            text: sectionHeadHtml,
+            classes: 'section-head'
+        });
+        const section = Methods.insertToDOM({
+            type: 'section',
+            append: heading ? sectionHead : null,
+            parent: selectWith(parent, '.item-left'),
+            attributes: 'delete'
+        });
+        const section_table = Methods.insertToDOM({
+            type: 'div',
+            text: sectionTableHtml,
+            classes: 'section-table',
+            parent: section
+        });
+    }
+
     static preventDefault = (event) => event.preventDefault();
     static disableLinksAndBtns = (condition = false, parent = undefined) => {
         const elements = parent ? selectAllWith(parent, "a, button") : selectAll('a, button');
@@ -240,6 +294,30 @@ class Methods {
             (data?.year) ? `${data?.year}: ${data?.name}` :
                 `${data?.code}: ${data?.name}`;
     }
+
+    static generateRandomName() {
+        const firstNames = ['Adam', 'Alice', 'Bob', 'Carol', 'David', 'Emma', 'Frank', 'Grace', 'Hannah', 'Isaac', 'Jade', 'Kevin', 'Linda', 'Michael', 'Nancy', 'Oliver', 'Pamela', 'Quinn', 'Rachel', 'Samuel', 'Tina', 'Ursula', 'Victor', 'Wendy', 'Xavier', 'Yvonne', 'Zack'];
+        const lastNamePrefixes = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Miller', 'Davis', 'Garcia', 'Rodriguez', 'Wilson', 'Martinez', 'Anderson', 'Taylor', 'Thomas', 'Hernandez', 'Moore', 'Martin', 'Jackson', 'Thompson', 'White'];
+
+        const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+        const lastNamePrefix = lastNamePrefixes[Math.floor(Math.random() * lastNamePrefixes.length)];
+
+        return firstName + ' ' + lastNamePrefix;
+    }
+
+    static generateRandomNumber(numDigits) {
+        const min = Math.pow(10, numDigits - 1); // Minimum value based on the number of digits
+        const max = Math.pow(10, numDigits) - 1; // Maximum value based on the number of digits
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    static generateRandomPhoneNumber() {
+        const prefixes = ["090", "080", "070"];
+        const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+        const remainingDigits = Math.random().toString().substring(2, 11); // Generate 8 random digits
+
+        return prefix + remainingDigits;
+    }
 }
 
 class CommonSetup {
@@ -268,8 +346,10 @@ class CommonSetup {
         }
 
         document.body.addEventListener('click', Methods.trackClick);
+        select("[data-delete-no]").addEventListener("click", () => Methods.trackClick(document.body))
 
         CommonSetup.initializeTriggers();
+        this.initializeRandomizer();
         this.initializeSearch();
         this.initializeRequestBtns();
         this.initializeForms();
@@ -301,6 +381,7 @@ class CommonSetup {
         //Other buttons
         selectAll('[data-share]').forEach(share => share.removeEventListener("click", CommonSetup.share));
         selectAll('[data-collection]').forEach(share => share.removeEventListener("click", CommonSetup.collection));
+        selectAll('[data-delete-btn]').forEach(del => del.removeEventListener("click", CommonSetup.delete));
 
         //---------------------------------------------------------------------------------
 
@@ -311,6 +392,18 @@ class CommonSetup {
         //Other buttons
         selectAll('[data-share]').forEach(share => share.addEventListener("click", CommonSetup.share));
         selectAll('[data-collection]').forEach(share => share.addEventListener("click", CommonSetup.collection));
+        selectAll('[data-delete-btn]').forEach(del => del.addEventListener("click", CommonSetup.delete));
+    }
+
+    initializeRandomizer() {
+        selectAll("button[data-random]").forEach(button => {
+            const form = button.dataset?.random;
+            button.addEventListener("click", () => {
+                CommonSetup.attachSpinner({ elem: button });
+                new Randomizer({ form });
+                CommonSetup.detachSpinner({ elem: button });
+            });
+        })
     }
 
     static openTrigger() {
@@ -319,6 +412,16 @@ class CommonSetup {
 
         const animate = select(`.${this.dataset?.affect}`) || this;
         const triggered = select(`#${this.dataset?.trigger}`);
+
+        if (!triggered) {
+            new Alert({
+                message: "The page you're requesting for isn't available",
+                type: 'warning'
+            })
+            console.warn(`No triggerable element found, Searching "#${this.dataset?.trigger}"`);
+            return;
+        }
+
         const children = (selectAllWith(triggered, 'section').length) ? selectAllWith(triggered, 'section') : triggered.children;
         const tl = gsap.timeline();
 
@@ -384,6 +487,8 @@ class CommonSetup {
             elem.removeAttribute('data-resource-inserted');
         });
         selectAll('[data-delete]').forEach(elem => elem.remove());
+        select("#delete-overlay input[name='id']").value = '';
+        select("#delete-overlay input[name='type']").value = '';
     }
 
     static async redirectTriggerHandle(elem) {
@@ -401,7 +506,13 @@ class CommonSetup {
         if (trigger == 'course-box') await CommonSetup.handleCourseTrigger(identifier)
         if (trigger == 'request') await CommonSetup.handleRequestTrigger(identifier)
         if (trigger == 'collection') await CommonSetup.handleCollectionInfoTrigger(identifier);
+        if (trigger == 'user') await CommonSetup.handleUserTrigger(identifier);
         if (trigger == 'search-box') CommonSetup.handleSearchTrigger(elem);
+
+        if (trigger == 'user' || trigger == 'resource') {
+            select("#delete-overlay input[name='id']").value = identifier;
+            select("#delete-overlay input[name='type']").value = trigger;
+        }
 
         CommonSetup.initializeTriggers();
     }
@@ -455,6 +566,57 @@ class CommonSetup {
             })
     }
 
+    static delete() {
+        if (!(this instanceof HTMLElement)) return console.warn("Clicked element is not an HTML Element");
+
+        const cont = this.closest('.item-cont');
+
+        if (!cont) return console.warn("Element not found");
+
+        const deleteOverlay = select("#delete-overlay");
+        const deletePopUp = selectWith(deleteOverlay, '.pop-up-cont');
+
+        const tl = gsap.timeline();
+
+        tl
+            .call(() => {
+                this.classList.add("active");
+                CommonSetup.attachSpinner({ elem: this });
+
+                cont.setAttribute('cont-is-waiting', '');
+                this.setAttribute('btn-is-waiting', '');
+            })
+
+            .set(deletePopUp, { opacity: 0, yPercent: 100 })
+            .set(deleteOverlay, { display: 'block' })
+            .to(cont, { scale: 0.9, opacity: 0.5, ease: 'expo.inOut', duration: 2 })
+            .to(deletePopUp, { opacity: 1, yPercent: 0, ease: 'expo.out' }, "-=1")
+            .call(() => {
+                Methods.trackOutsideClick(deletePopUp, CommonSetup.closeDelete)
+            })
+    }
+
+    static closeDelete() {
+        const cont = select("[cont-is-waiting]");
+        const btn = select("[btn-is-waiting]");
+        const deleteOverlay = select("#delete-overlay");
+        const deletePopUp = selectWith(deleteOverlay, '.pop-up-cont');
+
+        const tl = gsap.timeline();
+
+        tl
+            .to(deletePopUp, { opacity: 0, yPercent: 100 })
+            .to(cont, { scale: 1, opacity: 1, ease: 'expo.inOut', duration: 2 }, "<")
+            .set(deleteOverlay, { display: 'none' })
+            .call(() => {
+                CommonSetup.detachSpinner({ elem: btn });
+                btn?.classList.remove("active");
+
+                cont.removeAttribute('cont-is-waiting');
+                btn.removeAttribute('btn-is-waiting');
+            })
+    }
+
     static closeCollection() {
         const collectionBox = select(".add-to-collection-box");
         const collectionCont = select(".add-to-collection-cont");
@@ -476,9 +638,11 @@ class CommonSetup {
     //Insert data and sections into the DOM
     static addItems(data = {}, sections = {}, extra_data = []) {
         const parent = (data?.parent instanceof HTMLElement) ? data.parent : null;
+        const dataStay = data?.stay;
 
         if (parent) {
             delete data.parent;
+            delete data.stay;
 
             selectAllWith(parent, "section[data-delete]").forEach(e => e.remove());
 
@@ -488,13 +652,14 @@ class CommonSetup {
                 if (!elem) continue;
 
                 elem.innerText = value;
-                elem.setAttribute("data-resource-inserted", "")
+                dataStay ? '' : elem.setAttribute("data-resource-inserted", "");
             }
         }
 
         for (const key in sections) {
             const sectionData = sections[key];
             const parent = (sectionData?.parent instanceof HTMLElement) ? sectionData.parent : null;
+
             const heading = sectionData.heading || null;
             const code = sectionData?.code;
             const empty = sectionData?.empty;
@@ -761,6 +926,54 @@ class CommonSetup {
         } catch (error) {
             console.error('Error in handleRequestTrigger:', error);
             new Alert({ message: "Error retrieving request information, please try again", type: 'error' });
+        }
+    }
+
+    //Load correct data when a user is triggered
+    static async handleUserTrigger(id = null) {
+        if (!id) {
+            new Alert({ message: "Missing identifier for course retrieval, please reload the page and try again", type: 'error' });
+            return;
+        }
+
+        try {
+            const initUsers = new Items({ table: 'users', id });
+            const [user] = await initUsers.find();
+
+            const parent = select("#overlay #user");
+
+            delete user.created_at;
+            delete user.updated_at;
+
+            const info = {
+                id: user.id,
+                name: user.name,
+                role: user.role
+            }
+
+            const extra_info = {
+                email: user.email,
+                password: user.password,
+                phone_number: user.phone_number,
+            }
+
+            const data = {
+                parent,
+                name: user.name
+            }
+
+            CommonSetup.addItems(data);
+
+            Methods.customAdd(info, { parent, heading: 'user infromation' });
+            Methods.customAdd(extra_info, { parent });
+
+            CommonSetup.initializeTriggers();
+        } catch (error) {
+            console.error('Error in *:', error);
+            new Alert({
+                message: "Error retrieving user information, please try again",
+                type: 'error'
+            });
         }
     }
 
@@ -1266,7 +1479,7 @@ class CommonSetup {
         if (!(form instanceof HTMLElement)) return new Alert({ message: "Couldn't find form data for submission", type: 'warning' });
 
         var button = selectWith(form, 'button[type="submit"]');
-        if (!button) button = select(`button[type="submit"][form=${form?.id}]`);
+        if (!button) button = select(`button[type="submit"][form=${form.getAttribute("id")}]`);
 
         CommonSetup.attachSpinner({ elem: button });
 
@@ -1302,8 +1515,13 @@ class CommonSetup {
 
                         if (data?.clean_up) {
                             if (data.clean_up == 'request') await CommonSetup.cleanUpRequest(data.request_id);
-                            if (data.clean_up == 'create-collection') Methods.trackClick(document.body);
+                            if (data.clean_up == 'create-collection' || data.clean_up == 'delete') Methods.trackClick(document.body);
                             if (data.clean_up == 'add-resource') new Updater({ id: data.lecturer_id, type: 'resource' });
+                            if (data.clean_up == 'add-user') new Updater({ type: 'user' });
+                            if (data.clean_up == 'delete-user') {
+                                Methods.trackClick(document.body);
+                                new Updater({ type: 'user' });
+                            }
                         }
 
                         const parent = select('label[data-preview="pdfFile"]');
@@ -1621,13 +1839,14 @@ class Alert {
 
 new CommonSetup();
 
-function test(elem) {
-    const value = elem.value;
-    const toChange = select(`#select-clone [data-request="${value}"]`);
+// function test(elem) {
+//     const value = elem.value;
+//     const toChange = select(`#select-clone [data-request="${value}"]`);
 
-    selectAll("#select-clone .form-group").forEach(e => e.classList.remove("active"))
-    selectAll("#select-clone .form-group:not([data-request-select]) select").forEach(e => e.disabled = true)
+//     selectAll("#select-clone .form-group").forEach(e => e.classList.remove("active"))
+//     selectAll("#select-clone .form-group:not([data-request-select]) select").forEach(e => e.disabled = true)
 
-    toChange.classList.add("active");
-    selectWith(toChange, 'select').disabled = false;
-}
+//     toChange.classList.add("active");
+//     selectWith(toChange, 'select').disabled = false;
+// }
+CommonSetup.handleUserTrigger(100000);

@@ -113,6 +113,7 @@
                         <a href="" target="_blank" class="form-active" data-resource-read>read</a>
                         <button data-share>share</button>
                         <button data-collection>add to collection</button>
+                        <button data-delete-btn>delete</button>
                         <button data-close>close</button>
                     </div>
                 </div>
@@ -176,6 +177,7 @@
                         <h1>actions</h1>
                         <button data-share>share</button>
                         <button>make a request</button>
+                        <button data-delete-btn>delete</button>
                         <button data-close>close</button>
                     </div>
                 </div>
@@ -257,6 +259,58 @@
             </div>
         </div>
     </div>
+    <div class="item-box" id="add-user">
+        <div class="item-form">
+            <div class="overlay-heading">
+                <h1 class="no-cap">Add a new user</h1>
+            </div>
+            <form class="form-grid" action="/add-user" id="add-user-form">
+                <div class="form-group">
+                    <label for="id">ID</label>
+                    <input type="text" name="id" id="id" placeholder="Enter user ID">
+                </div>
+                <div class="form-group">
+                    <label for="name">full name</label>
+                    <input type="text" name="name" id="name" placeholder="Enter user fullname">
+                </div>
+                <div class="form-group">
+                    <label for="email">email</label>
+                    <input type="text" name="email" id="email" placeholder="Enter user email">
+                </div>
+                <div class="form-group">
+                    <label for="password">password</label>
+                    <input type="text" name="password" id="password" placeholder="Enter user password">
+                </div>
+                <div class="form-group">
+                    <label for="phone_number">phone number</label>
+                    <input type="text" name="phone_number" id="phone_number" placeholder="Enter user phone number">
+                </div>
+                <div class="form-group">
+                    <label for="department_id">department</label>
+                    <select name="department_id" id="department_id">
+                        <option value="" selected>Select department</option>
+                        <% data.allDepartments.forEach(department=> { %>
+                            <option value=<%=department.id %>><%= department.name %></option>
+                        <% }) %>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="role">role</label>
+                    <select name="role" id="role">
+                        <option value="" selected>Select user role</option>
+                        <% data.allRoles.forEach(role=> { %>
+                            <option value=<%=role.role %>><%= role.role %></option>
+                        <% }) %>
+                    </select>
+                </div>
+            </form>
+            <div class="form-cta">
+                <button data-random="add-user-form">randomize</button>
+                <button data-close>close</button>
+                <button type="submit" form="add-user-form">submit</button>
+            </div>
+        </div>
+    </div>
     <div class="item-box" id="request">
         <div class="request-box" data-access>
             <div class="request-info">
@@ -304,6 +358,25 @@
             </div>
         </div>
     </div>
+    <div class="item-box" id="user">
+        <div class="item-cont">
+            <div class="item-left">
+                <div class="overlay-heading">
+                    <h1 data-resource-name>-</h1>
+                </div>
+            </div>
+            <div class="item-right">
+                <div class="item-info">
+                    <div class="item-info-section">
+                        <h1>actions</h1>
+                        <button>Edit</button>
+                        <button data-delete-btn>Delete</button>
+                        <button data-close>close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="hidden" id="hidden">
         <div id="message">
             <div class="form-group">
@@ -338,6 +411,22 @@
                     <% }) %>
                 </select>
             </div>
+        </div>
+    </div>
+</div>
+<div id="delete-overlay">
+    <div class="pop-up-cont">
+        <div class="pop-up-section">
+            <h1>Are you sure you want to delete this content?</h1>
+            <form action="/delete" method="post">
+                <input type="hidden" name="id">
+                <input type="hidden" name="type">
+                <div class="form-row">
+                    <button data-delete-no type="button">no</button>
+                    <button data-delete-yes type="submit">yes</button>
+                </div>
+            </form>
+            <span class="delete-warning">This data will no longer be available to access if deleted.</span>
         </div>
     </div>
 </div>
