@@ -1,4 +1,4 @@
-<div id="overlay" class="active">
+<div id="overlay" class="active-temp">
     <div class="search" data-avoid>
         <input type="text" placeholder="Search." data-trigger="search-box" data-event="focus" data-affect="search">
         <div class="search-img">
@@ -44,11 +44,11 @@
         <div class="item-cont">
             <div class="item-left">
                 <div class="overlay-heading">
-                    <h1 data-resource-code>-</h1>
-                    <p data-resource-name>-</p>
+                    <h1 data-resource-code data-edit-code>-</h1>
+                    <p data-resource-name data-edit-name>-</p>
                 </div>
                 <div class="desc">
-                    <p>-</p>
+                    <p data-resource-description data-edit-description>-</p>
                 </div>
             </div>
             <div class="item-right">
@@ -69,17 +69,18 @@
                         <h1>actions</h1>
                         <button>make a request</button>
                         <button>report a problem</button>
+                        <button data-edit-btn>edit</button>
                         <button data-close>close</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="item-box" id="resource" data-triggered>
+    <div class="item-box" id="resource">
         <div class="item-cont">
             <div class="item-left">
                 <div class="overlay-heading">
-                    <h1 data-resource-joinedName data-edit-name>-</h1>
+                    <h1 data-resource-joinedName data-edit-joinedName>-</h1>
                     <p>from: <span class="highlight" data-trigger="course-box" data-resource-code>-</span></p>
                 </div>
                 <div class="desc">
@@ -146,10 +147,10 @@
         <div class="item-cont">
             <div class="item-left">
                 <div class="overlay-heading">
-                    <h1 class="no-cap" data-resource-name>-</h1>
+                    <h1 class="no-cap" data-resource-name data-edit-collection_name>-</h1>
                 </div>
                 <div class="desc">
-                    <p data-resource-description>No collection description</p>
+                    <p data-resource-description data-edit-description>-</p>
                 </div>
             </div>
             <div class="item-right">
@@ -178,6 +179,7 @@
                         <h1>actions</h1>
                         <button data-share>share</button>
                         <button>make a request</button>
+                        <button data-edit-btn>edit</button>
                         <button data-delete-btn>delete</button>
                         <button data-close>close</button>
                     </div>
@@ -424,6 +426,32 @@
                     placeholder="Enter resource description here..."></textarea>
             </div>
         </div>
+        <div data-edit-trigger="course-box">
+            <div class="form-group">
+                <label>course code</label>
+                <input type="text" name="code" id="code" placeholder="Enter course code" maxlength="8">
+            </div>
+            <div class="form-group">
+                <label>course name</label>
+                <input type="text" name="name" id="name" placeholder="Enter course name">
+            </div>
+            <div class="form-group">
+                <label>course description</label>
+                <textarea name="description" id="description" cols="30" rows="3"
+                    placeholder="Enter resource description here..."></textarea>
+            </div>
+        </div>
+        <div data-edit-trigger="collection">
+            <div class="form-group">
+                <label>collection name</label>
+                <input type="text" name="collection_name" id="collection_name" placeholder="Enter collection name">
+            </div>
+            <div class="form-group">
+                <label>collection description</label>
+                <textarea name="description" id="description" cols="30" rows="3"
+                    placeholder="Enter resource description here..."></textarea>
+            </div>
+        </div>
     </div>
 </div>
 <div id="delete-overlay">
@@ -442,9 +470,11 @@
         </div>
     </div>
 </div>
-<div id="edit-overlay" data-edit-type="resource" data-edit-identifier="2">
+<div id="edit-overlay">
     <div class="pop-up-cont">
-        <form class="pop-up-section edit" method="post">
+        <form action="/edit" class="pop-up-section edit" method="post">
+            <input type="hidden" name="id">
+            <input type="hidden" name="type">
             <div class="form-row">
                 <button data-edit-cancel type="button">cancel</button>
                 <button data-edit-update type="submit">update</button>

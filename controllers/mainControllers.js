@@ -704,15 +704,75 @@ const handleDelete = async (req, res) => {
             clean_up: 'delete'
         }
 
+        if(!id || !type) {
+            res.status(400).send({
+                message: "Couldn't delete data, due to missing information",
+                type: "error"
+            });
+
+            return;
+        }
+
         if (type == 'user') {
             await User.delete(id);
             send.message = 'User successfully deleted';
             send.clean_up = 'delete-user'
-        }
-
-        if (type == 'resource') {
+        }else if (type == 'resource') {
             await Resource.delete(id);
             send.message = 'Resource successfully deleted';
+        }
+
+        res.status(200).send(send);
+    } catch (error) {
+        console.error(error)
+        res.status(500).send({
+            message: "Internal server error, please try again",
+            type: "error"
+        });
+    }
+}
+
+const handleEdit = async (req, res) => {
+    try {
+        const { id, type } = req.body;
+        const send = {
+            message: 'Data successfully updated',
+            type: "success",
+            clean_up: 'delete'
+        }
+        var result = 0;
+
+        if(!id || !type) {
+            res.status(400).send({
+                message: "Couldn't update data, due to missing information",
+                type: "error"
+            });
+
+            return;
+        }
+
+        delete req.body.type;
+        
+        if(type == 'resource') {
+            const resource = new Resource(req.body);
+            result = await resource.update();
+            send.message = 'Resource successfully deleted';
+        } else if (type == 'course-box') {
+            const course = new Course(req.body);
+            result = await course.update();
+            send.message = 'Course successfully deleted';
+        } else if (type == 'collection') {
+            const collection = new Collection(req.body);
+            result = await collection.update();
+            send.message = 'Collection successfully deleted';
+        }
+
+        if (!result) {
+            res.status(500).send({
+                message: "Unable to update data, please try again",
+                type: "error",
+            });
+            return;
         }
 
         res.status(200).send(send);
@@ -884,5 +944,6 @@ module.exports = {
     showResourcesPage, showRequestsPage, getItems, getUserCollections,
     handleUpload, getPDF, handleAddingResources, handleHistory,
     handleAddingCollection, handleCollectionResouorce, showCollectionsPage,
-    showUserProfile, showManageUsersPage, handleAddUser, handleDelete
+    showUserProfile, showManageUsersPage, handleAddUser, handleDelete,
+    handleEdit
 }

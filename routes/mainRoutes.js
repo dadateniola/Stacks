@@ -1,5 +1,5 @@
 const { Router } = require("express");
-const { showSignPage, showResourcesPage, getItems, showRequestsPage, handleLogin, handleRequestAccess, handleUpload, getPDF, handleAddingResources, showDashboard, routeSetup, handleAcceptedRequests, handleDeclinedRequests, showHistoryPage, handleHistory, getUserCollections, handleAddingCollection, handleCollectionResouorce, showCollectionsPage, showUserProfile, showManageUsersPage, handleAddUser, handleDelete } = require("../controllers/mainControllers");
+const { showSignPage, showResourcesPage, getItems, showRequestsPage, handleLogin, handleRequestAccess, handleUpload, getPDF, handleAddingResources, showDashboard, routeSetup, handleAcceptedRequests, handleDeclinedRequests, showHistoryPage, handleHistory, getUserCollections, handleAddingCollection, handleCollectionResouorce, showCollectionsPage, showUserProfile, showManageUsersPage, handleAddUser, handleDelete, handleEdit } = require("../controllers/mainControllers");
 
 const router = Router();
 
@@ -28,6 +28,8 @@ router.post("/add-collection-resource", handleCollectionResouorce);
 router.post("/add-user", handleAddUser);
 
 router.post("/delete", handleDelete);
+
+router.post("/edit", handleEdit);
 
 
 router.use(routeSetup);

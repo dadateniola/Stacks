@@ -512,14 +512,17 @@ class CommonSetup {
         if (trigger == 'user') await CommonSetup.handleUserTrigger(identifier);
         if (trigger == 'search-box') CommonSetup.handleSearchTrigger(elem);
 
-        if (trigger == 'user' || trigger == 'resource') {
+        if (trigger == 'user' || trigger == 'resource' || trigger == 'course-box' || trigger == 'collection') {
             select("#delete-overlay input[name='type']").value = trigger;
             select("#delete-overlay input[name='id']").value = identifier;
-
+            
             const editOverlay = select("#edit-overlay");
-
+            
             editOverlay.setAttribute("data-edit-type", trigger);
             editOverlay.setAttribute("data-edit-identifier", identifier);
+            
+            selectWith(editOverlay, "input[type='hidden'][name='type']").value = trigger;
+            selectWith(editOverlay, "input[type='hidden'][name='id']").value = identifier;
         }
 
         CommonSetup.initializeTriggers();
@@ -1033,6 +1036,7 @@ class CommonSetup {
             const data = {
                 parent: select('#overlay #collection'),
                 name: Methods.sentenceCase(collection.collection_name),
+                description: Methods.sentenceCase(collection.description),
                 slides: slides.length,
                 pqs: pqs.length
             }
@@ -1181,7 +1185,6 @@ class CommonSetup {
         }
     }
 
-    //Organize the below
     static handleEditTrigger() {
         const editOverlay = select("#edit-overlay");
         const type = editOverlay.getAttribute("data-edit-type");
@@ -1199,23 +1202,40 @@ class CommonSetup {
             editForm.insertBefore(clone, before);
         })
 
+        CommonSetup.fixJoinedNames(type);
+
         const formInputs = selectAllWith(editForm, "input, textarea");
-        formInputs.forEach(elem => {
+        for (const elem of formInputs) {
             const name = elem.getAttribute("name");
             const info = select(`#${type} [data-edit-${name}]`);
+
+            if (!info) continue;
+
             const value = info.innerText;
 
             elem.value = value;
-            elem.addEventListener("focus", function(event) {
+            elem.addEventListener("focus", function (event) {
                 info.innerHTML = '<mark>' + event.target.value + '</mark>'
             })
-            elem.addEventListener("blur", function(event) {
+            elem.addEventListener("blur", function (event) {
                 info.innerHTML = event.target.value;
             })
-            elem.addEventListener("input", function(event) {
+            elem.addEventListener("input", function (event) {
+                event.target.value = Methods.sentenceCase(event.target.value);
                 info.innerHTML = '<mark>' + event.target.value + '</mark>';
             })
-        })
+        }
+    }
+
+    static fixJoinedNames(type) {
+        const joinedName = select(`#${type} [data-edit-joinedName]`);
+
+        if (!joinedName) return;
+
+        const splitJoined = joinedName.innerText.split(":");
+        const span = '<span data-edit-name>' + splitJoined.pop() + '</span>';
+
+        joinedName.innerHTML = splitJoined.shift() + ': ' + span;
     }
 
     //Stores viewed resource into history
