@@ -1947,13 +1947,13 @@ class Alert {
 
 new CommonSetup();
 
-// function test(elem) {
-//     const value = elem.value;
-//     const toChange = select(`#select-clone [data-request="${value}"]`);
+function test(elem) {
+    const value = elem.value;
+    const toChange = select(`#select-clone [data-request="${value}"]`);
 
-//     selectAll("#select-clone .form-group").forEach(e => e.classList.remove("active"))
-//     selectAll("#select-clone .form-group:not([data-request-select]) select").forEach(e => e.disabled = true)
+    selectAll("#select-clone .form-group").forEach(e => e.classList.remove("active"))
+    selectAll("#select-clone .form-group:not([data-request-select]) select").forEach(e => e.disabled = true)
 
-//     toChange.classList.add("active");
-//     selectWith(toChange, 'select').disabled = false;
-// }
+    toChange.classList.add("active");
+    selectWith(toChange, 'select').disabled = false;
+}
