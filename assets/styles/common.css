@@ -98,6 +98,11 @@ iframe {
     outline: 0;
 }
 
+mark {
+    font-weight: inherit;
+   background-color: pink;
+}
+
 [data-radio] {
     cursor: pointer;
 }
@@ -298,6 +303,7 @@ iframe {
     color: white;
 }
 
+#edit-overlay,
 #delete-overlay {
     position: fixed;
     top: 0;
@@ -366,6 +372,10 @@ iframe {
 
 .pop-up-section {
     gap: 15px;
+    max-height: initial;
+}
+
+.pop-up-section:not(.edit) {
     padding-bottom: 0;
 }
 
@@ -373,12 +383,19 @@ iframe {
     flex: 1;
 }
 
+.pop-up-section button[data-edit-update],
 .pop-up-section button[data-delete-no] {
     background-color: var(--keepel);
 }
 
+.pop-up-section button[data-edit-cancel],
 .pop-up-section button[data-delete-yes] {
     background-color: var(--mandy);
+}
+
+.pop-up-section button[data-delete-no],
+.pop-up-section button[data-edit-cancel] {
+    text-decoration: underline;
 }
 
 .pop-up-section .delete-warning {

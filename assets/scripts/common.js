@@ -347,6 +347,7 @@ class CommonSetup {
 
         document.body.addEventListener('click', Methods.trackClick);
         select("[data-delete-no]").addEventListener("click", () => Methods.trackClick(document.body))
+        select("[data-edit-cancel]").addEventListener("click", () => Methods.trackClick(document.body))
 
         CommonSetup.initializeTriggers();
         this.initializeRandomizer();
@@ -382,6 +383,7 @@ class CommonSetup {
         selectAll('[data-share]').forEach(share => share.removeEventListener("click", CommonSetup.share));
         selectAll('[data-collection]').forEach(share => share.removeEventListener("click", CommonSetup.collection));
         selectAll('[data-delete-btn]').forEach(del => del.removeEventListener("click", CommonSetup.delete));
+        selectAll('[data-edit-btn]').forEach(edit => edit.removeEventListener("click", CommonSetup.edit));
 
         //---------------------------------------------------------------------------------
 
@@ -393,6 +395,7 @@ class CommonSetup {
         selectAll('[data-share]').forEach(share => share.addEventListener("click", CommonSetup.share));
         selectAll('[data-collection]').forEach(share => share.addEventListener("click", CommonSetup.collection));
         selectAll('[data-delete-btn]').forEach(del => del.addEventListener("click", CommonSetup.delete));
+        selectAll('[data-edit-btn]').forEach(edit => edit.addEventListener("click", CommonSetup.edit));
     }
 
     initializeRandomizer() {
@@ -510,8 +513,13 @@ class CommonSetup {
         if (trigger == 'search-box') CommonSetup.handleSearchTrigger(elem);
 
         if (trigger == 'user' || trigger == 'resource') {
-            select("#delete-overlay input[name='id']").value = identifier;
             select("#delete-overlay input[name='type']").value = trigger;
+            select("#delete-overlay input[name='id']").value = identifier;
+
+            const editOverlay = select("#edit-overlay");
+
+            editOverlay.setAttribute("data-edit-type", trigger);
+            editOverlay.setAttribute("data-edit-identifier", identifier);
         }
 
         CommonSetup.initializeTriggers();
@@ -544,94 +552,96 @@ class CommonSetup {
     }
 
     static collection() {
-        const collectionBox = select(".add-to-collection-box");
-        const collectionCont = select(".add-to-collection-cont");
-        const background = select(".item-box#resource .item-cont");
+        if (!(this instanceof HTMLElement)) return console.warn("Clicked element is not an HTML Element");
 
-        const tl = gsap.timeline();
+        const button = this;
+        const cont = button.closest('.item-cont');
 
-        tl
-            .call(() => {
-                this.classList.add("active");
-                CommonSetup.attachSpinner({ elem: this });
-                CommonSetup.handleCollectionTrigger();
-            })
+        if (!cont) return console.warn("Element not found");
 
-            .set(collectionCont, { opacity: 0, yPercent: 100 })
-            .set(collectionBox, { display: 'block' })
-            .to(background, { scale: 0.9, opacity: 0.5, ease: 'expo.inOut', duration: 2 })
-            .to(collectionCont, { opacity: 1, yPercent: 0, ease: 'expo.out' }, "-=1")
-            .call(() => {
-                Methods.trackOutsideClick(select(".add-to-collection-cont"), CommonSetup.closeCollection)
-            })
+        const overlay = select(".add-to-collection-box");
+        const popup = select(".add-to-collection-cont");
+
+        CommonSetup.openPopup({ button, cont, overlay, popup, run: [CommonSetup.handleCollectionTrigger] });
     }
 
     static delete() {
         if (!(this instanceof HTMLElement)) return console.warn("Clicked element is not an HTML Element");
 
-        const cont = this.closest('.item-cont');
+        const button = this;
+        const cont = button.closest('.item-cont');
 
         if (!cont) return console.warn("Element not found");
 
-        const deleteOverlay = select("#delete-overlay");
-        const deletePopUp = selectWith(deleteOverlay, '.pop-up-cont');
+        const overlay = select("#delete-overlay");
+        const popup = selectWith(overlay, '.pop-up-cont');
+
+        CommonSetup.openPopup({ button, cont, overlay, popup });
+    }
+
+    static edit() {
+        if (!(this instanceof HTMLElement)) return console.warn("Clicked element is not an HTML Element");
+
+        const button = this;
+        const cont = button.closest('.item-cont');
+
+        if (!cont) return console.warn("Element not found");
+
+        const overlay = select("#edit-overlay");
+        const popup = selectWith(overlay, '.pop-up-cont');
+
+        CommonSetup.openPopup({ button, cont, overlay, popup, run: [CommonSetup.handleEditTrigger] });
+    }
+
+    static openPopup(params = {}) {
+        const { button, cont, overlay, popup, run } = params;
+
+        if (!(button instanceof HTMLElement)) return console.warn("Button isn't an HTML Element");
+        if (!(cont instanceof HTMLElement)) return console.warn("Cont isn't an HTML Element");
+        if (!(overlay instanceof HTMLElement)) return console.warn("Overlay isn't an HTML Element");
+        if (!(popup instanceof HTMLElement)) return console.warn("Popup isn't an HTML Element");
 
         const tl = gsap.timeline();
 
         tl
             .call(() => {
-                this.classList.add("active");
-                CommonSetup.attachSpinner({ elem: this });
+                button.classList.add("active");
+                CommonSetup.attachSpinner({ elem: button });
+                run?.forEach(func => func());
 
                 cont.setAttribute('cont-is-waiting', '');
-                this.setAttribute('btn-is-waiting', '');
+                button.setAttribute('btn-is-waiting', '');
             })
 
-            .set(deletePopUp, { opacity: 0, yPercent: 100 })
-            .set(deleteOverlay, { display: 'block' })
+            .set(popup, { opacity: 0, yPercent: 100 })
+            .set(overlay, { display: 'block' })
             .to(cont, { scale: 0.9, opacity: 0.5, ease: 'expo.inOut', duration: 2 })
-            .to(deletePopUp, { opacity: 1, yPercent: 0, ease: 'expo.out' }, "-=1")
+            .to(popup, { opacity: 1, yPercent: 0, ease: 'expo.out' }, "-=1")
             .call(() => {
-                Methods.trackOutsideClick(deletePopUp, CommonSetup.closeDelete)
+                Methods.trackOutsideClick(popup, () => CommonSetup.closePopup({ button, cont, overlay, popup }))
             })
     }
 
-    static closeDelete() {
-        const cont = select("[cont-is-waiting]");
-        const btn = select("[btn-is-waiting]");
-        const deleteOverlay = select("#delete-overlay");
-        const deletePopUp = selectWith(deleteOverlay, '.pop-up-cont');
+    static closePopup(params = {}) {
+        const { button, cont, overlay, popup } = params;
+
+        if (!(button instanceof HTMLElement)) return console.warn("Button isn't an HTML Element");
+        if (!(cont instanceof HTMLElement)) return console.warn("Cont isn't an HTML Element");
+        if (!(overlay instanceof HTMLElement)) return console.warn("Overlay isn't an HTML Element");
+        if (!(popup instanceof HTMLElement)) return console.warn("Popup isn't an HTML Element");
 
         const tl = gsap.timeline();
 
         tl
-            .to(deletePopUp, { opacity: 0, yPercent: 100 })
+            .to(popup, { opacity: 0, yPercent: 100 })
             .to(cont, { scale: 1, opacity: 1, ease: 'expo.inOut', duration: 2 }, "<")
-            .set(deleteOverlay, { display: 'none' })
+            .set(overlay, { display: 'none' })
             .call(() => {
-                CommonSetup.detachSpinner({ elem: btn });
-                btn?.classList.remove("active");
+                CommonSetup.detachSpinner({ elem: button });
+                button?.classList.remove("active");
 
                 cont.removeAttribute('cont-is-waiting');
-                btn.removeAttribute('btn-is-waiting');
-            })
-    }
-
-    static closeCollection() {
-        const collectionBox = select(".add-to-collection-box");
-        const collectionCont = select(".add-to-collection-cont");
-        const background = select(".item-box#resource .item-cont");
-        const collectionBtn = select(".item-box#resource [data-collection]")
-
-        const tl = gsap.timeline();
-
-        tl
-            .to(collectionCont, { opacity: 0, yPercent: 100 })
-            .to(background, { scale: 1, opacity: 1, ease: 'expo.inOut', duration: 2 }, "<")
-            .set(collectionBox, { display: 'none' })
-            .call(() => {
-                CommonSetup.detachSpinner({ elem: collectionBtn });
-                collectionBtn.classList.remove("active");
+                button.removeAttribute('btn-is-waiting');
             })
     }
 
@@ -1169,6 +1179,43 @@ class CommonSetup {
 
             CommonSetup.detachSpinner({ elem: selectWith(button, '.collection-cta') });
         }
+    }
+
+    //Organize the below
+    static handleEditTrigger() {
+        const editOverlay = select("#edit-overlay");
+        const type = editOverlay.getAttribute("data-edit-type");
+        const id = editOverlay.getAttribute("data-edit-identifier");
+
+        selectAll('[data-edit-delete]').forEach(elem => elem.remove());
+
+        const editForm = select("#edit-overlay form");
+        const before = selectWith(editForm, '.form-row');
+        const inputs = selectAll(`#overlay .hidden#hidden [data-edit-trigger="${type}"] .form-group`);
+        inputs.forEach(elem => {
+            const clone = elem.cloneNode(true);
+            clone.setAttribute("data-edit-delete", '')
+
+            editForm.insertBefore(clone, before);
+        })
+
+        const formInputs = selectAllWith(editForm, "input, textarea");
+        formInputs.forEach(elem => {
+            const name = elem.getAttribute("name");
+            const info = select(`#${type} [data-edit-${name}]`);
+            const value = info.innerText;
+
+            elem.value = value;
+            elem.addEventListener("focus", function(event) {
+                info.innerHTML = '<mark>' + event.target.value + '</mark>'
+            })
+            elem.addEventListener("blur", function(event) {
+                info.innerHTML = event.target.value;
+            })
+            elem.addEventListener("input", function(event) {
+                info.innerHTML = '<mark>' + event.target.value + '</mark>';
+            })
+        })
     }
 
     //Stores viewed resource into history
@@ -1849,4 +1896,5 @@ new CommonSetup();
 //     toChange.classList.add("active");
 //     selectWith(toChange, 'select').disabled = false;
 // }
-CommonSetup.handleUserTrigger(100000);
+
+CommonSetup.handleResourceTrigger(2);

@@ -1,4 +1,4 @@
-<div id="overlay" class="active-temp">
+<div id="overlay" class="active">
     <div class="search" data-avoid>
         <input type="text" placeholder="Search." data-trigger="search-box" data-event="focus" data-affect="search">
         <div class="search-img">
@@ -75,15 +75,15 @@
             </div>
         </div>
     </div>
-    <div class="item-box" id="resource">
+    <div class="item-box" id="resource" data-triggered>
         <div class="item-cont">
             <div class="item-left">
                 <div class="overlay-heading">
-                    <h1 data-resource-joinedName>-</h1>
+                    <h1 data-resource-joinedName data-edit-name>-</h1>
                     <p>from: <span class="highlight" data-trigger="course-box" data-resource-code>-</span></p>
                 </div>
                 <div class="desc">
-                    <p data-resource-description>-</p>
+                    <p data-resource-description data-edit-description>-</p>
                 </div>
             </div>
             <div class="item-right">
@@ -113,6 +113,7 @@
                         <a href="" target="_blank" class="form-active" data-resource-read>read</a>
                         <button data-share>share</button>
                         <button data-collection>add to collection</button>
+                        <button data-edit-btn>edit</button>
                         <button data-delete-btn>delete</button>
                         <button data-close>close</button>
                     </div>
@@ -412,6 +413,17 @@
                 </select>
             </div>
         </div>
+        <div data-edit-trigger="resource">
+            <div class="form-group">
+                <label>resource name</label>
+                <input type="text" name="name" id="name" placeholder="Enter resource name">
+            </div>
+            <div class="form-group">
+                <label>resource description</label>
+                <textarea name="description" id="description" cols="30" rows="3"
+                    placeholder="Enter resource description here..."></textarea>
+            </div>
+        </div>
     </div>
 </div>
 <div id="delete-overlay">
@@ -428,5 +440,15 @@
             </form>
             <span class="delete-warning">This data will no longer be available to access if deleted.</span>
         </div>
+    </div>
+</div>
+<div id="edit-overlay" data-edit-type="resource" data-edit-identifier="2">
+    <div class="pop-up-cont">
+        <form class="pop-up-section edit" method="post">
+            <div class="form-row">
+                <button data-edit-cancel type="button">cancel</button>
+                <button data-edit-update type="submit">update</button>
+            </div>
+        </form>
     </div>
 </div>
