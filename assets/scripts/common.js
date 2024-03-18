@@ -235,7 +235,7 @@ class Methods {
     }
 
     static sentenceCase(str = '') {
-        return str.charAt(0).toUpperCase() + str.slice(1);
+        return str ? str.charAt(0).toUpperCase() + str.slice(1) : null;
     }
 
     static assignErrorMsgs(data) {
@@ -346,8 +346,9 @@ class CommonSetup {
         }
 
         document.body.addEventListener('click', Methods.trackClick);
-        select("[data-delete-no]").addEventListener("click", () => Methods.trackClick(document.body))
-        select("[data-edit-cancel]").addEventListener("click", () => Methods.trackClick(document.body))
+        select("[data-delete-no]")?.addEventListener("click", () => Methods.trackClick(document.body))
+        select("[data-edit-cancel]")?.addEventListener("click", () => Methods.trackClick(document.body))
+        select("[data-sidebar-btn]")?.addEventListener("click", CommonSetup.sidebar);
 
         CommonSetup.initializeTriggers();
         this.initializeRandomizer();
@@ -515,12 +516,12 @@ class CommonSetup {
         if (trigger == 'user' || trigger == 'resource' || trigger == 'course-box' || trigger == 'collection') {
             select("#delete-overlay input[name='type']").value = trigger;
             select("#delete-overlay input[name='id']").value = identifier;
-            
+
             const editOverlay = select("#edit-overlay");
-            
+
             editOverlay.setAttribute("data-edit-type", trigger);
             editOverlay.setAttribute("data-edit-identifier", identifier);
-            
+
             selectWith(editOverlay, "input[type='hidden'][name='type']").value = trigger;
             selectWith(editOverlay, "input[type='hidden'][name='id']").value = identifier;
         }
@@ -594,6 +595,46 @@ class CommonSetup {
         const popup = selectWith(overlay, '.pop-up-cont');
 
         CommonSetup.openPopup({ button, cont, overlay, popup, run: [CommonSetup.handleEditTrigger] });
+    }
+
+    static sidebar() {
+        if (!(this instanceof HTMLElement)) return console.warn("Clicked element is not an HTML Element");
+
+        const button = this;
+        const loader = selectWith(this, '.cta');
+        const overlay = select("#sidebar-overlay");
+        const popup = selectWith(overlay, ".sidebar-cont");
+        const background = select(".content")
+
+        const tl = gsap.timeline();
+
+        tl
+            .call(() => {
+                CommonSetup.attachSpinner({ elem: loader, color: 'red' });
+            })
+            .set(popup, { opacity: 0, x: -50 })
+            .set(overlay, { display: 'block' })
+            .to(background, { opacity: 0.5 })
+            .to(popup, { opacity: 1, x: 0, ease: 'Back.easeOut' }, '<')
+            .call(() => {
+                Methods.trackOutsideClick(popup, () => CommonSetup.closeSidebar({ popup, overlay, background, loader }))
+            })
+
+    }
+
+    static closeSidebar(params = {}) {
+        const { popup, overlay, background, loader } = params;
+
+        const tl = gsap.timeline();
+
+        tl
+            .to(popup, { opacity: 0, x: 50, ease: 'Back.easeOut' })
+            .to(background, { opacity: 1 }, '<')
+            .set(overlay, { display: 'none' })
+            .call(() => {
+                CommonSetup.detachSpinner({ elem: loader });
+            })
+
     }
 
     static openPopup(params = {}) {
@@ -1036,7 +1077,7 @@ class CommonSetup {
             const data = {
                 parent: select('#overlay #collection'),
                 name: Methods.sentenceCase(collection.collection_name),
-                description: Methods.sentenceCase(collection.description),
+                description: Methods.sentenceCase(collection.description) || 'No description',
                 slides: slides.length,
                 pqs: pqs.length
             }
@@ -1916,5 +1957,3 @@ new CommonSetup();
 //     toChange.classList.add("active");
 //     selectWith(toChange, 'select').disabled = false;
 // }
-
-CommonSetup.handleResourceTrigger(2);

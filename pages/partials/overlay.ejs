@@ -169,9 +169,9 @@
                     <div class="line-hr"></div>
                     <div class="item-info-section">
                         <h1>owner</h1>
-                        <div class="user-img-row">
-                            <img src="/images/avatars/avatar-1.png" alt="owner">
-                            <p>emmanuel adeboye</p>
+                        <div data-trigger="user" data-identifier=<%= data.user.id %> class="user-img-row">
+                            <img src="/images/avatars/<%= data.user.pfp %>" alt="owner">
+                            <p><%= data.user.name %></p>
                         </div>
                     </div>
                     <div class="line-hr"></div>
@@ -480,5 +480,31 @@
                 <button data-edit-update type="submit">update</button>
             </div>
         </form>
+    </div>
+</div>
+<div id="sidebar-overlay">
+    <div class="sidebar-cont">
+        <div class="sidebar-section">
+            <div class="acc-box">
+                <img src="/images/avatars/<%= data.user.pfp %>" alt="pfp">
+                <div class="text">
+                    <p><%= data.user.name %></p>
+                    <span class="sub"><%= data.user.email %></span>
+                </div>
+            </div>
+        </div>
+        <div class="line-hr"></div>
+        <div class="sidebar-section">
+            <div class="links">
+                <a href="/profile/<%= data.user.id %>" class="link">
+                    <img src="/images/icons/request dark.png" alt="icon">
+                    <p>view profile</p>
+                </a>
+                <a href="/logout" class="link">
+                    <img src="/images/icons/logout dark.png" alt="icon">
+                    <p>logout</p>
+                </a>
+            </div>
+        </div>
     </div>
 </div>

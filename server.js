@@ -40,5 +40,9 @@ server.set('views', 'pages');
 
 server.use(mainRoutes);
 
+server.use((req, res) => {
+    res.render("404");
+})
+
 //Startup the server on a port
 server.listen(port, (err) => console.log(err || `Server Running\nVisit http://localhost:${port}/`))

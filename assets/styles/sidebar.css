@@ -44,6 +44,8 @@ img[alt="icon"] {
 .sidebar .part:first-child {
     padding: 0;
     display: flex;
+    /* justify-content: space-between; */
+    gap: 10px;
     align-items: center;
     height: 65px;
 }
@@ -106,11 +108,14 @@ img[alt="icon"] {
     gap: 5px;
 }
 
+.sidebar-section .acc-box,
 .sidebar .acc-box {
     display: flex;
+    align-items: center;
     gap: 8px;
 }
 
+.sidebar-section .acc-box img,
 .sidebar .acc-box img {
     position: relative;
     width: var(--img-wh);
@@ -119,19 +124,48 @@ img[alt="icon"] {
     border: 1px solid var(--mandy);
 }
 
+.sidebar-section .acc-box .text,
 .sidebar .acc-box .text {
     display: flex;
     flex-direction: column;
     gap: 2px;
 }
 
+.sidebar-section .acc-box .text p,
 .sidebar .acc-box .text p {
+    font-size: 0.75em;
     font-weight: 800;
+    text-transform: capitalize;
 }
 
+.sidebar-section .acc-box .text span,
 .sidebar .acc-box .text span {
     font-size: 9px;
     text-transform: none;
+}
+
+[data-role-student] {
+    --color: green !important;
+}
+
+[data-role-lecturer] {
+    --color: var(--mandy) !important;
+}
+
+[data-role-admin] {
+    --color: rgb(var(--notice)) !important;
+}
+
+.sidebar span.role {
+    --color: black;
+
+    display: inline-flex;
+    padding: 4px 7px;
+    border: 1px solid var(--color);
+    text-transform: capitalize;
+    color: var(--color);
+    border-radius: 10px;
+    font-size: 0.6em;
 }
 
 .sidebar .acc .cta {

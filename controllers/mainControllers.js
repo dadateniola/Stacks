@@ -57,10 +57,14 @@ async function getCollections(userCollections = {}) {
 }
 
 const routeSetup = async (req, res, next) => {
-    req.session.uid = DEFAULT_USER_ID;
+    // req.session.uid = DEFAULT_USER_ID;
     const userId = req.session.uid;
 
+    if (!userId) return res.redirect("/?msg=true");
+
     try {
+        const [user] = await User.find(['id', userId]);
+
         const allCourses = await Course.find();
         const allDepartments = await Department.find();
         const allRoles = await User.customSql('SELECT DISTINCT role FROM users');
@@ -72,6 +76,7 @@ const routeSetup = async (req, res, next) => {
         const previewRoute = (await Methods.checkFileExistence({ filePath })) ? `/get-pdf/${filename}/preview` : null;
 
         res.locals.data = {
+            user,
             lecturerCourses,
             previewRoute,
             allCourses,
@@ -87,34 +92,78 @@ const routeSetup = async (req, res, next) => {
 }
 
 const showSignPage = async (req, res) => {
-    res.render("sign")
+    const { msg, logout } = req.query;
+
+    const userId = req.session.uid;
+    const alert = {
+        message: msg ? 'User login required' : 'Successfully logged out',
+        type: msg ? 'warning' : 'success'
+    }
+
+    if (userId) return res.redirect("/dashboard");
+
+    if (msg || logout) {
+        res.render("sign", { alert });
+    } else {
+        res.render("sign");
+    }
+
 }
 
 const showDashboard = async (req, res) => {
+    const { msg } = req.query
     const userId = req.session.uid;
+    const alert = {
+        message: 'Cannot access the requested page',
+        type: 'warning'
+    }
 
-    const semesterCourses = await Course.customSql("SELECT * FROM courses WHERE id IN (SELECT course_id FROM departments_courses WHERE semester = 'first')")
+    try {
+        const [user_info] = await User.find(['id', userId]);
 
-    const allCourses = await Course.find();
+        var courses = [];
+        var heading = 'courses';
 
-    const resources = await Resource.find([['order by', 'created_at desc']]);
-
-    const recentlyAdded = [];
-
-    resources.forEach(resource => {
-        const courseInfo = allCourses.find(info => info.id == resource.course_id)
-        const data = {
-            id: resource.id,
-            code: courseInfo.code,
-            type: resource.type,
-            name: Methods.joinedName(resource),
-            last_visited: Methods.formatDate(resource.created_at)
+        if (user_info.role == "student") {
+            courses = await Course.customSql("SELECT * FROM courses WHERE id IN (SELECT course_id FROM departments_courses WHERE semester = 'first')")
+            heading = 'semester courses';
+        } else if (user_info.role == "lecturer") {
+            courses = await Course.customSql(`SELECT * FROM courses WHERE id IN (SELECT course_id FROM courses_lecturers WHERE lecturer_id = ${userId})`);
+            heading = 'courses taken';
         }
 
-        recentlyAdded.push(data);
-    })
+        const allCourses = await Course.find();
 
-    res.render('dashboard', { semesterCourses, recentlyAdded });
+        const resources = await Resource.find([['order by', 'created_at desc']]);
+
+        const recentlyAdded = [];
+
+        resources.forEach(resource => {
+            const courseInfo = allCourses.find(info => info.id == resource.course_id)
+            const data = {
+                id: resource.id,
+                code: courseInfo.code,
+                type: resource.type,
+                name: Methods.joinedName(resource),
+                last_visited: Methods.formatDate(resource.created_at)
+            }
+
+            recentlyAdded.push(data);
+        })
+
+        const pfp = user_info.pfp;
+
+        const data = {
+            courses, recentlyAdded, pfp, heading
+        }
+
+        if (msg) data.alert = alert;
+
+        res.render('dashboard', data);
+    } catch (error) {
+        console.error('Error in showDashboard:', error);
+        res.status(500).send('Internal Server Error');
+    }
 }
 
 const handleLogin = async (req, res) => {
@@ -217,7 +266,13 @@ const handleRequestAccess = async (req, res) => {
 }
 
 const showResourcesPage = async (req, res) => {
+    const userId = req.session.uid;
+
     try {
+        const [user_info] = await User.find(['id', userId]);
+
+        if (user_info.role != "lecturer") return res.redirect("/dashboard?msg=true");
+
         const lecturerCourses = await CourseLecturer.find(['lecturer_id', req.session.uid], null, ['course_id']);
         const courseResources = {};
 
@@ -304,12 +359,12 @@ const handleAddingResources = async (req, res) => {
 
 const showHistoryPage = async (req, res) => {
     try {
-        const id = req.session.uid;
+        const userId = req.session.uid;
 
         const allCourses = await Course.find();
         const allResources = await Resource.find();
 
-        const history = await History.find([['user_id', id], ['order by', 'updated_at desc']]);
+        const history = await History.find([['user_id', userId], ['order by', 'updated_at desc']]);
 
         const courseHistory = []
         const resourceHistory = []
@@ -348,15 +403,26 @@ const showHistoryPage = async (req, res) => {
 }
 
 const showRequestsPage = async (req, res) => {
-    const requests = await Request.find([['receiver', 'admin'], ['order by', 'created_at desc']]);
-    const types = {};
+    const userId = req.session.uid;
 
-    requests.forEach(request => {
-        const { type } = request;
-        types[type] = (types[type] || 0) + 1;
-    });
+    try {
+        const [user_info] = await User.find(['id', userId]);
 
-    res.render('requests', { requests, types });
+        if (user_info.role != "lecturer" && user_info.role != "admin") return res.redirect("/dashboard?msg=true");
+
+        const requests = await Request.find([['receiver', user_info.role], ['order by', 'created_at desc']]);
+        const types = {};
+
+        requests.forEach(request => {
+            const { type } = request;
+            types[type] = (types[type] || 0) + 1;
+        });
+
+        res.render('requests', { requests, types });
+    } catch (error) {
+        console.error('Error in showRequestsPage:', error);
+        res.status(500).send('Internal Server Error');
+    }
 }
 
 const handleAcceptedRequests = async (req, res) => {
@@ -612,11 +678,22 @@ const handleCollectionResouorce = async (req, res) => {
 const showCollectionsPage = async (req, res) => {
     const userId = req.session.uid;
 
-    const userCollections = await Collection.find(['user_id', userId]);
+    try {
+        const [user_info] = await User.find(['id', userId]);
 
-    const collections = await getCollections(userCollections);
+        if (user_info.role != "student") return res.redirect("/dashboard?msg=true");
 
-    res.render("collections", { collections });
+        const pfp = user_info.pfp;
+
+        const userCollections = await Collection.find(['user_id', userId]);
+
+        const collections = await getCollections(userCollections);
+
+        res.render("collections", { collections, pfp });
+    } catch (error) {
+        console.error('Error in showCollectionsPage:', error);
+        res.status(500).send('Internal Server Error');
+    }
 }
 
 const showManageUsersPage = async (req, res) => {
@@ -704,7 +781,7 @@ const handleDelete = async (req, res) => {
             clean_up: 'delete'
         }
 
-        if(!id || !type) {
+        if (!id || !type) {
             res.status(400).send({
                 message: "Couldn't delete data, due to missing information",
                 type: "error"
@@ -717,7 +794,7 @@ const handleDelete = async (req, res) => {
             await User.delete(id);
             send.message = 'User successfully deleted';
             send.clean_up = 'delete-user'
-        }else if (type == 'resource') {
+        } else if (type == 'resource') {
             await Resource.delete(id);
             send.message = 'Resource successfully deleted';
         }
@@ -742,7 +819,7 @@ const handleEdit = async (req, res) => {
         }
         var result = 0;
 
-        if(!id || !type) {
+        if (!id || !type) {
             res.status(400).send({
                 message: "Couldn't update data, due to missing information",
                 type: "error"
@@ -752,19 +829,19 @@ const handleEdit = async (req, res) => {
         }
 
         delete req.body.type;
-        
-        if(type == 'resource') {
+
+        if (type == 'resource') {
             const resource = new Resource(req.body);
             result = await resource.update();
-            send.message = 'Resource successfully deleted';
+            send.message = 'Resource successfully updated';
         } else if (type == 'course-box') {
             const course = new Course(req.body);
             result = await course.update();
-            send.message = 'Course successfully deleted';
+            send.message = 'Course successfully updated';
         } else if (type == 'collection') {
             const collection = new Collection(req.body);
             result = await collection.update();
-            send.message = 'Collection successfully deleted';
+            send.message = 'Collection successfully updated';
         }
 
         if (!result) {
@@ -937,6 +1014,19 @@ const getPDF = async (req, res) => {
     }
 }
 
+const logout = (req, res) => {
+    // Destroy the user's session
+    req.session.destroy((err) => {
+        if (err) {
+            console.error('Error destroying session:', err);
+            res.status(500).send('Error logging out');
+        } else {
+            // Redirect the user to the login page or any other appropriate page
+            res.redirect('/?logout=true');
+        }
+    });
+}
+
 module.exports = {
     routeSetup,
     showSignPage, showDashboard, handleLogin, handleRequestAccess,
@@ -945,5 +1035,6 @@ module.exports = {
     handleUpload, getPDF, handleAddingResources, handleHistory,
     handleAddingCollection, handleCollectionResouorce, showCollectionsPage,
     showUserProfile, showManageUsersPage, handleAddUser, handleDelete,
-    handleEdit
+    handleEdit,
+    logout
 }

@@ -100,9 +100,10 @@ iframe {
 
 mark {
     font-weight: inherit;
-   background-color: pink;
+    background-color: pink;
 }
 
+[data-sidebar-btn],
 [data-radio] {
     cursor: pointer;
 }
@@ -179,13 +180,13 @@ mark {
     height: 100dvh;
 }
 
-.search-box > section {
+.search-box>section {
     padding-bottom: 60px;
     max-height: 100%;
     overflow-y: scroll;
 }
 
-.search-box > section::-webkit-scrollbar {
+.search-box>section::-webkit-scrollbar {
     display: none;
 }
 
@@ -303,6 +304,7 @@ mark {
     color: white;
 }
 
+#sidebar-overlay,
 #edit-overlay,
 #delete-overlay {
     position: fixed;
@@ -313,6 +315,51 @@ mark {
     display: none;
 
     z-index: 80;
+}
+
+.sidebar-cont {
+    position: absolute;
+    padding: 20px 15px;
+    width: 250px;
+    left: calc(var(--sidebar-width) + 20px);
+    bottom: 20px;
+    border-radius: 15px;
+    background-color: white;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 20px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.sidebar-cont .link:hover,
+.sidebar-cont .link.stacks-active {
+    background-color: var(--dark);
+    color: var(--light);
+}
+
+.sidebar-cont .link:hover img {
+    filter: invert(100%);    
+}
+
+.sidebar-cont .links {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sidebar-cont .link {
+    padding: 13px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: nowrap;
+    border-radius: 10px;
+    background-color: var(--faint-white);
+}
+
+.sidebar-cont .links p {
+    font-size: 0.75em;
 }
 
 .add-to-collection-box {
@@ -627,7 +674,7 @@ button.form-active {
     filter: invert(100%);
 }
 
-.none >* {
+.none>* {
     display: none;
 }
 
@@ -1079,7 +1126,7 @@ button.null {
 }
 
 
-:not(.spinner) > .spinner:first-child {
+:not(.spinner)>.spinner:first-child {
     opacity: 1;
 }
 
@@ -1465,6 +1512,33 @@ tr:nth-child(odd) .table-icon {
     color: var(--sub-text) !important;
     font-weight: 600;
     text-wrap: wrap;
+}
+
+
+.page-not-found {
+    width: 100vw;
+    height: 100dvh;
+    background-color: white;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+}
+
+.page-not-found img {
+    width: 60%;
+}
+
+.page-not-found a {
+    display: flex;
+    padding: 15px;
+    border-radius: 10px;
+    background-color: var(--mandy);
+    color: white;
+    font-weight: 600;
+    font-size: 1em;
 }
 
 

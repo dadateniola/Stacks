@@ -23,62 +23,59 @@
                             <div class="content-head">
                                 <h1>dashboard</h1>
                             </div>
-                            <section>
-                                <div class="section-head">
-                                    <div class="section-info">
-                                        <p>semester courses</p>
-                                        <div class="line"></div>
-                                        <div class="user-img flex">
-                                            <img src="/images/avatars/avatar-6.png" alt="lecturer">
-                                            <img src="/images/avatars/avatar-7.png" alt="lecturer">
-                                            <img src="/images/avatars/avatar-8.png" alt="lecturer">
-                                            <img src="/images/avatars/avatar-9.png" alt="lecturer">
+                            <% if (courses.length) { %>
+                                <section>
+                                    <div class="section-head">
+                                        <div class="section-info">
+                                            <p><%= heading %></p>
+                                            <div class="line"></div>
+                                            <div class="user-img flex">
+                                                <img src="/images/avatars/<%= pfp %>" alt="lecturer">
+                                            </div>
+                                        </div>
+                                        <div class="section-format">
+                                            <div class="line"></div>
+                                            <button class="slide stacks-active">
+                                                <img src="/images/icons/row dark.png" alt="icon">
+                                            </button>
+                                            <button>
+                                                <img src="/images/icons/row dark.png" alt="icon">
+                                            </button>
                                         </div>
                                     </div>
-                                    <div class="section-format">
-                                        <div class="line"></div>
-                                        <button class="slide stacks-active">
-                                            <img src="/images/icons/row dark.png" alt="icon">
-                                        </button>
-                                        <button>
-                                            <img src="/images/icons/row dark.png" alt="icon">
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="section-slider">
-                                    <div class="swiper">
-                                        <div class="swiper-wrapper">
-                                            <% semesterCourses.forEach(course=> { %>
-                                                <div class="swiper-slide item" data-course data-trigger="course-box" data-identifier=<%= course.id %>>
-                                                    <div class="heading">
-                                                        <div class="type">
-                                                            <p>course</p>
+                                    <div class="section-slider">
+                                        <div class="swiper">
+                                            <div class="swiper-wrapper">
+                                                <% courses.forEach(course=> { %>
+                                                    <div class="swiper-slide item" data-course data-trigger="course-box" data-identifier=<%= course.id %>>
+                                                        <div class="heading">
+                                                            <div class="type">
+                                                                <p>course</p>
+                                                            </div>
+                                                            <div class="more">
+                                                                <img src="/images/icons/more.png" alt="more">
+                                                            </div>
                                                         </div>
-                                                        <div class="more">
-                                                            <img src="/images/icons/more.png" alt="more">
+                                                        <div class="cont">
+                                                            <p>
+                                                                <%= course.code %>
+                                                            </p>
+                                                            <span>
+                                                                <%= course.name %>
+                                                            </span>
+                                                        </div>
+                                                        <div class="line-hr"></div>
+                                                        <div class="user-img flex">
+                                                            <img src="/images/avatars/<%= pfp %>" alt="lecturer">
                                                         </div>
                                                     </div>
-                                                    <div class="cont">
-                                                        <p>
-                                                            <%= course.code %>
-                                                        </p>
-                                                        <span>
-                                                            <%= course.name %>
-                                                        </span>
-                                                    </div>
-                                                    <div class="line-hr"></div>
-                                                    <div class="user-img flex">
-                                                        <% let randomNumber=Math.floor(Math.random() * 4) + 1; %>
-                                                            <img src="/images/no-avatar/no-img-<%= randomNumber %>.png"
-                                                                alt="lecturer" class="no-img">
-                                                    </div>
-                                                </div>
-                                                <% }) %>
+                                                    <% }) %>
+                                            </div>
                                         </div>
+                                        <div class="swiper-pagination"></div>
                                     </div>
-                                    <div class="swiper-pagination"></div>
-                                </div>
-                            </section>
+                                </section>
+                            <% } %>
                             <% if (recentlyAdded.length) { %>
                                 <section>
                                     <div class="section-head">
@@ -124,6 +121,13 @@
                                                 <% }) %>
                                             </tbody>
                                         </table>
+                                    </div>
+                                </section>
+                            <% } %>
+                            <% if (!courses.length && !recentlyAdded.length) { %>
+                                <section>
+                                    <div class="section-empty">
+                                        <p>No information available</p>
                                     </div>
                                 </section>
                             <% } %>

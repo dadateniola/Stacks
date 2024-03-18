@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS users (
   `password` VARCHAR(255) NOT NULL,
   `phone_number` VARCHAR(20),
   `department_id` INT UNSIGNED,
+  `pfp` VARCHAR(255) DEFAULT 'avatar-1.png',
   `role` ENUM('student', 'lecturer', 'admin') NOT NULL,
   `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
   `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -147,12 +148,16 @@ VALUES
 (2, 'Computer Science', 4);
 
 -- Insert information into users table
-INSERT IGNORE INTO users (`id`, `name`, `email`, `password`, `phone_number`, `role`)
+INSERT IGNORE INTO users (`id`, `name`, `email`, `password`, `phone_number`, `role`, `pfp`)
 VALUES
-('20/1554' ,'dada teniola', 'dada@gmail.com', 'pass', '09052513369', 'admin'),
-('20/0018' ,'baiyere fikayo', 'baiyere@gmail.com', 'pass', '09052513369', 'admin'),
-('20/0725' ,'ajala oluwaferanmi', 'ajala@gmail.com', 'pass', '09052513369', 'admin'),
-('123006' ,'emmanuel samuel', 'emma@gmail.com', 'pass', '09052513369', 'lecturer');
+('20/1554' ,'dada teniola', 'dada@gmail.com', 'pass', '09052513369', 'admin', 'avatar-1.png'),
+('20/0018' ,'baiyere fikayo', 'baiyere@gmail.com', 'pass', '09052513369', 'admin', 'avatar-2.png'),
+('20/0725' ,'ajala oluwaferanmi', 'ajala@gmail.com', 'pass', '09052513369', 'admin', 'avatar-3.png'),
+('123006' ,'emmanuel samuel', 'emma@gmail.com', 'pass', '09052513369', 'lecturer', 'avatar-4.png');
+
+INSERT IGNORE INTO users (`id`, `name`, `email`, `password`, `phone_number`, `role`, `pfp`, `department_id`)
+VALUES
+('12345678' ,'adele michael', 'adele@gmail.com', 'pass', '09010113209', 'student', 'avatar-5.png', 1);
 
 -- Insert courses into the courses table with manually specified id
 INSERT IGNORE INTO courses (`id`, `code`, `name`)
