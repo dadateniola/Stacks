@@ -1,3 +1,4 @@
+const path = require('path');
 const fs = require('fs').promises;
 const nodemailer = require("nodemailer");
 
@@ -52,7 +53,7 @@ class Methods {
 
                 const isValid = validationRules[key].some(rule => rule.test(value));
 
-                if(!isValid && key == 'password') {
+                if (!isValid && key == 'password') {
                     result.invalidKeys[key] = 'Password cannot be shorter than 4 digits';
                     continue;
                 }
@@ -176,6 +177,30 @@ class Methods {
 
     static isEmptyObject(obj) {
         return Object.keys(obj).length === 0;
+    }
+
+    static async getPFP() {
+        try {
+            const filePath = path.resolve(__dirname, "..", "assets", "images", "avatars");
+
+            const files = await fs.readdir(filePath);
+
+            const avatars = files.filter(file => {
+                const extension = path.extname(file).toLowerCase();
+                return ['.png', '.jpg', '.jpeg', '.gif'].includes(extension);
+            });
+
+            if (avatars.length === 0) {
+                throw new Error('No image files found in the directory.');
+            }
+
+            const index = Math.floor(Math.random() * avatars.length);
+            const avatar = avatars[index];
+
+            return avatar;
+        } catch (error) {
+            throw error;
+        }
     }
 }
 

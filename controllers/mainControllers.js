@@ -14,7 +14,7 @@ const Collection = require("../Models/Collection");
 const CollectionResource = require("../Models/CollectionResource.js");
 const Department = require("../Models/Department.js");
 
-const DEFAULT_USER_ID = '123006';
+const DEFAULT_USER_ID = '20/1554';
 
 const tempFolder = path.resolve(__dirname, '..', 'temp');
 const uploadsFolder = path.resolve(__dirname, '..', 'uploads', 'resources');
@@ -57,21 +57,27 @@ async function getCollections(userCollections = {}) {
 }
 
 const routeSetup = async (req, res, next) => {
-    // req.session.uid = DEFAULT_USER_ID;
-    const userId = req.session.uid;
+    req.session.uid = DEFAULT_USER_ID;
+    const { alert, uid } = req.session;
 
-    if (!userId) return res.redirect("/?msg=true");
+    if (!uid) {
+        req.session.alert = {
+            message: "User login is required",
+            type: 'warning',
+        }
+        return res.redirect("/");
+    }
 
     try {
-        const [user] = await User.find(['id', userId]);
+        const [user] = await User.find(['id', uid]);
 
         const allCourses = await Course.find();
         const allDepartments = await Department.find();
         const allRoles = await User.customSql('SELECT DISTINCT role FROM users');
 
         //Add-resource overlay data
-        const lecturerCourses = await Course.customSql(`SELECT * FROM courses WHERE id IN (SELECT course_id FROM courses_lecturers WHERE lecturer_id = '${userId}')`);
-        const filename = Methods.tempFilename(userId);
+        const lecturerCourses = await Course.customSql(`SELECT * FROM courses WHERE id IN (SELECT course_id FROM courses_lecturers WHERE lecturer_id = '${uid}')`);
+        const filename = Methods.tempFilename(uid);
         const filePath = path.join(tempFolder, filename);
         const previewRoute = (await Methods.checkFileExistence({ filePath })) ? `/get-pdf/${filename}/preview` : null;
 
@@ -81,7 +87,12 @@ const routeSetup = async (req, res, next) => {
             previewRoute,
             allCourses,
             allDepartments,
-            allRoles
+            allRoles,
+        }
+
+        if (alert) {
+            res.locals.data.alert = alert;
+            delete req.session.alert;
         }
 
         next();
@@ -92,31 +103,23 @@ const routeSetup = async (req, res, next) => {
 }
 
 const showSignPage = async (req, res) => {
-    const { msg, logout } = req.query;
+    const { alert, uid } = req.session;
 
-    const userId = req.session.uid;
-    const alert = {
-        message: msg ? 'User login required' : 'Successfully logged out',
-        type: msg ? 'warning' : 'success'
+    if (uid) {
+        req.session.alert = {
+            message: "You're already logged in",
+            type: 'success',
+        }
+        return res.redirect("/dashboard");
     }
 
-    if (userId) return res.redirect("/dashboard");
+    delete req.session.alert;
 
-    if (msg || logout) {
-        res.render("sign", { alert });
-    } else {
-        res.render("sign");
-    }
-
+    res.render("sign", { data: { alert } });
 }
 
 const showDashboard = async (req, res) => {
-    const { msg } = req.query
     const userId = req.session.uid;
-    const alert = {
-        message: 'Cannot access the requested page',
-        type: 'warning'
-    }
 
     try {
         const [user_info] = await User.find(['id', userId]);
@@ -153,13 +156,7 @@ const showDashboard = async (req, res) => {
 
         const pfp = user_info.pfp;
 
-        const data = {
-            courses, recentlyAdded, pfp, heading
-        }
-
-        if (msg) data.alert = alert;
-
-        res.render('dashboard', data);
+        res.render('dashboard', { courses, recentlyAdded, pfp, heading });
     } catch (error) {
         console.error('Error in showDashboard:', error);
         res.status(500).send('Internal Server Error');
@@ -452,6 +449,8 @@ const handleAcceptedRequests = async (req, res) => {
             user_data.department_id = data.department_id
         }
 
+        data.pfp = await Methods.getPFP();
+
         const user = new User(user_data);
         const userResult = await user.add();
 
@@ -721,8 +720,10 @@ const handleAddUser = async (req, res) => {
             return res.send({ invalidKeys });
         }
 
-        var userId = req.session.uid;
-        userId = DEFAULT_USER_ID;
+        const userId = req.session.uid;
+        const { course_id } = data;
+
+        delete data.course_id;
 
         if (!userId) return res.status(401).send({ message: 'User authentication required, please login', type: 'warning' });
 
@@ -744,9 +745,30 @@ const handleAddUser = async (req, res) => {
         //Remove department_id if role isnt student
         if (data.role != 'student') delete data.department_id;
 
+        data.pfp = await Methods.getPFP();
+
         //Add new user to database
         const user = new User(data);
         const result = await user.add();
+        
+        //Attach a course to the user if they are a lecturer
+        if (data.role == 'lecturer') {
+            const courseLecturers = new CourseLecturer({
+                course_id,
+                lecturer_id: data.id
+            });
+            const clResult = await courseLecturers.add();
+
+            if (!clResult || Methods.isObject(clResult)) {
+                const message = (Methods.isObject(clResult)) ? clResult.message : "Unable to add user, please try again";
+    
+                res.status(500).send({
+                    message,
+                    type: "error",
+                });
+                return
+            }
+        }
 
         if (!result || Methods.isObject(result)) {
             const message = (Methods.isObject(result)) ? result.message : "Unable to add user, please try again";

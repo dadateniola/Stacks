@@ -144,12 +144,12 @@ class Randomizer {
 
         const inputs = selectAllWith(form, 'input, select');
 
-        inputs.forEach(elem => {
+        for (const elem of inputs) {
             if (elem.tagName.toLowerCase() === 'input') {
                 const name = elem.getAttribute("name");
                 var value = null;
 
-                if (name == 'id') value = Methods.generateRandomNumber(8);
+                if (name == 'id') value = Methods.generateRandomNumber(6);
                 if (name == 'name') value = Methods.generateRandomName();
                 if (name == 'email') value = this.generateEmail();
                 if (name == 'password') value = 'pass';
@@ -157,6 +157,7 @@ class Randomizer {
 
                 elem.value = value;
             } else if (elem.tagName.toLowerCase() === 'select') {
+                if (elem.hasAttribute("data-avoid-randomizer")) continue;
                 const optionsWithValue = Array.from(elem.options).filter(option => option.value !== '');
 
                 if (optionsWithValue.length > 0) {
@@ -164,7 +165,7 @@ class Randomizer {
                     elem.value = optionsWithValue[randomIndex].value;
                 }
             }
-        })
+        }
     }
 
     generateEmail() {

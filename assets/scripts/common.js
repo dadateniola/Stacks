@@ -1407,7 +1407,10 @@ class CommonSetup {
         selectAll("[data-request-inputs] >*").forEach(e => e.remove());
 
         requestInputs.append(inputs.cloneNode(true));
-        selectAll("[data-request-inputs] >*").forEach(elem => elem.setAttribute("id", `${open}-clone`))
+        selectAll("[data-request-inputs] >*").forEach(elem => {
+            elem.setAttribute("id", `${open}-clone`);
+            elem.setAttribute("data-request-parent", "");
+        })
 
         return true;
     }
@@ -1949,11 +1952,14 @@ new CommonSetup();
 
 function test(elem) {
     const value = elem.value;
-    const toChange = select(`#select-clone [data-request="${value}"]`);
+    const parent = elem.closest("[data-request-parent]");
+    const toChange = selectWith(parent, `[data-request="${value}"]`);
 
-    selectAll("#select-clone .form-group").forEach(e => e.classList.remove("active"))
-    selectAll("#select-clone .form-group:not([data-request-select]) select").forEach(e => e.disabled = true)
+    selectAllWith(parent, ".form-group").forEach(e => e.classList.remove("active"))
+    selectAllWith(parent, ".form-group:not([data-request-select]) select, .form-group[data-request-triggerable] select").forEach(e => e.disabled = true)
 
-    toChange.classList.add("active");
-    selectWith(toChange, 'select').disabled = false;
+    if (toChange) {
+        toChange.classList.add("active");
+        selectWith(toChange, 'select').disabled = false;
+    }
 }

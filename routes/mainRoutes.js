@@ -31,9 +31,9 @@ router.post("/delete", handleDelete);
 
 router.post("/edit", handleEdit);
 
-router.get('/', showSignPage);
-
 router.get("/logout", logout)
+
+router.get('/', showSignPage);
 
 
 router.use(routeSetup);

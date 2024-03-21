@@ -138,10 +138,12 @@ mark {
     pointer-events: none;
 }
 
+.form-group[data-request-triggerable],
 #select-clone .form-group:not([data-request-select]) {
     display: none;
 }
 
+.form-group[data-request-triggerable].active,
 #select-clone .form-group.active {
     display: flex !important;
 }

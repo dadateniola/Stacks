@@ -1,8 +1,8 @@
 <!-- data-disabled was here -->
 <div class="alert-box"> 
-   <% if (typeof alert !== 'undefined' && alert) { %>
+   <% if (typeof data.alert !== 'undefined' && data.alert) { %>
     <div data-info>
-        <% Object.entries(alert).forEach(([key, value]) => { %>
+        <% Object.entries(data.alert).forEach(([key, value]) => { %>
             <p id="<%= key %>"><%= value %></p>
         <% }) %>
     </div>
