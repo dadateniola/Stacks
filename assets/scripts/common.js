@@ -34,14 +34,14 @@ class Methods {
     }
 
     static customAdd(obj = {}, params = {}) {
-        const { parent, heading } = params;
+        const { parent, heading, pfp } = params;
 
         var row = '<tr>';
         var head = '<tr>';
 
         Object.entries(obj).forEach(([key, value]) => {
             const isMail = (key == 'email' || key == 'password') ? 'class="no-cap"' : '';
-            row += `<td><p ${isMail}>` + value + '</p></td>';
+            row += `<td><p ${isMail} data-edit-${key}>` + value + '</p></td>';
             head += '<td>' + key.split('_').join(' ') + '</td>';
         })
 
@@ -53,6 +53,9 @@ class Methods {
             <div class="section-info">
                 <p>${heading}</p>
                 <div class="line"></div>
+                <div class="user-img flex">
+                    <img src="/images/avatars/${pfp}" alt="lecturer">
+                </div>
             </div>
         `;
         const sectionTableHtml = `
@@ -144,7 +147,7 @@ class Methods {
         }, {});
 
         return JSON.stringify(dataObj);
-    };
+    }
 
     static checkDeviceType = () => {
         const mobileThreshold = 768;
@@ -314,7 +317,7 @@ class Methods {
     static generateRandomPhoneNumber() {
         const prefixes = ["090", "080", "070"];
         const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
-        const remainingDigits = Math.random().toString().substring(2, 11); // Generate 8 random digits
+        const remainingDigits = Math.random().toString().substring(3, 11); // Generate 8 random digits
 
         return prefix + remainingDigits;
     }
@@ -503,6 +506,10 @@ class CommonSetup {
 
         const trigger = elem.dataset?.trigger;
         const identifier = elem.dataset?.identifier;
+
+        if (getStyle(select("#sidebar-overlay"), "display") == "block") {
+            Methods.trackClick(document.body);
+        }
 
         CommonSetup.handleHistory(identifier, trigger);
 
@@ -1018,7 +1025,7 @@ class CommonSetup {
 
             CommonSetup.addItems(data);
 
-            Methods.customAdd(info, { parent, heading: 'user infromation' });
+            Methods.customAdd(info, { parent, heading: 'user infromation', pfp: user.pfp });
             Methods.customAdd(extra_info, { parent });
 
             CommonSetup.initializeTriggers();
@@ -1248,22 +1255,21 @@ class CommonSetup {
         const formInputs = selectAllWith(editForm, "input, textarea");
         for (const elem of formInputs) {
             const name = elem.getAttribute("name");
-            const info = select(`#${type} [data-edit-${name}]`);
+            const info = selectAll(`#${type} [data-edit-${name}]`);
 
-            if (!info) continue;
-
-            const value = info.innerText;
+            if (!info.length) continue;
+            const value = info[0].innerText;
 
             elem.value = value;
             elem.addEventListener("focus", function (event) {
-                info.innerHTML = '<mark>' + event.target.value + '</mark>'
+                info.forEach(e => e.innerHTML = '<mark>' + event.target.value + '</mark>')
             })
             elem.addEventListener("blur", function (event) {
-                info.innerHTML = event.target.value;
+                info.forEach(e => e.innerHTML = event.target.value)
             })
             elem.addEventListener("input", function (event) {
                 event.target.value = Methods.sentenceCase(event.target.value);
-                info.innerHTML = '<mark>' + event.target.value + '</mark>';
+                info.forEach(e => e.innerHTML = '<mark>' + event.target.value + '</mark>')
             })
         }
     }

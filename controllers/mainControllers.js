@@ -19,6 +19,11 @@ const DEFAULT_USER_ID = '20/1554';
 const tempFolder = path.resolve(__dirname, '..', 'temp');
 const uploadsFolder = path.resolve(__dirname, '..', 'uploads', 'resources');
 
+const error_alert = {
+    message: 'Internal Server Error',
+    type: 'error'
+}
+
 async function getCollections(userCollections = {}) {
     const collections = [];
 
@@ -98,7 +103,7 @@ const routeSetup = async (req, res, next) => {
         next();
     } catch (error) {
         console.error('Error in routeSetup:', error);
-        res.status(500).send('Internal Server Error');
+        res.status(500).render('500', { error_alert });
     }
 }
 
@@ -124,7 +129,7 @@ const showDashboard = async (req, res) => {
     try {
         const [user_info] = await User.find(['id', userId]);
 
-        var courses = [];
+        var courses = await Course.find([['limit', 10]]);
         var heading = 'courses';
 
         if (user_info.role == "student") {
@@ -159,7 +164,7 @@ const showDashboard = async (req, res) => {
         res.render('dashboard', { courses, recentlyAdded, pfp, heading });
     } catch (error) {
         console.error('Error in showDashboard:', error);
-        res.status(500).send('Internal Server Error');
+        res.status(500).render('500', { error_alert });
     }
 }
 
@@ -289,7 +294,7 @@ const showResourcesPage = async (req, res) => {
         res.render('resources', { courseResources });
     } catch (error) {
         console.error('Error in showResourcesPage:', error);
-        res.status(500).send('Internal Server Error');
+        res.status(500).render('500', { error_alert });
     }
 }
 
@@ -395,7 +400,7 @@ const showHistoryPage = async (req, res) => {
         res.render("history", { courseHistory, resourceHistory });
     } catch (error) {
         console.error('Error in "showHistoryPage": ', error);
-        res.status(500).send('Internal Server Error');
+        res.status(500).render('500', { error_alert });
     }
 }
 
@@ -418,7 +423,7 @@ const showRequestsPage = async (req, res) => {
         res.render('requests', { requests, types });
     } catch (error) {
         console.error('Error in showRequestsPage:', error);
-        res.status(500).send('Internal Server Error');
+        res.status(500).render('500', { error_alert });
     }
 }
 
@@ -691,20 +696,35 @@ const showCollectionsPage = async (req, res) => {
         res.render("collections", { collections, pfp });
     } catch (error) {
         console.error('Error in showCollectionsPage:', error);
-        res.status(500).send('Internal Server Error');
+        res.status(500).render('500', { error_alert });
     }
 }
 
 const showManageUsersPage = async (req, res) => {
-    const users = await User.find([['order by', 'created_at desc']]);
-    const roles = {};
+    try {
+        const users = await User.find([['order by', 'created_at desc']]);
+        const roles = {};
 
-    users.forEach(user => {
-        const { role } = user;
-        roles[role] = (roles[role] || 0) + 1;
-    });
+        users.forEach(user => {
+            const { role } = user;
+            roles[role] = (roles[role] || 0) + 1;
+        });
 
-    res.render("manage-users", { users, roles });
+        res.render("manage-users", { users, roles });
+    } catch (error) {
+        console.error('Error in showManageUsersPage:', error);
+        res.status(500).render('500', { error_alert });
+    }
+}
+
+const showNoticeBoard = async (req, res) => {
+    try {
+
+        res.render('notice-board');
+    } catch (error) {
+        console.error('Error in showCollectionsPage:', error);
+        res.status(500).render('500', { error_alert });
+    }
 }
 
 const handleAddUser = async (req, res) => {
@@ -750,7 +770,7 @@ const handleAddUser = async (req, res) => {
         //Add new user to database
         const user = new User(data);
         const result = await user.add();
-        
+
         //Attach a course to the user if they are a lecturer
         if (data.role == 'lecturer') {
             const courseLecturers = new CourseLecturer({
@@ -761,7 +781,7 @@ const handleAddUser = async (req, res) => {
 
             if (!clResult || Methods.isObject(clResult)) {
                 const message = (Methods.isObject(clResult)) ? clResult.message : "Unable to add user, please try again";
-    
+
                 res.status(500).send({
                     message,
                     type: "error",
@@ -833,7 +853,18 @@ const handleDelete = async (req, res) => {
 
 const handleEdit = async (req, res) => {
     try {
-        const { id, type } = req.body;
+        const data = req.body;
+        // Validate user information
+        const methods = new Methods(data);
+        const { invalidKeys } = methods.validateData();
+
+        // Check if there is invalid data to send back to the user
+        if (Object.keys(invalidKeys).length > 0) {
+            invalidKeys.scope = '#edit-overlay';
+            return res.send({ invalidKeys });
+        }
+
+        const { id, type } = data;
         const send = {
             message: 'Data successfully updated',
             type: "success",
@@ -850,20 +881,24 @@ const handleEdit = async (req, res) => {
             return;
         }
 
-        delete req.body.type;
+        delete data.type;
 
         if (type == 'resource') {
-            const resource = new Resource(req.body);
+            const resource = new Resource(data);
             result = await resource.update();
             send.message = 'Resource successfully updated';
         } else if (type == 'course-box') {
-            const course = new Course(req.body);
+            const course = new Course(data);
             result = await course.update();
             send.message = 'Course successfully updated';
         } else if (type == 'collection') {
-            const collection = new Collection(req.body);
+            const collection = new Collection(data);
             result = await collection.update();
             send.message = 'Collection successfully updated';
+        } else if (type == 'user') {
+            const user = new User(data);
+            result = await user.update();
+            send.message = 'User successfully updated';
         }
 
         if (!result) {
@@ -1057,6 +1092,6 @@ module.exports = {
     handleUpload, getPDF, handleAddingResources, handleHistory,
     handleAddingCollection, handleCollectionResouorce, showCollectionsPage,
     showUserProfile, showManageUsersPage, handleAddUser, handleDelete,
-    handleEdit,
+    handleEdit, showNoticeBoard,
     logout
 }

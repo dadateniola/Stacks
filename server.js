@@ -41,7 +41,12 @@ server.set('views', 'pages');
 server.use(mainRoutes);
 
 server.use((req, res) => {
-    res.render("404");
+    res.status(404).render("404", {
+        error_alert: {
+            message: 'Page Not Found',
+            type: 'error'
+        }
+    });
 })
 
 //Startup the server on a port

@@ -1,5 +1,5 @@
 const { Router } = require("express");
-const { showSignPage, showResourcesPage, getItems, showRequestsPage, handleLogin, handleRequestAccess, handleUpload, getPDF, handleAddingResources, showDashboard, routeSetup, handleAcceptedRequests, handleDeclinedRequests, showHistoryPage, handleHistory, getUserCollections, handleAddingCollection, handleCollectionResouorce, showCollectionsPage, showUserProfile, showManageUsersPage, handleAddUser, handleDelete, handleEdit, logout } = require("../controllers/mainControllers");
+const { showSignPage, showResourcesPage, getItems, showRequestsPage, handleLogin, handleRequestAccess, handleUpload, getPDF, handleAddingResources, showDashboard, routeSetup, handleAcceptedRequests, handleDeclinedRequests, showHistoryPage, handleHistory, getUserCollections, handleAddingCollection, handleCollectionResouorce, showCollectionsPage, showUserProfile, showManageUsersPage, handleAddUser, handleDelete, handleEdit, logout, showNoticeBoard } = require("../controllers/mainControllers");
 
 const router = Router();
 
@@ -50,6 +50,8 @@ router.get('/requests', showRequestsPage);
 router.get("/collections", showCollectionsPage);
 
 router.get("/manage-users", showManageUsersPage);
+
+router.get("/notice-board", showNoticeBoard);
 
 router.get("/profile/:id?", showUserProfile);
 

@@ -22,7 +22,7 @@ class Methods {
             name: [/\S+/],
             password: [/\w{4,}/],
             collection_name: [/\S+/],
-            phone_number: [/\S+/],
+            phone_number: [/^\d{11}$/],
             module: [/\S+/],
             course_id: [/\S+/],
             type: [/\S+/],
@@ -55,6 +55,11 @@ class Methods {
 
                 if (!isValid && key == 'password') {
                     result.invalidKeys[key] = 'Password cannot be shorter than 4 digits';
+                    continue;
+                }
+                
+                if (!isValid && key == 'phone_number') {
+                    result.invalidKeys[key] = 'Phone number has to be 11 digits';
                     continue;
                 }
 

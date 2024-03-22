@@ -1,0 +1,19 @@
+main[data-content="notice"] {
+    padding: 0 10vw;
+    background-color: #F5F7FA;
+    overflow-x: hidden;
+    height: calc(100% - var(--header-height));
+}
+
+.notice-slider {
+    width: 100%;
+}
+
+.notice {
+    position: relative;
+    width: 100%;
+    height: var(--notice-height);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

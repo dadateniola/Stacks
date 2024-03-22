@@ -51,6 +51,7 @@
     --sidebar-small-gap: 12px;
 
     --header-height: 65px;
+    --notice-height: 110px;
 
     --t: 0.5s;
 
@@ -777,6 +778,10 @@ select {
     background: url('/images/icons/arrow\ down.png') no-repeat;
     background-position: 98% center;
     background-size: 25px;
+}
+
+.pop-up-cont select {
+    background-color: var(--faint-white);
 }
 
 textarea {
@@ -1530,7 +1535,7 @@ tr:nth-child(odd) .table-icon {
 }
 
 .page-not-found img {
-    width: 60%;
+    height: 70vh;
 }
 
 .page-not-found a {

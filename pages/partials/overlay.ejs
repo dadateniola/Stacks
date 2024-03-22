@@ -68,8 +68,9 @@
                     <div class="item-info-section">
                         <h1>actions</h1>
                         <button>make a request</button>
-                        <button>report a problem</button>
-                        <button data-edit-btn>edit</button>
+                        <% if (data.user.role == 'admin') { %>
+                            <button data-edit-btn>edit</button>
+                        <% } %>
                         <button data-close>close</button>
                     </div>
                 </div>
@@ -113,9 +114,13 @@
                         <h1>actions</h1>
                         <a href="" target="_blank" class="form-active" data-resource-read>read</a>
                         <button data-share>share</button>
-                        <button data-collection>add to collection</button>
-                        <button data-edit-btn>edit</button>
-                        <button data-delete-btn>delete</button>
+                        <% if (data.user.role == 'student') { %>
+                            <button data-collection>add to collection</button>
+                        <% } %>
+                        <% if (data.user.role == 'lecturer') { %>
+                            <button data-edit-btn>edit</button>
+                            <button data-delete-btn>delete</button>
+                        <% } %>
                         <button data-close>close</button>
                     </div>
                 </div>
@@ -179,8 +184,10 @@
                         <h1>actions</h1>
                         <button data-share>share</button>
                         <button>make a request</button>
-                        <button data-edit-btn>edit</button>
-                        <button data-delete-btn>delete</button>
+                        <% if (data.user.role == 'student') { %>
+                            <button data-edit-btn>edit</button>
+                            <button data-delete-btn>delete</button>
+                        <% } %>
                         <button data-close>close</button>
                     </div>
                 </div>
@@ -374,14 +381,14 @@
         <div class="item-cont">
             <div class="item-left">
                 <div class="overlay-heading">
-                    <h1 data-resource-name>-</h1>
+                    <h1 data-resource-name data-edit-name>-</h1>
                 </div>
             </div>
             <div class="item-right">
                 <div class="item-info">
                     <div class="item-info-section">
                         <h1>actions</h1>
-                        <button>Edit</button>
+                        <button data-edit-btn>Edit</button>
                         <button data-delete-btn>Delete</button>
                         <button data-close>close</button>
                     </div>
@@ -427,38 +434,48 @@
         <div data-edit-trigger="resource">
             <div class="form-group">
                 <label>resource name</label>
-                <input type="text" name="name" id="name" placeholder="Enter resource name">
+                <input type="text" name="name" placeholder="Enter resource name">
             </div>
             <div class="form-group">
                 <label>resource description</label>
-                <textarea name="description" id="description" cols="30" rows="3"
+                <textarea name="description" cols="30" rows="3"
                     placeholder="Enter resource description here..."></textarea>
             </div>
         </div>
         <div data-edit-trigger="course-box">
             <div class="form-group">
                 <label>course code</label>
-                <input type="text" name="code" id="code" placeholder="Enter course code" maxlength="8">
+                <input type="text" name="code" placeholder="Enter course code" maxlength="8">
             </div>
             <div class="form-group">
                 <label>course name</label>
-                <input type="text" name="name" id="name" placeholder="Enter course name">
+                <input type="text" name="name" placeholder="Enter course name">
             </div>
             <div class="form-group">
                 <label>course description</label>
-                <textarea name="description" id="description" cols="30" rows="3"
+                <textarea name="description" cols="30" rows="3"
                     placeholder="Enter resource description here..."></textarea>
             </div>
         </div>
         <div data-edit-trigger="collection">
             <div class="form-group">
                 <label>collection name</label>
-                <input type="text" name="collection_name" id="collection_name" placeholder="Enter collection name">
+                <input type="text" name="collection_name" placeholder="Enter collection name">
             </div>
             <div class="form-group">
                 <label>collection description</label>
-                <textarea name="description" id="description" cols="30" rows="3"
+                <textarea name="description" cols="30" rows="3"
                     placeholder="Enter resource description here..."></textarea>
+            </div>
+        </div>
+        <div data-edit-trigger="user">
+            <div class="form-group">
+                <label>fullname</label>
+                <input type="text" name="name" placeholder="Enter fullname">
+            </div>
+            <div class="form-group">
+                <label>phone number</label>
+                <input type="text" name="phone_number" placeholder="Enter phone number">
             </div>
         </div>
     </div>
@@ -505,10 +522,10 @@
         <div class="line-hr"></div>
         <div class="sidebar-section">
             <div class="links">
-                <a href="/profile/<%= data.user.id %>" class="link">
+                <div data-trigger="user" data-identifier="<%= data.user.id %>" class="link">
                     <img src="/images/icons/request dark.png" alt="icon">
                     <p>view profile</p>
-                </a>
+                </div>
                 <a href="/logout" class="link">
                     <img src="/images/icons/logout dark.png" alt="icon">
                     <p>logout</p>

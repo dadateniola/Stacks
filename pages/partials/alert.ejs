@@ -7,4 +7,11 @@
         <% }) %>
     </div>
    <% } %>
+   <% if (typeof error_alert !== 'undefined' && error_alert) { %>
+    <div data-info>
+        <% Object.entries(error_alert).forEach(([key, value]) => { %>
+            <p id="<%= key %>"><%= value %></p>
+        <% }) %>
+    </div>
+   <% } %>
 </div>
