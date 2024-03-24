@@ -24,6 +24,11 @@ const error_alert = {
     type: 'error'
 }
 
+const unauthorized_alert = {
+    message: 'Cannot access the requested page',
+    type: 'warning'
+}
+
 async function getCollections(userCollections = {}) {
     const collections = [];
 
@@ -124,7 +129,7 @@ const showSignPage = async (req, res) => {
 }
 
 const showDashboard = async (req, res) => {
-    const userId = req.session.uid;
+    const userId = req.session?.uid;
 
     try {
         const [user_info] = await User.find(['id', userId]);
@@ -273,7 +278,10 @@ const showResourcesPage = async (req, res) => {
     try {
         const [user_info] = await User.find(['id', userId]);
 
-        if (user_info.role != "lecturer") return res.redirect("/dashboard?msg=true");
+        if (user_info.role != "lecturer") {
+            req.session.alert = unauthorized_alert;
+            return res.redirect("/dashboard");
+        }
 
         const lecturerCourses = await CourseLecturer.find(['lecturer_id', req.session.uid], null, ['course_id']);
         const courseResources = {};
@@ -410,7 +418,10 @@ const showRequestsPage = async (req, res) => {
     try {
         const [user_info] = await User.find(['id', userId]);
 
-        if (user_info.role != "lecturer" && user_info.role != "admin") return res.redirect("/dashboard?msg=true");
+        if (user_info.role != "lecturer" && user_info.role != "admin") {
+            req.session.alert = unauthorized_alert;
+            return res.redirect("/dashboard");
+        }
 
         const requests = await Request.find([['receiver', user_info.role], ['order by', 'created_at desc']]);
         const types = {};
@@ -685,7 +696,10 @@ const showCollectionsPage = async (req, res) => {
     try {
         const [user_info] = await User.find(['id', userId]);
 
-        if (user_info.role != "student") return res.redirect("/dashboard?msg=true");
+        if (user_info.role != "student") {
+            req.session.alert = unauthorized_alert;
+            return res.redirect("/dashboard");
+        }
 
         const pfp = user_info.pfp;
 
@@ -701,7 +715,16 @@ const showCollectionsPage = async (req, res) => {
 }
 
 const showManageUsersPage = async (req, res) => {
+    const userId = req.session.uid;
+
     try {
+        const [user_info] = await User.find(['id', userId]);
+
+        if (user_info.role != "admin") {
+            req.session.alert = unauthorized_alert;
+            return res.redirect("/dashboard");
+        }
+
         const users = await User.find([['order by', 'created_at desc']]);
         const roles = {};
 
@@ -1079,7 +1102,11 @@ const logout = (req, res) => {
             res.status(500).send('Error logging out');
         } else {
             // Redirect the user to the login page or any other appropriate page
-            res.redirect('/?logout=true');
+            // req.session.alert = {
+            //     message: 'Logout successful',
+            //     type: 'success'
+            // }
+            return res.redirect("/");
         }
     });
 }

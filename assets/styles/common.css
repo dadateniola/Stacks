@@ -44,6 +44,7 @@
     --tiny-text: 0.7em;
 
     --padding: 40px;
+    --content-padding: 30px;
     --input-padding: 17px 20px;
 
     --sidebar-width: 240px;
@@ -657,6 +658,7 @@ textarea.error {
     position: relative;
     margin-left: var(--sidebar-width);
     width: calc(100vw - var(--sidebar-width));
+    background-color: var(--faint-white);
     height: 100vh;
     flex: 1;
 }
@@ -1175,7 +1177,7 @@ button.null {
 
 
 main.main-content {
-    padding: 30px;
+    padding: var(--content-padding);
     padding-bottom: 10vh;
     width: 100%;
     background-color: var(--faint-white);
@@ -1198,7 +1200,7 @@ main.main-content {
 .section-head.colored {
     background-color: white;
     padding: 15px;
-    padding-right: 0;
+    padding-right: 0 !important;
     border-radius: 15px;
 }
 
@@ -1333,6 +1335,7 @@ main.main-content {
     padding: 5px;
     background-color: white;
     border-radius: 15px;
+    overflow-x: scroll;
 }
 
 /* Tables */
@@ -1554,11 +1557,11 @@ tr:nth-child(odd) .table-icon {
         --text: 0.9em;
         --small-text: 0.75em;
 
+        --content-padding: 25px;        
         --img-wh: 30px;
     }
 
     main.main-content {
-        padding: 25px;
         padding-bottom: 10vh;
         gap: 30px;
     }
@@ -1583,5 +1586,49 @@ tr:nth-child(odd) .table-icon {
 
     .more {
         justify-content: center;
+    }
+}
+
+@media (max-width: 768px) {
+    :root {
+        --text: 0.8em;
+        --small-text: 0.65em;
+    }
+
+    .content {
+        margin-left: 0;
+    }
+
+    .content-head h1 {
+        font-size: 24px;
+    }
+
+    main.main-content {
+        gap: 25px;
+    }
+
+    section {
+        gap: 16px;
+    }
+
+    .section-head.colored {
+        padding: 10px;
+    }
+
+    .section-format {
+        padding-right: 10px;
+    }
+
+    table {
+        table-layout: auto;
+    }
+
+    .section-types > * {
+        display: none;
+    }
+
+    td, th {
+        min-width: 120px;
+        max-width: 220px;
     }
 }

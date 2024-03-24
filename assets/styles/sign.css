@@ -49,7 +49,7 @@ main>* {
 
 .form {
     padding: 0 5px;
-    min-width: 450px;
+    min-width: min(100%, 450px);
     max-height: 80%;
     gap: 40px;
     overflow-x: visible;
@@ -152,6 +152,10 @@ main>* {
     }
 
     .form-head p {
-        font-size: 3.5vw;
+        font-size: 3.3vw;
+    }
+
+    .form-row {
+        flex-direction: column;
     }
 }

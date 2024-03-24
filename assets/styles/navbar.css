@@ -4,7 +4,7 @@ header {
     left: 0;
     width: 100%;
     height: var(--header-height);
-    padding: 0 30px;
+    padding: 0 var(--content-padding);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -96,4 +96,30 @@ header .activities button {
 .search.active .search-img img {
     filter: invert(100%);
     opacity: 1;
+}
+
+
+
+@media (max-width: 768px) {
+    .search {
+        left: var(--content-padding);
+    }
+
+    .search input {
+        width: 200px;
+    }
+
+    .search.active input {
+        width: 240px;
+    }
+}
+
+@media (max-width: 425px) {
+    :root {
+        --header-height: 55px
+    }
+
+    header .activities {
+        display: none;
+    }
 }

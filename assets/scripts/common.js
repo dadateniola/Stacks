@@ -48,13 +48,12 @@ class Methods {
         row += '</tr>';
         head += '</tr>';
 
-
         const sectionHeadHtml = `
             <div class="section-info">
                 <p>${heading}</p>
                 <div class="line"></div>
                 <div class="user-img flex">
-                    <img src="/images/avatars/${pfp}" alt="lecturer">
+                    ${pfp ? `<img src="/images/avatars/${pfp}" alt="lecturer">` : ''}
                 </div>
             </div>
         `;
@@ -116,27 +115,35 @@ class Methods {
     }
 
     static trackOutsideClick(elem, animation) {
-        if (!(elem instanceof HTMLElement)) return console.warn("Cannon track mouse clicks of a Non-HTML Element");
+        if (!(elem instanceof HTMLElement)) return console.warn("Cannot track mouse clicks of a non-HTML element");
 
-        tracking.push([elem, animation]);
+        const trackingId = Symbol();
+        tracking.push({ id: trackingId, elem, animation });
 
-        return tracking.length - 1;
+        return trackingId;
     }
+
     static trackClick(event) {
         if (!tracking.length) return;
-
+    
         const target = (event instanceof Event) ? event.target : event;
-
-        tracking.forEach(([elem, animation], index) => {
+    
+        const trackingCopy = [...tracking];
+    
+        trackingCopy.forEach(({ id, elem, animation }) => {
             if (!elem.contains(target)) {
                 animation();
-                Methods.stopTracking(index);
+                Methods.stopTracking(id);
             }
-        })
-
+        });
     }
-    static stopTracking(index) {
-        tracking.splice(index, 1);
+    
+
+    static stopTracking(trackingId) {
+        const index = tracking.findIndex(entry => entry.id === trackingId);
+        if (index !== -1) {
+            tracking.splice(index, 1);
+        }
     }
 
     static formDataToJson = (formData) => {
@@ -349,9 +356,10 @@ class CommonSetup {
         }
 
         document.body.addEventListener('click', Methods.trackClick);
-        select("[data-delete-no]")?.addEventListener("click", () => Methods.trackClick(document.body))
-        select("[data-edit-cancel]")?.addEventListener("click", () => Methods.trackClick(document.body))
+        select("[data-delete-no]")?.addEventListener("click", () => Methods.trackClick(document.body));
+        select("[data-edit-cancel]")?.addEventListener("click", () => Methods.trackClick(document.body));
         select("[data-sidebar-btn]")?.addEventListener("click", CommonSetup.sidebar);
+        select("[data-sidebar-toggle]")?.addEventListener("click", CommonSetup.toggleSidebar);
 
         CommonSetup.initializeTriggers();
         this.initializeRandomizer();
@@ -644,6 +652,30 @@ class CommonSetup {
 
     }
 
+    static toggleSidebar() {
+        const sidebar = select(".sidebar");
+        const content = select(".content");
+
+        const tl = gsap.timeline();
+
+        if (sidebar.hasAttribute("data-sidebar-open")) {
+            tl
+                .to(sidebar, { x: '-100%' })
+                .to(content, { opacity: 1 }, '<')
+                .call(() => {
+                    sidebar.removeAttribute("data-sidebar-open");
+                })
+        } else {
+            tl
+                .to(sidebar, { x: 0 })
+                .to(content, { opacity: 0.5 }, '<')
+                .call(() => {
+                    sidebar.setAttribute("data-sidebar-open", '');
+                    Methods.trackOutsideClick(sidebar, () => CommonSetup.toggleSidebar())
+                })
+        }
+    }
+
     static openPopup(params = {}) {
         const { button, cont, overlay, popup, run } = params;
 
@@ -908,6 +940,7 @@ class CommonSetup {
                 parent: select('#overlay #course-box'),
                 code: course.code,
                 name: course.name,
+                description: course.description,
             }
 
             const courseSlides = {
