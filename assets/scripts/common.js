@@ -660,14 +660,14 @@ class CommonSetup {
 
         if (sidebar.hasAttribute("data-sidebar-open")) {
             tl
-                .to(sidebar, { x: '-100%' })
+                .to(sidebar, { x: '-100%', ease: 'Expo.easeOut', clearProps: true })
                 .to(content, { opacity: 1 }, '<')
                 .call(() => {
                     sidebar.removeAttribute("data-sidebar-open");
                 })
         } else {
             tl
-                .to(sidebar, { x: 0 })
+                .to(sidebar, { x: 0, ease: 'Expo.easeOut' })
                 .to(content, { opacity: 0.5 }, '<')
                 .call(() => {
                     sidebar.setAttribute("data-sidebar-open", '');
@@ -2002,3 +2002,5 @@ function test(elem) {
         selectWith(toChange, 'select').disabled = false;
     }
 }
+
+// CommonSetup.handleCourseTrigger(5)

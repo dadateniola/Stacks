@@ -14,7 +14,7 @@ const Collection = require("../Models/Collection");
 const CollectionResource = require("../Models/CollectionResource.js");
 const Department = require("../Models/Department.js");
 
-const DEFAULT_USER_ID = '20/1554';
+const DEFAULT_USER_ID = '12345678';
 
 const tempFolder = path.resolve(__dirname, '..', 'temp');
 const uploadsFolder = path.resolve(__dirname, '..', 'uploads', 'resources');
@@ -67,7 +67,7 @@ async function getCollections(userCollections = {}) {
 }
 
 const routeSetup = async (req, res, next) => {
-    req.session.uid = DEFAULT_USER_ID;
+    // req.session.uid = DEFAULT_USER_ID;
     const { alert, uid } = req.session;
 
     if (!uid) {

@@ -118,8 +118,4 @@ header .activities button {
     :root {
         --header-height: 55px
     }
-
-    header .activities {
-        display: none;
-    }
 }

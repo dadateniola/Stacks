@@ -10,11 +10,11 @@ class Methods {
 
     validateData() {
         const validationRules = {
-            id: [
-                /^\d{6}$/,
-                /^\d{2}\/\d{4}$/,
-                /^[a-zA-Z0-9]{8}$/
-            ],
+            // id: [
+            //     /^\d{6}$/,
+            //     /^\d{2}\/\d{4}$/,
+            //     /^[a-zA-Z0-9]{8}$/
+            // ],
             email: [
                 /.+@.*babcock\.edu\.ng$/
             ],
