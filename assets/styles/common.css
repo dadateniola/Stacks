@@ -217,6 +217,16 @@ mark {
     gap: 40px;
 }
 
+.item-cont.deleted .item-left {
+    text-decoration: line-through;
+}
+
+.item-cont.deleted .item-right a,
+.item-cont.deleted .item-right button:not([data-close]) {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
 .item-form {
     padding: 0 5px;
     display: flex;

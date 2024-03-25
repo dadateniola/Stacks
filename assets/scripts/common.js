@@ -125,11 +125,11 @@ class Methods {
 
     static trackClick(event) {
         if (!tracking.length) return;
-    
+
         const target = (event instanceof Event) ? event.target : event;
-    
+
         const trackingCopy = [...tracking];
-    
+
         trackingCopy.forEach(({ id, elem, animation }) => {
             if (!elem.contains(target)) {
                 animation();
@@ -137,7 +137,7 @@ class Methods {
             }
         });
     }
-    
+
 
     static stopTracking(trackingId) {
         const index = tracking.findIndex(entry => entry.id === trackingId);
@@ -1307,6 +1307,15 @@ class CommonSetup {
         }
     }
 
+    static cleanUpDelete() {
+        const parent = select("#overlay [data-triggered]");
+        const content = selectWith(parent, '.item-cont');
+
+        content.classList.add("deleted");
+
+        Methods.trackClick(document.body);
+    }
+
     static fixJoinedNames(type) {
         const joinedName = select(`#${type} [data-edit-joinedName]`);
 
@@ -1665,11 +1674,12 @@ class CommonSetup {
 
                         if (data?.clean_up) {
                             if (data.clean_up == 'request') await CommonSetup.cleanUpRequest(data.request_id);
-                            if (data.clean_up == 'create-collection' || data.clean_up == 'delete') Methods.trackClick(document.body);
+                            if (data.clean_up == 'create-collection') Methods.trackClick(document.body);
                             if (data.clean_up == 'add-resource') new Updater({ id: data.lecturer_id, type: 'resource' });
                             if (data.clean_up == 'add-user') new Updater({ type: 'user' });
+                            if (data.clean_up == 'delete') CommonSetup.cleanUpDelete();
                             if (data.clean_up == 'delete-user') {
-                                Methods.trackClick(document.body);
+                                CommonSetup.cleanUpDelete();
                                 new Updater({ type: 'user' });
                             }
                         }
@@ -2002,5 +2012,3 @@ function test(elem) {
         selectWith(toChange, 'select').disabled = false;
     }
 }
-
-// CommonSetup.handleCourseTrigger(5)

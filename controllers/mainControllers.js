@@ -14,7 +14,7 @@ const Collection = require("../Models/Collection");
 const CollectionResource = require("../Models/CollectionResource.js");
 const Department = require("../Models/Department.js");
 
-const DEFAULT_USER_ID = '12345678';
+const DEFAULT_USER_ID = '123006';
 
 const tempFolder = path.resolve(__dirname, '..', 'temp');
 const uploadsFolder = path.resolve(__dirname, '..', 'uploads', 'resources');
@@ -67,7 +67,7 @@ async function getCollections(userCollections = {}) {
 }
 
 const routeSetup = async (req, res, next) => {
-    // req.session.uid = DEFAULT_USER_ID;
+    req.session.uid = DEFAULT_USER_ID;
     const { alert, uid } = req.session;
 
     if (!uid) {
@@ -80,6 +80,10 @@ const routeSetup = async (req, res, next) => {
 
     try {
         const [user] = await User.find(['id', uid]);
+
+        if(!user) {
+            return res.redirect("/logout");
+        }
 
         const allCourses = await Course.find();
         const allDepartments = await Department.find();
@@ -856,11 +860,11 @@ const handleDelete = async (req, res) => {
         }
 
         if (type == 'user') {
-            await User.delete(id);
+            // await User.delete(id);
             send.message = 'User successfully deleted';
             send.clean_up = 'delete-user'
         } else if (type == 'resource') {
-            await Resource.delete(id);
+            // await Resource.delete(id);
             send.message = 'Resource successfully deleted';
         }
 

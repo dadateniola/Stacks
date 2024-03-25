@@ -53,7 +53,7 @@ router.get("/manage-users", showManageUsersPage);
 
 router.get("/notice-board", showNoticeBoard);
 
-router.get("/profile/:id?", showUserProfile);
+// router.get("/profile/:id?", showUserProfile);
 
 router.get('/get-pdf/:file/:type?', getPDF);
 
