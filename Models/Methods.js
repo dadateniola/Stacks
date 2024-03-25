@@ -18,6 +18,7 @@ class Methods {
             email: [
                 /.+@.*babcock\.edu\.ng$/
             ],
+            id: [/\S+/],
             message: [/\S+/],
             name: [/\S+/],
             password: [/\w{4,}/],
