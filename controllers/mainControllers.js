@@ -860,11 +860,15 @@ const handleDelete = async (req, res) => {
         }
 
         if (type == 'user') {
-            // await User.delete(id);
+            await User.delete(id);
             send.message = 'User successfully deleted';
             send.clean_up = 'delete-user'
         } else if (type == 'resource') {
-            // await Resource.delete(id);
+            const [resource] = await Resource.find(['id', id], null, ['file']);
+            
+            await Resource.delete(id);
+            await fs.unlink(path.resolve(uploadsFolder, resource?.file));
+
             send.message = 'Resource successfully deleted';
         }
 

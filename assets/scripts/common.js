@@ -428,6 +428,8 @@ class CommonSetup {
         const animate = select(`.${this.dataset?.affect}`) || this;
         const triggered = select(`#${this.dataset?.trigger}`);
 
+        selectWith(triggered, '.item-cont')?.classList.remove("deleted");
+
         if (!triggered) {
             new Alert({
                 message: "The page you're requesting for isn't available",
