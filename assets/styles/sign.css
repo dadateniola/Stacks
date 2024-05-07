@@ -130,7 +130,7 @@ main>* {
     padding: 2px;
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 8px;
     border-radius: 10px;
 }
 
