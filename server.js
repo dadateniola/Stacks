@@ -40,7 +40,7 @@ server.set('view engine', 'ejs');
 server.set('views', 'pages');
 
 //Reset database everytime the server starts
-// Model.resetDB();
+Model.resetDB();
 
 server.use(mainRoutes);
 
