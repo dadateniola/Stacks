@@ -263,7 +263,8 @@ class Methods {
                 type: 'span',
                 text: this.sentenceCase(value),
                 parent,
-                classes: 'error'
+                classes: 'error',
+                attributes: 'error-msg'
             })
 
             input.classList.add('error');
@@ -275,8 +276,11 @@ class Methods {
     static removeErrorMsgs(e) {
         const input = e instanceof Event ? e.target : e;
         const nextSibling = input.nextElementSibling;
+        const parent = input.parentNode;
 
         if (nextSibling && nextSibling.tagName === 'SPAN' && nextSibling.classList.contains('error')) nextSibling.remove();
+
+        selectWith(parent, "span.error[data-error-msg]")?.remove();
 
         input.classList.remove('error');
         input.removeEventListener("focus", Methods.removeErrorMsgs);

@@ -69,8 +69,77 @@ class PageSetup {
         }
     }
 
+    static roles = {
+        admin: {
+            id: '20/1554',
+        },
+        student: {
+            id: '12345678',
+        },
+        lecturer: {
+            id: '123006',
+        }
+    }
+
     init() {
+        select("[data-role-toggle]").addEventListener("click", PageSetup.toggleRoleChange);
+        selectAll(".role-select-options button").forEach(button => button.addEventListener("click", PageSetup.changeRole));
+
         PageSetup.assignChange();
+    }
+
+    static toggleRoleChange(elem) {
+        Methods.disableLinksAndBtns(true);
+
+        const button = this instanceof HTMLElement ? this : elem;
+        const img = selectWith(button, 'img');
+
+        const roleSelect = select(".role-select");
+        const isToggled = roleSelect.dataset?.toggled || false;
+
+        const buttons = selectAll(".role-select-options button");
+
+        const tl = gsap.timeline();
+
+        if (isToggled) {
+            tl
+                .call(() => {
+                    roleSelect.removeAttribute("data-toggled");
+                    img.src = '/images/icons/users dark.png'
+                })
+                .to(buttons, { opacity: 0, xPercent: 0, y: -20, stagger: 0.1, ease: 'Expo.easeOut', clearProps: true })
+                // .set(buttons, { dsiplay: 'none' })
+
+                .call(() => Methods.disableLinksAndBtns(false))
+        } else {
+            tl
+                .call(() => {
+                    roleSelect.setAttribute("data-toggled", true);
+                    img.src = '/images/icons/cancel.png'
+                })
+                .set(buttons, { opacity: 0, xPercent: -50, y: 0, display: 'block' })
+
+                .to(buttons, { opacity: 1, xPercent: 0, stagger: -0.1, ease: 'Back.easeOut' })
+
+                .call(() => Methods.disableLinksAndBtns(false))
+        }
+    }
+
+    static changeRole() {
+        const role = this.value;
+        const data = PageSetup.roles[role];
+
+        if (data) {
+            const id_input = select("input[name='id']");
+            const password_input = select("input[name='password']");
+
+            if (id_input && password_input) {
+                id_input.value = data.id;
+                password_input.value = 'pass';
+            }
+        }
+
+        PageSetup.toggleRoleChange(select('[data-role-toggle]'));
     }
 
     static assignChange() {
@@ -89,12 +158,14 @@ class PageSetup {
 
         const formType = formCont?.dataset?.type || 'createAcc';
         const nextForm = PageSetup.forms[formType];
+        const roleSelect = select('.role-select');
 
         const tl = gsap.timeline();
 
         tl
             .to(formElements, { y: -60, opacity: 0, stagger: 0.1, ease: "Expo.easeIn" })
             .to(formCTA, { opacity: 0 }, "<")
+            .to(roleSelect, { x: formType == 'login' ? 0 : -80, ease: 'Back.easeInOut' }, '-=0.5')
 
             .call(() => {
                 const innerTl = gsap.timeline();

@@ -40,7 +40,7 @@ server.set('view engine', 'ejs');
 server.set('views', 'pages');
 
 //Reset database everytime the server starts
-Model.resetDB();
+// Model.resetDB();
 
 server.use(mainRoutes);
 
@@ -54,4 +54,4 @@ server.use((req, res) => {
 })
 
 //Startup the server on a port
-server.listen(port, (err) => console.log(err || `Server Running\nVisit http://localhost:${port}/`))
+server.listen(port, (err) => console.log(err || `Server Running\nVisit http://localhost:${port}/`));
