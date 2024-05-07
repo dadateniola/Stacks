@@ -899,7 +899,7 @@ const handleEdit = async (req, res) => {
         const send = {
             message: 'Data successfully updated',
             type: "success",
-            clean_up: 'delete'
+            clean_up: 'edit'
         }
         var result = 0;
 

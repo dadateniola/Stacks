@@ -683,6 +683,8 @@ class CommonSetup {
     }
 
     static openPopup(params = {}) {
+        Methods.disableLinksAndBtns(true);
+
         const { button, cont, overlay, popup, run } = params;
 
         if (!(button instanceof HTMLElement)) return console.warn("Button isn't an HTML Element");
@@ -707,7 +709,8 @@ class CommonSetup {
             .to(cont, { scale: 0.9, opacity: 0.5, ease: 'expo.inOut', duration: 2 })
             .to(popup, { opacity: 1, yPercent: 0, ease: 'expo.out' }, "-=1")
             .call(() => {
-                Methods.trackOutsideClick(popup, () => CommonSetup.closePopup({ button, cont, overlay, popup }))
+                Methods.trackOutsideClick(popup, () => CommonSetup.closePopup({ button, cont, overlay, popup }));
+                Methods.disableLinksAndBtns(false);
             })
     }
 
@@ -1313,11 +1316,11 @@ class CommonSetup {
         }
     }
 
-    static cleanUpDelete() {
+    static cleanUpDelete(condition = false) {
         const parent = select("#overlay [data-triggered]");
         const content = selectWith(parent, '.item-cont');
 
-        content.classList.add("deleted");
+        if(condition) content.classList.add("deleted");
 
         Methods.trackClick(document.body);
     }
@@ -1683,9 +1686,10 @@ class CommonSetup {
                             if (data.clean_up == 'create-collection') Methods.trackClick(document.body);
                             if (data.clean_up == 'add-resource') new Updater({ id: data.lecturer_id, type: 'resource' });
                             if (data.clean_up == 'add-user') new Updater({ type: 'user' });
-                            if (data.clean_up == 'delete') CommonSetup.cleanUpDelete();
+                            if (data.clean_up == 'edit') CommonSetup.cleanUpDelete();
+                            if (data.clean_up == 'delete') CommonSetup.cleanUpDelete(true);
                             if (data.clean_up == 'delete-user') {
-                                CommonSetup.cleanUpDelete();
+                                CommonSetup.cleanUpDelete(true);
                                 new Updater({ type: 'user' });
                             }
                         }
