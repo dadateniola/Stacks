@@ -4,6 +4,7 @@ const session = require('express-session');
 const fileUpload = require("express-fileupload");
 const path = require('path');
 const mainRoutes = require('./routes/mainRoutes');
+const Model = require('./Models/Model');
 
 const port = process.env.PORT || 5000;
 
@@ -37,6 +38,9 @@ server.use(fileUpload());
 //Setup ejs
 server.set('view engine', 'ejs');
 server.set('views', 'pages');
+
+//Reset database everytime the server starts
+Model.resetDB();
 
 server.use(mainRoutes);
 
